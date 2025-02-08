@@ -14,84 +14,56 @@ trait Debugger
     private array $allowedLevels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
     private array $errorLevels = ['error', 'critical', 'alert', 'emergency'];
 
-    /**
-     * Get the list of errors.
-     */
     public function getErrors(): MessageBag
     {
         return $this->errors ?? new MessageBag();
     }
 
-    /**
-     * Add an error message.
-     */
     public function addError(string|array|Throwable $exception, string $level = 'error'): void
     {
-        $sanitizedErrorLevel = $this->sanitizeErrorLevel($level);
+        if (is_null($this->sanitizeErrorLevel($level))) return;
+        if (!isset($this->errors)) $this->errors = new MessageBag();
 
-        if (!isset($sanitizedErrorLevel)) {
-            return;
-        }
-
-        if (!isset($this->errors)) {
-            $this->errors = new MessageBag();
-        }
-
-        $this->errors->merge($this->formatException($exception, $sanitizedErrorLevel));
+        $this->errors->merge($this->formatException($level, $exception));
     }
 
-    /**
-     * Log debug information and handle errors if necessary.
-     */
-    public function debug(string $level, string $message, string|int|array|object|null $context = null): mixed
+    public function debug(string $level, string $message, string|array|Throwable $context = []): string
     {
-        $sanitizedLevel = $this->sanitizeLevel($level);
+        if (is_null($this->sanitizeLevel($level))) return 'The level given is invalid.';
 
-        Log::log($sanitizedLevel, $message, $this->formatContext($context, $sanitizedLevel));
-        $this->addError($message, $sanitizedLevel);
+        Log::log($level, $message, $this->formatContext($level, $context));
+        $this->addError($message, $level);
 
-        return $context ?? $message;
+        return $message;
     }
 
-    /**
-     * Sanitize debugger levels.
-     */
-    private function sanitizeLevel(string $level): string
+    private function sanitizeLevel(string $level): ?string
     {
         return Helper::sanitize(Str::lower($level), $this->allowedLevels);
     }
 
-    /**
-     * Sanitize debugger error levels.
-     */
-    private function sanitizeErrorLevel(string $level)
+    private function sanitizeErrorLevel(string $level): ?string
     {
         return Helper::sanitize(Str::lower($level), $this->errorLevels);
     }
 
-    /**
-     * Format debugger context to array.
-     */
-    private function formatContext(mixed $context = [], string $level): array
+    private function formatContext(string $level, string|array|Throwable $context = []): array
     {
         return match (true) {
-            is_object($context) => Helper::objectToArray($context),
             is_array($context) => $context,
             is_string($context) => ['context' => $context],
-            default => $this->formatException($context ?? [], $level)
+            $context instanceof Throwable => $this->formatException($level, $context),
+            default => []
         };
     }
 
-    /**
-     * Format the log context from an exception.
-     */
-    private function formatException(string|array|Throwable $exception, string $level = 'error'): array
+    private function formatException(string $level, string|array|Throwable $exception = []): array
     {
-        $sanitizedLevel = $this->sanitizeErrorLevel($level);
+        if (is_null($this->sanitizeErrorLevel($level))) return [];
 
         return match (true) {
             $exception instanceof Throwable => [
-                $sanitizedLevel => [[
+                $level => [[
                     'message'   => $exception->getMessage(),
                     'code'      => $exception->getCode(),
                     'line'      => $exception->getLine(),
@@ -101,7 +73,7 @@ trait Debugger
                 ]]
             ],
             is_string($exception) => [
-                $sanitizedLevel => [[
+                $level => [[
                     'message'   => Helper::stringify($exception),
                     'timestamp' => now()->toDateTimeString(),
                 ]]

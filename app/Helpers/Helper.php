@@ -31,7 +31,7 @@ class Helper
             'int' => filter_var($input, FILTER_SANITIZE_NUMBER_INT),
             'float' => filter_var($input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION),
             'html' => htmlspecialchars($input, ENT_QUOTES, 'UTF-8'),
-            default => throw new Exception('The given input does not allowed.'),
+            default => throw new Exception('The given rules are not compatible.'),
         };
     }
 

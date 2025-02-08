@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Debugger;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 class MakeLogic extends Command
 {
+    use Debugger;
+
     protected $signature = 'make:logic {name : The folder/class name in format Folder/ClassName}
                             {--extends= : The class to extend from (e.g., App\\Helpers\\Formatter, Illuminate\\Console\\Command)}';
 
@@ -44,14 +47,14 @@ class MakeLogic extends Command
         [$namespace, $filePath, $className] = $this->getClassDetails($name);
 
         if ($this->isReservedClassName($className)) {
-            $this->error("The class name '$className' is reserved and cannot be used.");
+            $this->handleError("The class name '$className' is reserved and cannot be used.");
             return;
         }
 
         $extends = $this->validateExtendsClass($extends);
 
         if ($this->classExists($filePath)) {
-            exit(1);
+            return;
         }
 
         $classContent = $this->generateClassContent($namespace, $className, $extends);
@@ -60,7 +63,7 @@ class MakeLogic extends Command
         $this->info("Class $className created successfully at $filePath");
     }
 
-    protected function getClassDetails(string $name): array
+    private function getClassDetails(string $name): array
     {
         $nameParts = explode('/', $name);
         $className = Str::studly(array_pop($nameParts));
@@ -75,28 +78,28 @@ class MakeLogic extends Command
         return [$namespace, $filePath, $className];
     }
 
-    protected function buildNamespace(string $subPath): string
+    private function buildNamespace(string $subPath): string
     {
         return 'App' . ($subPath ? '\\' . str_replace('/', '\\', trim($subPath, '/')) : '');
     }
 
-    protected function createDirectoryIfNeeded(string $fullPath): void
+    private function createDirectoryIfNeeded(string $fullPath): void
     {
         if (!File::exists($fullPath)) {
             File::makeDirectory($fullPath, 0755, true);
         }
     }
 
-    protected function classExists(string $filePath): bool
+    private function classExists(string $filePath): bool
     {
         if (File::exists($filePath)) {
-            $this->error("Class already exists at $filePath");
+            $this->handleError("Class already exists at $filePath");
             return true;
         }
         return false;
     }
 
-    protected function validateExtendsClass(?string $extends): ?string
+    private function validateExtendsClass(?string $extends): ?string
     {
         if (!$extends) {
             return null;
@@ -106,28 +109,15 @@ class MakeLogic extends Command
             return $extends;
         }
 
-        $this->error("The class $extends does not exist.");
-        exit;
+        $this->handleError("The class $extends does not exist.");
     }
 
-    /**
-     * Validate if the class name is in the reserved list
-     *
-     * @param string $className
-     * @return bool
-     */
-    protected function isReservedClassName(string $className): bool
+    private function isReservedClassName(string $className): bool
     {
         return in_array($className, $this->reservedClassNames);
     }
 
-    /**
-     * Get the short class name without namespace.
-     *
-     * @param string $class
-     * @return string
-     */
-    protected function generateClassContent(string $namespace, string $className, ?string $extends): string
+    private function generateClassContent(string $namespace, string $className, ?string $extends): string
     {
         $template = File::get(resource_path('templates/__class_template.stub'));
         $extendsStatement = $extends ? "extends " . class_basename($extends) : '';
@@ -140,5 +130,12 @@ class MakeLogic extends Command
             [$namespace ?? '', $useStatement ?? '', $classStatement ?? ''],
             $template
         );
+    }
+
+    private function handleError(string $message, \Throwable|null $th = null)
+    {
+        $this->debug('error', $message, $th);
+        $this->error($message);
+        exit;
     }
 }
