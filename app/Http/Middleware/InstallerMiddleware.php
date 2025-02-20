@@ -20,19 +20,24 @@ class InstallerMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         try {
+            if ($request->is('livewire/*') || $request->header('X-Livewire') || $request->expectsJson() || $request->ajax()) {
+                return $next($request);
+            }
+
             $isInstalled = app(SystemService::class)->isInstalled();
+
+            // If installed, block access to installation routes
+            if ($isInstalled && $request->is('install*')) {
+                return redirect()->route('dashboard');
+            }
 
             if (!$isInstalled) {
                 // Allow access to the installation route
                 if ($request->is('install*')) {
                     return $next($request);
                 }
-                return redirect()->route('install');
-            }
 
-            // If installed, block access to installation routes
-            if ($request->is('install*')) {
-                return redirect()->route('dashboard');
+                return redirect()->route('install');
             }
 
             return $next($request);

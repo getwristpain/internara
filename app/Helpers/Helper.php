@@ -4,9 +4,15 @@ namespace App\Helpers;
 
 use Exception;
 use ReflectionClass;
+use Illuminate\Support\Str;
 
 class Helper
 {
+    public static function key(string $key): string
+    {
+        return now()->timestamp . '-' . $key . '-' . Str::random(8);
+    }
+
     /**
      * Sanitize input based on the given rules
      *

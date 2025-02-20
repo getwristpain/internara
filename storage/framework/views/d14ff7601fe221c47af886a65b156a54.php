@@ -1,0 +1,1 @@
+components.input-image<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/storage/framework/views/93ae05e683b59a9933873a294e2b1271.blade.php ENDPATH**/ ?>

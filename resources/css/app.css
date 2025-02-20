@@ -1,3 +1,99 @@
+@import url("https://fonts.googleapis.com/css2?family=Rethink+Sans:ital,wght@0,400..800;1,400..800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply wh-screen text-body min-h-screen overflow-x-hidden;
+    }
+
+    .basic-transition {
+        @apply transition duration-300 ease-in-out;
+    }
+
+    .disabled,
+    .disabled:disabled {
+        @apply disabled:no-interact disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .no-interact {
+        @apply pointer-events-none select-none;
+        user-drag: none;
+        user-select: none;
+        -webkit-user-drag: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .wh-screen {
+        @apply h-screen w-screen;
+    }
+
+    .wh-full {
+        @apply h-full w-full;
+    }
+}
+
+@layer components {
+    label {
+        @apply block text-sm font-medium text-neutral;
+    }
+
+    iconify-icon {
+        @apply scale-110;
+    }
+
+    .alert {
+        @apply flex gap-4;
+    }
+
+    .alert.alert-sm {
+        @apply gap-2 p-2 text-sm;
+    }
+
+    .layout-cols {
+        @apply flex w-full flex-col gap-4 lg:flex-row;
+    }
+
+    .required::after {
+        @apply relative -top-1 text-xs text-error content-['*'];
+    }
+
+    .scrollbar-hidden::-webkit-scrollbar {
+        @apply hidden;
+    }
+
+    .scrollbar-styled::-webkit-scrollbar {
+        @apply w-2;
+    }
+
+    .scrollbar-styled::-webkit-scrollbar-track {
+        @apply rounded-full bg-base-100;
+    }
+
+    .scrollbar-styled::-webkit-scrollbar-thumb {
+        @apply basic-transition rounded-full bg-gray-300 hover:bg-gray-400;
+    }
+
+    .text-heading {
+        @apply font-extrabold tracking-tight antialiased;
+    }
+
+    .text-heading-lg {
+        @apply text-heading text-2xl;
+    }
+
+    .text-heading-xl {
+        @apply text-heading text-4xl lg:text-6xl;
+    }
+
+    .text-subheading {
+        @apply font-bold tracking-tight antialiased;
+    }
+    .text-body {
+        @apply font-rethink text-base font-normal text-neutral antialiased;
+    }
+}

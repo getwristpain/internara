@@ -5,7 +5,7 @@ namespace {{ namespace }};
 class {{ classStatement }}
 {
     /*
-     * Class constructor.
+     * Class constructor
      */
     public function __construct()
     {

@@ -12,5 +12,5 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-require __DIR__ . '/web/system.php';
+require __DIR__ . '/web/installation.php';
 require __DIR__ . '/web/auth.php';

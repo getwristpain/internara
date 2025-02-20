@@ -1,0 +1,1 @@
+components.input-label<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/storage/framework/views/850694dd1d224144e315de875385b34f.blade.php ENDPATH**/ ?>
