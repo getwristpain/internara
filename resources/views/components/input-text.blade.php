@@ -1,15 +1,15 @@
 @props([
     'autofocus' => false,
     'disabled' => false,
-    'help' => '',
     'hideMessages' => false,
+    'hint' => null,
     'icon' => 'tabler:edit',
-    'name' => '',
-    'label' => '',
+    'label' => null,
     'max' => null,
     'messages' => [],
     'min' => null,
     'model' => '',
+    'name' => '',
     'pattern' => null,
     'placeholder' => '',
     'required' => false,
@@ -27,15 +27,7 @@
 @endphp
 
 <div class="flex flex-col gap-2 w-full">
-    @if ($label)
-        <label class="{{ implode(' ', [!$required ?: 'required', !$disabled ?: 'disabled opacity-100']) }}"
-            for="{{ $name }}">
-            <span>{{ $label }}</span>
-            @if ($help)
-                <span class="pl-1 text-gray-500">({{ $help }})</span>
-            @endif
-        </label>
-    @endif
+    <x-input-label :$name :$label :$required :$hint></x-input-label>
 
     <div class="flex items-center gap-2">
         <div class="relative w-full">
@@ -77,7 +69,7 @@
                     {{ $attributes->merge([
                         'class' =>
                             'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral
-                                                                                                                                                                                                                                                                                                                                                                disabled' .
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            disabled' .
                             (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
                         'disabled' => $disabled,
                         'autofocus' => $autofocus,
@@ -95,7 +87,7 @@
                     {{ $attributes->merge([
                         'class' =>
                             'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral
-                                                                                                                                                                                                                                                                                                                                                                disabled' .
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            disabled' .
                             (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
                         'disabled' => $disabled,
                         'autofocus' => $autofocus,

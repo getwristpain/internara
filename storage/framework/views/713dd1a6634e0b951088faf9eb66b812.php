@@ -49,6 +49,7 @@ unset($__defined_vars); ?>
         'class' => implode(' ', [$component['buttonStyles'], !$reverse ?: 'flex-row-reverse']),
         'form' => $form,
     ])); ?>>
+
     <span><?php echo e($slot); ?></span>
 
     <?php if(isset($icon) && !$hideIcon): ?>

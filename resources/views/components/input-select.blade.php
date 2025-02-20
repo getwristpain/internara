@@ -4,7 +4,8 @@
     'badge' => '',
     'disabled' => false,
     'hideError' => false,
-    'label' => '',
+    'hint' => null,
+    'label' => null,
     'model' => '',
     'name' => '',
     'options' => '',
@@ -30,14 +31,8 @@
 
 <div class="flex flex-col gap-2 w-full font-medium pt-1 {{ $disabled ? 'disabled' : '' }}">
     <div class="flex flex-col w-full gap-2">
-        @if (!empty($label))
-            <div class="text-sm text-gray-600">
-                <label class="text-sm font-medium text-gray-600 {{ $required ? 'required' : '' }}"
-                    for="{{ $name }}">
-                    {{ $label }}
-                </label>
-            </div>
-        @endif
+        <x-input-label :$name :$label :$required :$hint></x-input-label>
+
         <div class="relative w-full" x-data="{
             open: false,
             search: '',
@@ -76,9 +71,9 @@
                 <!-- Search Input -->
                 <template x-if="showSearch">
                     <input class="w-full p-2 border rounded-t-md" type="text" x-model="search"
-                        placeholder="{{ $placeholder }}" style="font-size: inherit;"
-                        {{ $disabled ? 'disabled' : '' }} {{ $required ? 'required' : '' }}
-                        {{ $autofocus ? 'autofocus' : '' }} wire:loading.attr="disabled">
+                        placeholder="{{ $placeholder }}" style="font-size: inherit;" {{ $disabled ? 'disabled' : '' }}
+                        {{ $required ? 'required' : '' }} {{ $autofocus ? 'autofocus' : '' }}
+                        wire:loading.attr="disabled">
                 </template>
 
                 <!-- Options List -->

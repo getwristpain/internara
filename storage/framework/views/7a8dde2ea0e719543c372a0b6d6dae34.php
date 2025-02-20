@@ -7,7 +7,7 @@ $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
         'buttonStyles' => 'btn',
     ],
     'disabled' => false,
-    'icon' => '',
+    'icon' => null,
     'reverse' => false,
 ]));
 
@@ -30,7 +30,7 @@ foreach (array_filter(([
         'buttonStyles' => 'btn',
     ],
     'disabled' => false,
-    'icon' => '',
+    'icon' => null,
     'reverse' => false,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
@@ -44,15 +44,16 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<button
+<button wire:click.prevent="<?php echo e($action); ?>"
     <?php echo e($attributes->merge([
         'class' => implode(' ', [$component['buttonStyles'], !$reverse ?: 'flex-row-reverse']),
         'disabled' => $disabled,
     ])); ?>>
 
-    <?php if(isset($icon)): ?>
+    <!--[if BLOCK]><![endif]--><?php if(isset($icon)): ?>
         <iconify-icon icon="<?php echo e($icon); ?>"></iconify-icon>
-        <span><?php echo e($slot); ?></span>
-    <?php endif; ?>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+    <span><?php echo e($slot); ?></span>
 </button>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/button.blade.php ENDPATH**/ ?>

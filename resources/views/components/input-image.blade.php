@@ -1,10 +1,11 @@
 @props([
     'component' => [],
     'hideMessages' => false,
-    'name' => '',
-    'label' => '',
+    'hint' => null,
+    'label' => null,
     'messages' => [],
     'model' => '',
+    'name' => '',
     'placeholder' => 'Unggah Berkas',
     'required' => false,
 ])
@@ -34,9 +35,7 @@
         }
     }
 }" {{ $attributes->merge(['class' => 'space-y-2 font-medium']) }} x-cloak>
-    @if (isset($label))
-        <label class="{{ !$required ?: 'required' }}" for="{{ $name }}">{{ $label }}</label>
-    @endif
+    <x-input-label :$name :$label :$required :$hint></x-input-label>
 
     <div
         class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 {{ $componentStyles }}">

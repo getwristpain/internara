@@ -1,17 +1,20 @@
 <?php
 
-use App\Livewire\Pages\Installations\Completion;
-use App\Livewire\Pages\Installations\DepartmentClassroom;
-use App\Livewire\Pages\Installations\OwnerSetup;
-use App\Livewire\Pages\Installations\SchoolSetting;
-use App\Livewire\Pages\Installations\Welcome;
+use App\Livewire\Installations\{
+    InstallComplete,
+    InstallDepartment,
+    InstallOwner,
+    InstallSchool,
+    InstallWelcome
+};
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/install')
+    ->middleware(['guest'])
     ->group(function () {
-        Route::get('/', Welcome::class)->name('install');
-        Route::get('/school-setting', SchoolSetting::class)->name('install.school-setting');
-        Route::get('/department-classroom', DepartmentClassroom::class)->name('install.department-classroom');
-        Route::get('/owner-setup', OwnerSetup::class)->name('install.owner-setup');
-        Route::get('/completion', Completion::class)->name('install.completion');
-    })->middleware(['guest']);
+        Route::get('/', InstallWelcome::class)->name('install.welcome');
+        Route::get('/school', InstallSchool::class)->name('install.school');
+        Route::get('/department', InstallDepartment::class)->name('install.department');
+        Route::get('/owner', InstallOwner::class)->name('install.owner');
+        Route::get('/complete', InstallComplete::class)->name('install.complete');
+    });

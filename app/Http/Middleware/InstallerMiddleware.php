@@ -3,10 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Debugger;
+use App\Services\SystemService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\SystemService;
 
 class InstallerMiddleware
 {
@@ -15,28 +15,24 @@ class InstallerMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if ($request->is('livewire/*') || $request->header('X-Livewire') || $request->expectsJson() || $request->ajax()) {
+            if ($this->isLivewireRequest($request)) {
                 return $next($request);
             }
 
             $isInstalled = app(SystemService::class)->isInstalled();
 
-            // If installed, block access to installation routes
-            if ($isInstalled && $request->is('install*')) {
+            if ($isInstalled && $this->isInstallRoute($request)) {
                 return redirect()->route('dashboard');
             }
 
-            if (!$isInstalled) {
-                // Allow access to the installation route
-                if ($request->is('install*')) {
-                    return $next($request);
-                }
-
+            if (!$isInstalled && !$this->isInstallRoute($request)) {
                 return redirect()->route('install');
             }
 
@@ -45,5 +41,27 @@ class InstallerMiddleware
             $this->debug('error', 'Unexpected error in installation middleware.', $th);
             throw $th;
         }
+    }
+
+    /**
+     * Determine if the request is a Livewire request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    private function isLivewireRequest(Request $request): bool
+    {
+        return $request->is('livewire/*') || $request->header('X-Livewire') || $request->expectsJson() || $request->ajax();
+    }
+
+    /**
+     * Determine if the request is for an install route.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    private function isInstallRoute(Request $request): bool
+    {
+        return $request->is('install*');
     }
 }

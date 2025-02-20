@@ -13,6 +13,7 @@
         'class' => implode(' ', [$component['buttonStyles'], !$reverse ?: 'flex-row-reverse']),
         'form' => $form,
     ]) }}>
+
     <span>{{ $slot }}</span>
 
     @if (isset($icon) && !$hideIcon)

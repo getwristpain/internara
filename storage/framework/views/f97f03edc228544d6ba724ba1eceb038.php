@@ -4,15 +4,15 @@ $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'autofocus' => false,
     'disabled' => false,
-    'help' => '',
     'hideMessages' => false,
+    'hint' => null,
     'icon' => 'tabler:edit',
-    'name' => '',
-    'label' => '',
+    'label' => null,
     'max' => null,
     'messages' => [],
     'min' => null,
     'model' => '',
+    'name' => '',
     'pattern' => null,
     'placeholder' => '',
     'required' => false,
@@ -37,15 +37,15 @@ unset($__newAttributes);
 foreach (array_filter(([
     'autofocus' => false,
     'disabled' => false,
-    'help' => '',
     'hideMessages' => false,
+    'hint' => null,
     'icon' => 'tabler:edit',
-    'name' => '',
-    'label' => '',
+    'label' => null,
     'max' => null,
     'messages' => [],
     'min' => null,
     'model' => '',
+    'name' => '',
     'pattern' => null,
     'placeholder' => '',
     'required' => false,
@@ -73,15 +73,25 @@ unset($__defined_vars); ?>
 ?>
 
 <div class="flex flex-col gap-2 w-full">
-    <?php if($label): ?>
-        <label class="<?php echo e(implode(' ', [!$required ?: 'required', !$disabled ?: 'disabled opacity-100'])); ?>"
-            for="<?php echo e($name); ?>">
-            <span><?php echo e($label); ?></span>
-            <?php if($help): ?>
-                <span class="pl-1 text-gray-500">(<?php echo e($help); ?>)</span>
-            <?php endif; ?>
-        </label>
-    <?php endif; ?>
+    <?php if (isset($component)) { $__componentOriginale3da9d84bb64e4bc2eeebaafabfb2581 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginale3da9d84bb64e4bc2eeebaafabfb2581 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-label','data' => ['name' => $name,'label' => $label,'required' => $required,'hint' => $hint]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('input-label'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['name' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($name),'label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($label),'required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'hint' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($hint)]); ?> <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginale3da9d84bb64e4bc2eeebaafabfb2581)): ?>
+<?php $attributes = $__attributesOriginale3da9d84bb64e4bc2eeebaafabfb2581; ?>
+<?php unset($__attributesOriginale3da9d84bb64e4bc2eeebaafabfb2581); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginale3da9d84bb64e4bc2eeebaafabfb2581)): ?>
+<?php $component = $__componentOriginale3da9d84bb64e4bc2eeebaafabfb2581; ?>
+<?php unset($__componentOriginale3da9d84bb64e4bc2eeebaafabfb2581); ?>
+<?php endif; ?>
 
     <div class="flex items-center gap-2">
         <div class="relative w-full">
@@ -124,7 +134,7 @@ unset($__defined_vars); ?>
                     <?php echo e($attributes->merge([
                         'class' =>
                             'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral
-                                                                                                                                                                                                                                                                                                                                                                disabled' .
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            disabled' .
                             (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
                         'disabled' => $disabled,
                         'autofocus' => $autofocus,
@@ -143,7 +153,7 @@ unset($__defined_vars); ?>
                     <?php echo e($attributes->merge([
                         'class' =>
                             'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral
-                                                                                                                                                                                                                                                                                                                                                                disabled' .
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            disabled' .
                             (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
                         'disabled' => $disabled,
                         'autofocus' => $autofocus,

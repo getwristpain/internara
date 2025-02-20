@@ -1,22 +1,15 @@
 @props([
     'options' => '',
     'disabled' => false,
-    'help' => '',
-    'label' => '',
+    'hint' => null,
+    'label' => null,
     'model' => '',
     'name' => '',
     'required' => false,
 ])
 
 <div class="w-full space-y-2">
-    @if ($label)
-        <label class="{{ $required ? 'required' : '' }} {{ $disabled ? 'disabled opacity-100' : '' }}">
-            <span>{{ $label }}</span>
-            @if ($help)
-                <span class="pl-1 text-gray-500">({{ $help }})</span>
-            @endif
-        </label>
-    @endif
+    <x-input-label :$name :$label :$required :$hint></x-input-label>
 
     <div class="space-y-4">
         <div class="layout-cols">
