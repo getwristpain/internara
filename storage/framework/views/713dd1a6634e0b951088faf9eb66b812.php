@@ -51,8 +51,8 @@ unset($__defined_vars); ?>
     ])); ?>>
     <span><?php echo e($slot); ?></span>
 
-    <!--[if BLOCK]><![endif]--><?php if(isset($icon) && !$hideIcon): ?>
+    <?php if(isset($icon) && !$hideIcon): ?>
         <iconify-icon icon="<?php echo e($icon); ?>"></iconify-icon>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </button>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/button-submit.blade.php ENDPATH**/ ?>

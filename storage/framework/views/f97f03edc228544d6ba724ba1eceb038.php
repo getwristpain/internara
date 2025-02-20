@@ -73,15 +73,15 @@ unset($__defined_vars); ?>
 ?>
 
 <div class="flex flex-col gap-2 w-full">
-    <!--[if BLOCK]><![endif]--><?php if($label): ?>
+    <?php if($label): ?>
         <label class="<?php echo e(implode(' ', [!$required ?: 'required', !$disabled ?: 'disabled opacity-100'])); ?>"
             for="<?php echo e($name); ?>">
             <span><?php echo e($label); ?></span>
-            <!--[if BLOCK]><![endif]--><?php if($help): ?>
+            <?php if($help): ?>
                 <span class="pl-1 text-gray-500">(<?php echo e($help); ?>)</span>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?>
         </label>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <div class="flex items-center gap-2">
         <div class="relative w-full">
@@ -101,7 +101,7 @@ unset($__defined_vars); ?>
                     default => $icon,
                 }); ?>"></iconify-icon>
 
-            <!--[if BLOCK]><![endif]--><?php if($type === 'textarea'): ?>
+            <?php if($type === 'textarea'): ?>
                 <textarea id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
                     <?php if($model): ?> wire:model.live.debounce.1000ms="<?php echo e($model); ?>" <?php endif; ?>
                     placeholder="<?php echo e($placeholder); ?>" autocomplete="<?php echo e($name); ?>"
@@ -155,15 +155,15 @@ unset($__defined_vars); ?>
                     ])); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error">
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?>
         </div>
 
-        <!--[if BLOCK]><![endif]--><?php if($unit): ?>
+        <?php if($unit): ?>
             <span class="text-sm font-medium text-gray-500"><?php echo e($unit); ?></span>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     </div>
 
-    <!--[if BLOCK]><![endif]--><?php if($messages && !$hideMessages): ?>
+    <?php if($messages && !$hideMessages): ?>
         <div>
             <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -186,6 +186,6 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
         </div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-text.blade.php ENDPATH**/ ?>

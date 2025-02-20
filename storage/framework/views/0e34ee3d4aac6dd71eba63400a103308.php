@@ -71,7 +71,7 @@ unset($__defined_vars); ?>
 
 <div class="flex flex-col gap-2 w-full font-medium pt-1 <?php echo e($disabled ? 'disabled' : ''); ?>">
     <div class="flex flex-col w-full gap-2">
-        <!--[if BLOCK]><![endif]--><?php if(!empty($label)): ?>
+        <?php if(!empty($label)): ?>
             <div class="text-sm text-gray-600">
                 <label class="text-sm font-medium text-gray-600 <?php echo e($required ? 'required' : ''); ?>"
                     for="<?php echo e($name); ?>">
@@ -79,7 +79,7 @@ unset($__defined_vars); ?>
 
                 </label>
             </div>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
         <div class="relative w-full" x-data="{
             open: false,
             search: '',
@@ -145,7 +145,7 @@ unset($__defined_vars); ?>
             </div>
         </div>
     </div>
-    <!--[if BLOCK]><![endif]--><?php if($errors->has($model) && !$hideError): ?>
+    <?php if($errors->has($model) && !$hideError): ?>
         <div class="mt-2">
             <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -168,6 +168,6 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
         </div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-select.blade.php ENDPATH**/ ?>

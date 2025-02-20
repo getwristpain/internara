@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('fax');
             $table->string('email')->unique();
             $table->string('website');
-            $table->string('logo');
+            $table->string('logo_path');
             $table->string('principal_name');
             $table->timestamps();
         });

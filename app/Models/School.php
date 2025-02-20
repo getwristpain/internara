@@ -13,7 +13,7 @@ class School extends Model
         'fax',
         'email',
         'website',
-        'logo',
+        'logo_path',
         'principal_name',
     ];
 

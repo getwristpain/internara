@@ -28,11 +28,11 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<!--[if BLOCK]><![endif]--><?php if(!empty($messages) && is_array($messages)): ?>
+<?php if(!empty($messages) && is_array($messages)): ?>
     <ul <?php echo e($attributes->merge(['class' => 'text-sm text-error font-medium space-y-1'])); ?>>
-        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $message): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $message): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <li><?php echo e($message); ?></li>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </ul>
-<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+<?php endif; ?>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-error.blade.php ENDPATH**/ ?>

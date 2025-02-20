@@ -6,6 +6,7 @@ use App\Debugger;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Process\Process;
 
 use function Laravel\Prompts\{text, confirm, password, select};
 
@@ -27,91 +28,85 @@ class AppInstaller extends Command
      */
     protected $description = 'Automates the installation and setup of the application, including environment configuration, database setup, migrations, and optimizations.';
 
-    private function handleError(string $message, ?\Throwable $exception = null)
+    /**
+     * Execute the console command.
+     */
+    public function handle()
     {
-        $this->debug('error', $message, $exception);
-        $this->error($message);
-        exit(1);
+        $appUrl = config('app.url', 'localhost:8000');
+
+        $this->info('Starting installation...');
+
+        $this->install();
+
+        $this->info('Installation completed.');
+        $this->info("\nRun 'php artisan serve' to start the server.");
+        $this->info("Open $appUrl in your browser.");
     }
 
-    private function executeCommand(string $command, array $arguments = [], string $startMessage = '', string $successMessage = '', string $errorMessage = '')
+    /**
+     * Perform the installation steps.
+     */
+    protected function install()
     {
-        if ($startMessage) $this->info($startMessage);
-
-        try {
-            $this->call($command, $arguments);
-            if ($successMessage) $this->info($successMessage);
-        } catch (\Throwable $th) {
-            $this->handleError($errorMessage ?: "Error executing command: $command", $th);
-        }
+        $this->clearCache();
+        $this->checkEnvFile();
+        $this->generateAppKey();
+        $this->configureEnv();
+        $this->configureDatabase();
+        $this->runMigrations();
+        $this->runFreshMigrations();
+        $this->seedDatabase();
+        $this->createStorageLink();
+        $this->cleanStorage();
+        $this->buildAssets();
+        $this->optimize();
     }
 
-    private function executeShellCommand(string $command)
-    {
-        $process = new \Symfony\Component\Process\Process(explode(' ', $command));
-        $process->setTimeout(300);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException($process->getErrorOutput());
-        }
-
-        $this->info($process->getOutput());
-    }
-
-    private function setEnv(string $key, string|int|bool $value, bool $rewrite = true)
-    {
-        $key = Str::upper(Str::slug($key, '_'));
-        $envPath = base_path('.env');
-
-        if (!File::exists($envPath)) $this->checkAndCreateEnv();
-        if (!$rewrite && !empty(env($key))) return;
-
-        $envContent = File::get($envPath);
-        $envPattern = "/^{$key}=.*/m";
-
-        if (preg_match($envPattern, $envContent)) {
-            $envContent = preg_replace($envPattern, "{$key}={$value}", $envContent);
-        } else {
-            $envContent .= "\n{$key}={$value}";
-        }
-
-        File::put($envPath, $envContent);
-    }
-
-    private function clearCache()
+    /**
+     * Clear the application cache.
+     */
+    protected function clearCache()
     {
         $this->executeCommand('optimize:clear', [], 'Clearing cache...', 'Cache cleared.', 'Failed to clear cache.');
     }
 
-    private function checkAndCreateEnv()
+    /**
+     * Check and create the .env file if it does not exist.
+     */
+    protected function checkEnvFile()
     {
-        $this->info('Checking application environment...');
+        $this->info('Checking environment file...');
 
         if (!File::exists(base_path('.env'))) {
             $this->info('.env file does not exist, creating it...');
 
             if (File::exists(base_path('.env.example'))) {
                 File::copy(base_path('.env.example'), base_path('.env'));
-                $this->info('.env file has been created from .env.example.');
+                $this->info('.env file created from .env.example.');
             } else {
-                $this->handleError('.env.example file is missing! Please ensure the .env.example file is present.');
-                return;
+                $this->abort('Missing .env.example file! Please ensure the .env.example file is present.');
             }
         } else {
             $this->info('Skipped! .env file already exists.');
         }
     }
 
-    private function generateKey()
+    /**
+     * Generate the application key.
+     */
+    protected function generateAppKey()
     {
-        $this->executeCommand('key:generate', [], 'Generating application key...', 'Application key generated.');
+        $this->executeCommand('key:generate', [], 'Generating app key...', 'App key generated.');
     }
 
-    private function setupEnvConfig()
+    /**
+     * Configure the environment settings.
+     */
+    protected function configureEnv()
     {
         try {
-            $this->info('Setting up application environment configuration...');
+            $this->info('Configuring environment...');
 
             $envConfig = [
                 'APP_NAME' => config('app.name', 'Internara'),
@@ -123,38 +118,40 @@ class AppInstaller extends Command
 
             foreach ($envConfig as $key => $value) {
                 [$value, $rewrite] = is_array($value) ? $value : [$value, true];
-                $this->setEnv($key, $value, $rewrite);
+                $this->updateEnv($key, $value, $rewrite);
             }
 
-            $this->info('Application environment configurations successfully completed.');
+            $this->info('Environment configuration completed.');
         } catch (\Throwable $th) {
-            $this->handleError('Failed to setup application environment configuration.', $th);
-            throw $th;
+            $this->abort('Failed to configure environment.', $th);
         }
     }
 
-    private function setupDBConnection()
+    /**
+     * Configure the database connection.
+     */
+    protected function configureDatabase()
     {
-        $this->info('Starting database connection setup...');
+        $this->info('Configuring database...');
 
         if (!confirm('Do you want to configure the database connection?')) {
             $this->info('Skipping database configuration.');
             return;
         }
 
-        $dbConnectionTypes = ['sqlite', 'mysql', 'pgsql', 'sqlsrv'];
-        $selectedDbType = select('Select the database connection type:', $dbConnectionTypes, 0);
+        $dbTypes = ['sqlite', 'mysql', 'pgsql', 'sqlsrv'];
+        $dbType = select('Select the database connection type:', $dbTypes, 0);
 
-        if ($selectedDbType === 'sqlite') {
+        if ($dbType === 'sqlite') {
             $dbConfig = [
                 'DB_CONNECTION' => 'sqlite',
             ];
             $this->info("SQLite database will be stored at: " . database_path('database.sqlite'));
         } else {
             $dbConfig = [
-                'DB_CONNECTION' => $selectedDbType,
+                'DB_CONNECTION' => $dbType,
                 'DB_HOST' => text('Database host', '127.0.0.1'),
-                'DB_PORT' => text('Database port', $selectedDbType === 'pgsql' ? '5432' : '3306'),
+                'DB_PORT' => text('Database port', $dbType === 'pgsql' ? '5432' : '3306'),
                 'DB_DATABASE' => text('Database name', 'laravel'),
                 'DB_USERNAME' => text('Database username', 'root'),
                 'DB_PASSWORD' => password('Database password')
@@ -162,30 +159,42 @@ class AppInstaller extends Command
         }
 
         foreach ($dbConfig as $key => $value) {
-            $this->setEnv($key, $value);
+            $this->updateEnv($key, $value);
         }
 
-        $this->info('Database connection successfully configured.');
+        $this->info('Database configuration completed.');
     }
 
-    private function runMigration()
+    /**
+     * Run the database migrations.
+     */
+    protected function runMigrations()
     {
         $this->executeCommand('migrate', ['--force' => true], 'Running migrations...', 'Migrations completed.', 'Failed to run migrations.');
     }
 
-    private function freshMigration()
+    /**
+     * Run fresh database migrations.
+     */
+    protected function runFreshMigrations()
     {
         $this->executeCommand('migrate:fresh', ['--force' => 'true']);
     }
 
-    private function runSeeder()
+    /**
+     * Seed the database.
+     */
+    protected function seedDatabase()
     {
         $this->executeCommand('db:seed', [], 'Seeding database...', 'Seeding completed.', 'Failed to seed database.');
     }
 
-    private function linkStorage()
+    /**
+     * Create a symbolic link to the storage folder.
+     */
+    protected function createStorageLink()
     {
-        $this->info('Linking storage folder...');
+        $this->info('Creating storage link...');
 
         if (File::exists(public_path('storage'))) {
             $this->info('Skipped! Storage link already exists.');
@@ -195,7 +204,10 @@ class AppInstaller extends Command
         $this->executeCommand('storage:link', [], 'Creating storage link...', 'Storage linked.', 'Failed to link storage.');
     }
 
-    private function cleanStorage()
+    /**
+     * Clean the storage directories.
+     */
+    protected function cleanStorage()
     {
         $this->info('Cleaning storage...');
 
@@ -208,58 +220,111 @@ class AppInstaller extends Command
 
             $this->info('Storage cleaned successfully.');
         } catch (\Throwable $th) {
-            $this->handleError('Failed to clean storage.', $th);
+            $this->abort('Failed to clean storage.', $th);
         }
     }
 
-    private function buildApp()
+    /**
+     * Build the application assets.
+     */
+    protected function buildAssets()
     {
-        $this->info('Building application assets...');
+        $this->info('Building assets...');
 
         try {
-            $this->executeShellCommand('npm install');
-            $this->executeShellCommand('npm run build');
+            $this->runShellCommand('npm install');
+            $this->runShellCommand('npm run build');
 
-            $this->info('Application assets built successfully.');
+            $this->info('Assets built successfully.');
         } catch (\Throwable $th) {
-            $this->handleError('Failed to build application assets.', $th);
+            $this->abort('Failed to build assets.', $th);
         }
     }
 
-    private function optimizeApp()
+    /**
+     * Optimize the application.
+     */
+    protected function optimize()
     {
         $this->executeCommand('optimize', [], 'Optimizing application...', 'Optimization completed.', 'Failed to optimize.');
     }
 
-    private function performInstall()
+    /**
+     * Abort the installation process with an error message.
+     *
+     * @param string $message
+     * @param \Throwable|null $exception
+     */
+    private function abort(string $message, ?\Throwable $exception = null)
     {
-        $this->clearCache();
-        $this->checkAndCreateEnv();
-        $this->generateKey();
-        $this->setupEnvConfig();
-        $this->setupDBConnection();
-        $this->runMigration();
-        $this->freshMigration();
-        $this->runSeeder();
-        $this->linkStorage();
-        $this->cleanStorage();
-        $this->buildApp();
-        $this->optimizeApp();
+        $this->debug('error', $message, $exception);
+        $this->error($message);
+        exit(1);
     }
 
     /**
-     * Execute the console command.
+     * Run an Artisan command.
+     *
+     * @param string $command
+     * @param array $arguments
+     * @param string $startMessage
+     * @param string $successMessage
+     * @param string $errorMessage
      */
-    public function handle()
+    private function executeCommand(string $command, array $arguments = [], string $startMessage = '', string $successMessage = '', string $errorMessage = '')
     {
-        $APP_URL = config('app.url', 'localhost:8000');
+        if ($startMessage) $this->info($startMessage);
 
-        $this->info('Starting to install application...');
+        try {
+            $this->call($command, $arguments);
+            if ($successMessage) $this->info($successMessage);
+        } catch (\Throwable $th) {
+            $this->abort($errorMessage ?: "Error executing command: $command", $th);
+        }
+    }
 
-        $this->performInstall();
+    /**
+     * Run a shell command.
+     *
+     * @param string $command
+     */
+    private function runShellCommand(string $command)
+    {
+        $process = new Process(explode(' ', $command));
+        $process->setTimeout(300);
+        $process->run();
 
-        $this->info('Application successfully installed.');
-        $this->info("\nRun 'php artisan serve' to start server.");
-        $this->info("Open $APP_URL in your browser.");
+        if (!$process->isSuccessful()) {
+            throw new \RuntimeException($process->getErrorOutput());
+        }
+
+        $this->info($process->getOutput());
+    }
+
+    /**
+     * Update the .env file with a new value.
+     *
+     * @param string $key
+     * @param string|int|bool $value
+     * @param bool $rewrite
+     */
+    private function updateEnv(string $key, string|int|bool $value, bool $rewrite = true)
+    {
+        $key = Str::upper(Str::slug($key, '_'));
+        $envPath = base_path('.env');
+
+        if (!File::exists($envPath)) $this->checkEnvFile();
+        if (!$rewrite && !empty(env($key))) return;
+
+        $envContent = File::get($envPath);
+        $envPattern = "/^{$key}=.*/m";
+
+        if (preg_match($envPattern, $envContent)) {
+            $envContent = preg_replace($envPattern, "{$key}={$value}", $envContent);
+        } else {
+            $envContent .= "\n{$key}={$value}";
+        }
+
+        File::put($envPath, $envContent);
     }
 }

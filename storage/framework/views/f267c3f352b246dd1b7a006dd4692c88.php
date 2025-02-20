@@ -45,14 +45,14 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <div class="w-full space-y-2">
-    <!--[if BLOCK]><![endif]--><?php if($label): ?>
+    <?php if($label): ?>
         <label class="<?php echo e($required ? 'required' : ''); ?> <?php echo e($disabled ? 'disabled opacity-100' : ''); ?>">
             <span><?php echo e($label); ?></span>
-            <!--[if BLOCK]><![endif]--><?php if($help): ?>
+            <?php if($help): ?>
                 <span class="pl-1 text-gray-500">(<?php echo e($help); ?>)</span>
-            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+            <?php endif; ?>
         </label>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <div class="space-y-4">
         <div class="layout-cols">

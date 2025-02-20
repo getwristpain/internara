@@ -71,9 +71,9 @@ unset($__defined_vars); ?>
         }
     }
 }" <?php echo e($attributes->merge(['class' => 'space-y-2 font-medium'])); ?> x-cloak>
-    <!--[if BLOCK]><![endif]--><?php if(isset($label)): ?>
+    <?php if(isset($label)): ?>
         <label class="<?php echo e(!$required ?: 'required'); ?>" for="<?php echo e($name); ?>"><?php echo e($label); ?></label>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <div
         class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 <?php echo e($componentStyles); ?>">
@@ -111,7 +111,7 @@ unset($__defined_vars); ?>
             </div>
         </div>
 
-        <!--[if BLOCK]><![endif]--><?php if(!empty($messages) && !$hideMessages): ?>
+        <?php if(!empty($messages) && !$hideMessages): ?>
             <div>
                 <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -133,7 +133,7 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
             </div>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     </div>
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-image.blade.php ENDPATH**/ ?>
