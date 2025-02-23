@@ -116,10 +116,9 @@ unset($__defined_vars); ?>
             }
         }">
             <div class="flex w-full gap-2 items-center justify-between cursor-pointer input input-bordered <?php echo e($disabled ? 'opacity-80 cursor-not-allowed' : ''); ?>"
-                @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) { open = !open }" wire:loading.class="disabled"
-                wire:loading.attr="disabled">
+                @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) { open = !open }">
                 <iconify-icon class="text-gray-400 scale-125" icon="tabler:selector"></iconify-icon>
-                <span class="flex-1 text-gray-500 <?php echo e($badgeClass); ?>" style="font-size: inherit;"
+                <span class="flex-1 text-gray-500 <?php echo e($badgeClass); ?> text-nowrap" style="font-size: inherit;"
                     x-text="filteredOptions().find(option => option.value === selected)?.label || '<?php echo e($placeholder); ?>'"></span>
                 <svg class="inline w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -131,19 +130,19 @@ unset($__defined_vars); ?>
                 <!-- Search Input -->
                 <template x-if="showSearch">
                     <input class="w-full p-2 border rounded-t-md" type="text" x-model="search"
-                        placeholder="<?php echo e($placeholder); ?>" style="font-size: inherit;" <?php echo e($disabled ? 'disabled' : ''); ?>
-
-                        <?php echo e($required ? 'required' : ''); ?> <?php echo e($autofocus ? 'autofocus' : ''); ?>
-
-                        wire:loading.attr="disabled">
+                        placeholder="<?php echo e('Cari ' . $placeholder); ?>" style="font-size: inherit;"
+                        <?php echo e($disabled ? 'disabled' : ''); ?> <?php echo e($required ? 'required' : ''); ?> autofocus />
                 </template>
 
                 <!-- Options List -->
                 <div class="max-h-60 overflow-y-auto">
                     <template x-for="option in filteredOptions()" :key="option.value">
                         <div class="p-2 cursor-pointer hover:bg-gray-100"
-                            @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) { selected = option.value; open = false }"
-                            wire:loading.class="opacity-50 cursor-not-allowed" wire:loading.attr="disabled">
+                            @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) {
+                            selected = option.value;
+                            open = false;
+                            search = '';
+                        }">
                             <span x-text="option.label"></span>
                         </div>
                     </template>
@@ -151,15 +150,14 @@ unset($__defined_vars); ?>
 
                 <!-- Create New Option -->
                 <template x-if="isCreatingNew()">
-                    <div class="p-2 cursor-pointer hover:bg-gray-100" @click="addOption()"
-                        wire:loading.class="opacity-50 cursor-not-allowed" wire:loading.attr="disabled">
+                    <div class="p-2 cursor-pointer hover:bg-gray-100" @click="addOption()">
                         <span x-text="'Create new: ' + search"></span>
                     </div>
                 </template>
             </div>
         </div>
     </div>
-    <?php if($errors->has($model) && !$hideError): ?>
+    <!--[if BLOCK]><![endif]--><?php if($errors->has($model) && !$hideError): ?>
         <div class="mt-2">
             <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -182,6 +180,6 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
         </div>
-    <?php endif; ?>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-select.blade.php ENDPATH**/ ?>

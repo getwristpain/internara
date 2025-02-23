@@ -6,11 +6,11 @@
     </div>
 
     <div>
-        @livewire('components.schools.school-form', key(\App\Helpers\Helper::key('school-form')))
+        @livewire('settings.school-setting', key(\App\Helpers\Helper::key('school-setting')))
     </div>
 
     <div class="flex items-center justify-end w-full gap-4">
         <x-button class="btn-ghost" action="back">Kembali</x-button>
-        <x-button-submit form="school_form">Lanjut</x-button-submit>
+        <x-button-submit form="school_setting_form">Lanjut</x-button-submit>
     </div>
 </div>

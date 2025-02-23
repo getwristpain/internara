@@ -171,14 +171,14 @@ unset($__defined_vars); ?>
                 <div class="w-1/3">
                     <?php if (isset($component)) { $__componentOriginal262894a2c291df91ae9f7b925bf8a923 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal262894a2c291df91ae9f7b925bf8a923 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-text','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','type' => 'number','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => $required]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-text','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => $required]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('input-text'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','type' => 'number','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required)]); ?> <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required)]); ?> <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal262894a2c291df91ae9f7b925bf8a923)): ?>
 <?php $attributes = $__attributesOriginal262894a2c291df91ae9f7b925bf8a923; ?>

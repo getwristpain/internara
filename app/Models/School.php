@@ -26,7 +26,7 @@ class School extends Model
         parent::boot();
 
         static::creating(function ($school) {
-            $school->logo = $school->logo ?? asset('images/logo.png');
+            $school->logo_path = $school->logo_path ?? asset('images/logo.png');
         });
     }
 }

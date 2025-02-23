@@ -10,9 +10,9 @@
 $__split = function ($name, $params = []) {
     return [$name, $params];
 };
-[$__name, $__params] = $__split('components.schools.school-form');
+[$__name, $__params] = $__split('settings.school-setting');
 
-$__html = app('livewire')->mount($__name, $__params, \App\Helpers\Helper::key('school-form'), $__slots ?? [], get_defined_vars());
+$__html = app('livewire')->mount($__name, $__params, \App\Helpers\Helper::key('school-setting'), $__slots ?? [], get_defined_vars());
 
 echo $__html;
 
@@ -46,14 +46,14 @@ if (isset($__slots)) unset($__slots);
 <?php endif; ?>
         <?php if (isset($component)) { $__componentOriginal7fe032b346fffe6ecd9360d8e4db9a12 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal7fe032b346fffe6ecd9360d8e4db9a12 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button-submit','data' => ['form' => 'school_form']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button-submit','data' => ['form' => 'school_setting_form']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('button-submit'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['form' => 'school_form']); ?>Lanjut <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['form' => 'school_setting_form']); ?>Lanjut <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal7fe032b346fffe6ecd9360d8e4db9a12)): ?>
 <?php $attributes = $__attributesOriginal7fe032b346fffe6ecd9360d8e4db9a12; ?>

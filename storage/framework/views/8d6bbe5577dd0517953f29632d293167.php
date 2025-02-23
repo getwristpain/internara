@@ -2,7 +2,6 @@
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
-    'component' => [],
     'hideMessages' => false,
     'hint' => null,
     'label' => null,
@@ -11,6 +10,7 @@ $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'name' => '',
     'placeholder' => 'Unggah Berkas',
     'required' => false,
+    'value' => '',
 ]));
 
 foreach ($attributes->all() as $__key => $__value) {
@@ -27,7 +27,6 @@ unset($__propNames);
 unset($__newAttributes);
 
 foreach (array_filter(([
-    'component' => [],
     'hideMessages' => false,
     'hint' => null,
     'label' => null,
@@ -36,6 +35,7 @@ foreach (array_filter(([
     'name' => '',
     'placeholder' => 'Unggah Berkas',
     'required' => false,
+    'value' => '',
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 }
@@ -49,30 +49,28 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <?php
-    $componentHasErrorsStyles = !empty($messages) ? 'border-red-500' : 'border-gray-300';
-    $componentStyles = implode(' ', [$componentHasErrorsStyles, $component['styles'] ?? '']);
-    $inputStyles = implode(' ', [$componentHasErrorsStyles, $component['inputStyles'] ?? '']);
-
-    $messages = !empty($messages) ? $message : ($errors->has($model) ? $errors->get($model) : []);
+    $messages = !empty($messages) ? $messages : (!empty($model) && $errors->has($model) ? $errors->get($model) : []);
+    $hasErrors = !empty($messages);
+    $borderColor = $hasErrors ? 'border-red-500' : 'border-gray-300';
 ?>
 
-<div x-data="{
-    preview: <?php if ((object) ($model) instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($model->value()); ?>')<?php echo e($model->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($model); ?>')<?php endif; ?>.live,
-    selectFile() {
-        this.$refs.fileInput.click();
+<div class="space-y-2 font-medium" x-data="{
+    preview: null,
+    initImage: <?php echo \Illuminate\Support\Js::from($value)->toHtml() ?> ?? <?php if ((object) ($model) instanceof \Livewire\WireDirective) : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($model->value()); ?>')<?php echo e($model->hasModifier('live') ? '.live' : ''); ?><?php else : ?>window.Livewire.find('<?php echo e($__livewire->getId()); ?>').entangle('<?php echo e($model); ?>')<?php endif; ?>,
+    init() {
+        if (!this.preview && this.initImage) {
+            this.preview = this.initImage;
+        }
     },
     updatePreview(event) {
-        const file = event.target.files[0];
+        let file = event.target.files[0];
         if (file) {
             let reader = new FileReader();
-            reader.onload = (e) => {
-                this.preview = e.target.result;
-                $wire.set('<?php echo e($model); ?>', e.target.result);
-            };
+            reader.onload = (e) => this.preview = e.target.result;
             reader.readAsDataURL(file);
         }
     }
-}" <?php echo e($attributes->merge(['class' => 'space-y-2 font-medium'])); ?> x-cloak>
+}">
     <?php if (isset($component)) { $__componentOriginale3da9d84bb64e4bc2eeebaafabfb2581 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale3da9d84bb64e4bc2eeebaafabfb2581 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-label','data' => ['name' => $name,'label' => $label,'required' => $required,'hint' => $hint]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -94,16 +92,18 @@ unset($__defined_vars); ?>
 <?php endif; ?>
 
     <div
-        class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 <?php echo e($componentStyles); ?>">
-        <!-- Hidden File Input -->
-        <input class="hidden" id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" <?php echo e($required); ?> type="file"
-            x-ref="fileInput" @change="updatePreview" wire:model="<?php echo e($model); ?>">
+        class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 <?php echo e($borderColor); ?>">
 
-        <div class="cursor-pointer hover:bg-gray-200 basic-transition border-4 border-dashed rounded-lg bg-gray-100 p-4 <?php echo e($inputStyles); ?>"
-            @click="selectFile">
+        <!-- Hidden File Input -->
+        <input class="hidden" id="<?php echo e($name); ?>" type="file" name="<?php echo e($name); ?>"
+            wire:model="<?php echo e($model); ?>" x-ref="fileInput" @change="updatePreview($event)">
+
+        <!-- Drop Area -->
+        <div class="cursor-pointer hover:bg-gray-200 transition border-4 border-dashed rounded-lg bg-gray-100 p-4"
+            @click="$refs.fileInput.click()">
             <div>
                 <template x-if="preview">
-                    <img class="object-cover h-24" :src="preview" alt="<?php echo e($label); ?>">
+                    <img class="object-cover h-24" :src="preview" :alt="preview">
                 </template>
                 <template x-if="!preview">
                     <?php if (isset($component)) { $__componentOriginald8df7172a1dcf52e21a74bcdceb15e43 = $component; } ?>
@@ -129,7 +129,7 @@ unset($__defined_vars); ?>
             </div>
         </div>
 
-        <?php if(!empty($messages) && !$hideMessages): ?>
+        <!--[if BLOCK]><![endif]--><?php if($hasErrors && !$hideMessages): ?>
             <div>
                 <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -151,7 +151,7 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     </div>
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-image.blade.php ENDPATH**/ ?>

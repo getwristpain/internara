@@ -36,9 +36,11 @@ class AddressService extends Service
         return $this->fetchData("villages/{$districtId}", "villages_{$districtId}", true);
     }
 
-    public function getPostalCode(string $villageId): string
+    public function getPostalCode(string $districtId, string $villageId): ?string
     {
-        return $this->fetchData("villages/{$villageId}", "villages_{$villageId}", true)->first()['postal_code'] ?? '';
+        return $this->getVillages($districtId)
+            ->where('id', $villageId)
+            ->first()['postal_code'] ?? null;
     }
 
     public function getFullAddress(...$address): string

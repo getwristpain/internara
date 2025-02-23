@@ -14,7 +14,9 @@
         "laravel/prompts": "^0.3.4",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.4",
-        "livewire/volt": "^1.0"
+        "livewire/volt": "^1.0",
+        "php-flasher/flasher-laravel": "^2.1",
+        "php-flasher/flasher-sweetalert-laravel": "^2.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.14",

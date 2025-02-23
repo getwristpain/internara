@@ -1,5 +1,4 @@
 @props([
-    'component' => [],
     'hideMessages' => false,
     'hint' => null,
     'label' => null,
@@ -8,46 +7,47 @@
     'name' => '',
     'placeholder' => 'Unggah Berkas',
     'required' => false,
+    'value' => '',
 ])
 
 @php
-    $componentHasErrorsStyles = !empty($messages) ? 'border-red-500' : 'border-gray-300';
-    $componentStyles = implode(' ', [$componentHasErrorsStyles, $component['styles'] ?? '']);
-    $inputStyles = implode(' ', [$componentHasErrorsStyles, $component['inputStyles'] ?? '']);
-
-    $messages = !empty($messages) ? $message : ($errors->has($model) ? $errors->get($model) : []);
+    $messages = !empty($messages) ? $messages : (!empty($model) && $errors->has($model) ? $errors->get($model) : []);
+    $hasErrors = !empty($messages);
+    $borderColor = $hasErrors ? 'border-red-500' : 'border-gray-300';
 @endphp
 
-<div x-data="{
-    preview: @entangle($model).live,
-    selectFile() {
-        this.$refs.fileInput.click();
+<div class="space-y-2 font-medium" x-data="{
+    preview: null,
+    initImage: @js($value) ?? @entangle($model),
+    init() {
+        if (!this.preview && this.initImage) {
+            this.preview = this.initImage;
+        }
     },
     updatePreview(event) {
-        const file = event.target.files[0];
+        let file = event.target.files[0];
         if (file) {
             let reader = new FileReader();
-            reader.onload = (e) => {
-                this.preview = e.target.result;
-                $wire.set('{{ $model }}', e.target.result);
-            };
+            reader.onload = (e) => this.preview = e.target.result;
             reader.readAsDataURL(file);
         }
     }
-}" {{ $attributes->merge(['class' => 'space-y-2 font-medium']) }} x-cloak>
-    <x-input-label :$name :$label :$required :$hint></x-input-label>
+}">
+    <x-input-label :name="$name" :label="$label" :required="$required" :hint="$hint"></x-input-label>
 
     <div
-        class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 {{ $componentStyles }}">
-        <!-- Hidden File Input -->
-        <input class="hidden" id="{{ $name }}" name="{{ $name }}" {{ $required }} type="file"
-            x-ref="fileInput" @change="updatePreview" wire:model="{{ $model }}">
+        class="flex flex-col items-center justify-center w-full gap-2 border rounded-lg min-h-4 p-4 {{ $borderColor }}">
 
-        <div class="cursor-pointer hover:bg-gray-200 basic-transition border-4 border-dashed rounded-lg bg-gray-100 p-4 {{ $inputStyles }}"
-            @click="selectFile">
+        <!-- Hidden File Input -->
+        <input class="hidden" id="{{ $name }}" type="file" name="{{ $name }}"
+            wire:model="{{ $model }}" x-ref="fileInput" @change="updatePreview($event)">
+
+        <!-- Drop Area -->
+        <div class="cursor-pointer hover:bg-gray-200 transition border-4 border-dashed rounded-lg bg-gray-100 p-4"
+            @click="$refs.fileInput.click()">
             <div>
                 <template x-if="preview">
-                    <img class="object-cover h-24" :src="preview" alt="{{ $label }}">
+                    <img class="object-cover h-24" :src="preview" :alt="preview">
                 </template>
                 <template x-if="!preview">
                     <x-no-media class="h-24 opacity-40"></x-no-media>
@@ -55,9 +55,9 @@
             </div>
         </div>
 
-        @if (!empty($messages) && !$hideMessages)
+        @if ($hasErrors && !$hideMessages)
             <div>
-                <x-input-error :$messages></x-input-error>
+                <x-input-error :messages="$messages"></x-input-error>
             </div>
         @endif
     </div>

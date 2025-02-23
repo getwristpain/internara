@@ -50,9 +50,9 @@ unset($__defined_vars); ?>
         'disabled' => $disabled,
     ])); ?>>
 
-    <!--[if BLOCK]><![endif]--><?php if(isset($icon)): ?>
+    <?php if(isset($icon)): ?>
         <iconify-icon icon="<?php echo e($icon); ?>"></iconify-icon>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <span><?php echo e($slot); ?></span>
 </button>

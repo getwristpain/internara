@@ -56,10 +56,9 @@
             }
         }">
             <div class="flex w-full gap-2 items-center justify-between cursor-pointer input input-bordered {{ $disabled ? 'opacity-80 cursor-not-allowed' : '' }}"
-                @click="if (!{{ $disabled ? 'true' : 'false' }}) { open = !open }" wire:loading.class="disabled"
-                wire:loading.attr="disabled">
+                @click="if (!{{ $disabled ? 'true' : 'false' }}) { open = !open }">
                 <iconify-icon class="text-gray-400 scale-125" icon="tabler:selector"></iconify-icon>
-                <span class="flex-1 text-gray-500 {{ $badgeClass }}" style="font-size: inherit;"
+                <span class="flex-1 text-gray-500 {{ $badgeClass }} text-nowrap" style="font-size: inherit;"
                     x-text="filteredOptions().find(option => option.value === selected)?.label || '{{ $placeholder }}'"></span>
                 <svg class="inline w-5 h-5 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -71,17 +70,19 @@
                 <!-- Search Input -->
                 <template x-if="showSearch">
                     <input class="w-full p-2 border rounded-t-md" type="text" x-model="search"
-                        placeholder="{{ $placeholder }}" style="font-size: inherit;" {{ $disabled ? 'disabled' : '' }}
-                        {{ $required ? 'required' : '' }} {{ $autofocus ? 'autofocus' : '' }}
-                        wire:loading.attr="disabled">
+                        placeholder="{{ 'Cari ' . $placeholder }}" style="font-size: inherit;"
+                        {{ $disabled ? 'disabled' : '' }} {{ $required ? 'required' : '' }} autofocus />
                 </template>
 
                 <!-- Options List -->
                 <div class="max-h-60 overflow-y-auto">
                     <template x-for="option in filteredOptions()" :key="option.value">
                         <div class="p-2 cursor-pointer hover:bg-gray-100"
-                            @click="if (!{{ $disabled ? 'true' : 'false' }}) { selected = option.value; open = false }"
-                            wire:loading.class="opacity-50 cursor-not-allowed" wire:loading.attr="disabled">
+                            @click="if (!{{ $disabled ? 'true' : 'false' }}) {
+                            selected = option.value;
+                            open = false;
+                            search = '';
+                        }">
                             <span x-text="option.label"></span>
                         </div>
                     </template>
@@ -89,8 +90,7 @@
 
                 <!-- Create New Option -->
                 <template x-if="isCreatingNew()">
-                    <div class="p-2 cursor-pointer hover:bg-gray-100" @click="addOption()"
-                        wire:loading.class="opacity-50 cursor-not-allowed" wire:loading.attr="disabled">
+                    <div class="p-2 cursor-pointer hover:bg-gray-100" @click="addOption()">
                         <span x-text="'Create new: ' + search"></span>
                     </div>
                 </template>

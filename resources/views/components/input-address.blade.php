@@ -37,7 +37,7 @@
                         placeholder="RT/RW/Nama Jalan/Nomor Bangunan (Opsional)"></x-input-text>
                 </div>
                 <div class="w-1/3">
-                    <x-input-text wire:key="{{ \App\Helpers\Helper::key('input_text_postal_code') }}" type="number"
+                    <x-input-text wire:key="{{ \App\Helpers\Helper::key('input_text_postal_code') }}"
                         name="{{ $name . '_postal_code' }}" model="{{ $model . '.postal_code' }}"
                         placeholder="Kode Pos" :$required></x-input-text>
                 </div>

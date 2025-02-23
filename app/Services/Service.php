@@ -13,21 +13,15 @@ class Service
 {
     use Debugger;
 
-    protected array $attributes = [];
     protected ?Model $model;
     protected string $cacheKey;
     protected int $cacheTTL;
 
-    public function __construct(?Model $model = null, int $cacheTTL = 60)
+    protected function __construct(?Model $model = null, int $cacheTTL = 60)
     {
         $this->model = $model;
         $this->cacheKey = Str::lower(class_basename($model));
         $this->cacheTTL = $cacheTTL;
-    }
-
-    public function __set(string $name, $value): void
-    {
-        $this->attributes[$name] = $value;
     }
 
     public function getAll(): Collection
@@ -57,19 +51,24 @@ class Service
 
     public function create(array $data): Model
     {
-        $validatedData = $this->validate($data);
-        return $this->model->create($validatedData);
+        return $this->model->create($data);
     }
 
     public function update(string|int $id, array $data): Model
     {
-        $this->attributes['id'] = $id;
-        $validatedData = $this->validate($data);
 
         $model = $this->find($id);
-        if ($model->update($validatedData)) {
+        if ($model->update($data)) {
             Cache::forget($this->generateCacheKey('id', ['id' => $id]));
         }
+
+        return $model;
+    }
+
+    public function updateOrCreate(array $where, array $data): Model
+    {
+        $model = $this->model->updateOrCreate($where, $data);
+        Cache::forget($this->generateCacheKey('id', ['id' => $model->id]));
 
         return $model;
     }
@@ -104,34 +103,19 @@ class Service
         return true;
     }
 
-    public function updateOrCreate(array $where, array $data): Model
-    {
-        if (isset($where['id'])) {
-            $this->attributes['id'] = $where['id'];
-        }
-        $validatedData = $this->validate($data);
-        $model = $this->model->updateOrCreate($where, $validatedData);
-        Cache::forget($this->generateCacheKey('id', ['id' => $model->id]));
-
-        return $model;
-    }
-
     public function bulkAction(array $ids, string $action, array $attributes = []): void
     {
         $query = $this->model->whereIn('id', $ids);
 
         switch ($action) {
             case 'insert':
-                $validatedData = array_map(fn($item) => $this->validate($item), $attributes);
-                $this->model->insert($validatedData);
+                $this->model->insert($attributes);
                 break;
             case 'upsert':
-                $validatedData = array_map(fn($item) => $this->validate($item), $attributes);
-                $this->model->upsert($validatedData, ['id']);
+                $this->model->upsert($attributes, ['id'], array_keys($attributes[0]));
                 break;
             case 'update':
-                $validatedData = $this->validate($attributes);
-                $query->update($validatedData);
+                $query->update();
                 break;
             case 'delete':
                 $query->delete();
@@ -148,32 +132,33 @@ class Service
         }
     }
 
+    public function transaction(Closure $callback)
+    {
+        return $this->model->getConnection()->transaction($callback);
+    }
+
     protected function queryCached(Closure $callback, string $key, array $filters = [])
     {
         $cacheKey = $this->generateCacheKey($key, $filters);
         return Cache::remember($cacheKey, $this->cacheTTL, fn() => $callback($this->model));
     }
 
-    private function generateCacheKey(string $key, array $filters = []): string
-    {
-        $cacheFilters = empty($filters) ? '' : md5(serialize($filters));
-        return implode(':', [$this->cacheKey, $key, $cacheFilters]);
-    }
-
-    public function transaction(Closure $callback)
-    {
-        return $this->model->getConnection()->transaction($callback);
-    }
-
-    protected function rules(): array
+    protected function rules(array $attributes = []): array
     {
         return [];
     }
 
-    protected function validate(array $data = [], array $rules = [], array $messages = [], array $attributes = []): array
+    protected function validate(?array $data = null, array $rules = [], array $message = [], array $attributes = []): array
     {
-        $data = array_merge($this->attributes, $data);
-        $rules = array_merge($this->rules(), $rules);
-        return validator($data, $rules, $messages, $attributes)->validate();
+        $data = $data ?? $this->model?->toArray();
+        $rules = array_merge($this->rules($data), $rules);
+
+        return validator($data, $rules, $message, $attributes)->validate();
+    }
+
+    private function generateCacheKey(string $key, array $filters = []): string
+    {
+        $cacheFilters = empty($filters) ? '' : md5(serialize($filters));
+        return implode(':', [$this->cacheKey, $key, $cacheFilters]);
     }
 }

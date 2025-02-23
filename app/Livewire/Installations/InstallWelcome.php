@@ -2,10 +2,11 @@
 
 namespace App\Livewire\Installations;
 
-use Livewire\Attributes\Title;
+use Livewire\Attributes\{Title, Layout};
 use Livewire\Component;
 
 #[Title('Selamat Datang')]
+#[Layout('components.layouts.guest')]
 class InstallWelcome extends Component
 {
     public function next()

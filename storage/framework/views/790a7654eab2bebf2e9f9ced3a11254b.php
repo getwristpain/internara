@@ -117,4 +117,5 @@ unset($__defined_vars); ?>
             </div>
         </div>
     </div>
-</div><?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/installations/install-welcome.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/installations/install-welcome.blade.php ENDPATH**/ ?>
