@@ -3,11 +3,9 @@
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'action' => '',
-    'component' => [
-        'buttonStyles' => 'btn',
-    ],
     'disabled' => false,
     'icon' => null,
+    'iconEffect' => '',
     'reverse' => false,
 ]));
 
@@ -26,11 +24,9 @@ unset($__newAttributes);
 
 foreach (array_filter(([
     'action' => '',
-    'component' => [
-        'buttonStyles' => 'btn',
-    ],
     'disabled' => false,
     'icon' => null,
+    'iconEffect' => '',
     'reverse' => false,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
@@ -44,15 +40,34 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<button wire:click.prevent="<?php echo e($action); ?>"
+<button x-data="{
+    rotated: false,
+    action: <?php echo \Illuminate\Support\Js::from($action)->toHtml() ?>,
+    iconEffect: <?php echo \Illuminate\Support\Js::from($iconEffect)->toHtml() ?>,
+}"
+    @click="
+        if (iconEffect === 'rotate') {
+            rotated = !rotated;
+        }
+
+        if (action.startsWith('$dispatch')) {
+            let match = action.match(/\$dispatch\('([^']+)'\)/);
+            if (match) {
+                $dispatch(match[1]);
+            }
+        } else if (action) {
+            $wire.call(action);
+        }
+    "
     <?php echo e($attributes->merge([
-        'class' => implode(' ', [$component['buttonStyles'], !$reverse ?: 'flex-row-reverse']),
+        'class' => implode(' ', ['btn', !$reverse ?: 'flex-row-reverse']),
         'disabled' => $disabled,
     ])); ?>>
 
-    <?php if(isset($icon)): ?>
-        <iconify-icon icon="<?php echo e($icon); ?>"></iconify-icon>
-    <?php endif; ?>
+    <!--[if BLOCK]><![endif]--><?php if($icon): ?>
+        <iconify-icon class="transition-transform duration-300" :class="{ 'rotate-180': rotated }"
+            icon="<?php echo e($icon); ?>"></iconify-icon>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     <span><?php echo e($slot); ?></span>
 </button>

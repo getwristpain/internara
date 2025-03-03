@@ -29,8 +29,9 @@ class System extends Model
         parent::boot();
 
         static::creating(function ($system) {
-            $system->name = $system->name ?? config('app.name');
-            $system->logo = $system->logo ?? asset('images/logo.png');
+            $system->name ??= config('app.name');
+            $system->logo ??= asset(config('app.logo', 'images/logo.png'));
+            $system->installed ??= false;
         });
     }
 }

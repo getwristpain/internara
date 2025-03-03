@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Installations;
 
-use Livewire\Attributes\{Title, Layout};
 use Livewire\Component;
 
-#[Title('Selamat Datang')]
-#[Layout('components.layouts.guest')]
+/**
+ * @mixin \Livewire\Component
+ */
 class InstallWelcome extends Component
 {
     public function next()
@@ -16,6 +16,9 @@ class InstallWelcome extends Component
 
     public function render()
     {
-        return view('livewire.installations.install-welcome');
+        return view('livewire.installations.install-welcome')
+            ->layout('components.layouts.guest', [
+                'title' => ('Selamat datang di '.config('app.name', 'Internara')),
+            ]);
     }
 }

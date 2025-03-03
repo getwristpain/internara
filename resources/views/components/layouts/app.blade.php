@@ -7,10 +7,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <!-- Title -->
-        <title>{{ ($title ?? '' ? $title . ' | ' : '') . config('app.name', 'Internara') }}</title>
+        <title>{{ $title ?? config('app.name', 'Internara') }}</title>
 
         <!-- Favicon -->
-        <link rel="shortcut icon" href="{{ $favicon ?? asset('images/logo.png') }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ $favicon ?? asset(config('app.logo', 'images/logo.png')) }}"
+            type="image/x-icon">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

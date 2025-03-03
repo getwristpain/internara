@@ -1,6 +1,8 @@
 @props([
-    'app_name' => config('app.name', 'Internara'),
-    'app_version' => config('app.version', '1.0.0'),
+    'system' => [
+        'name' => config('app.name', 'Internara'),
+        'version' => config('app.version', '1.0.0'),
+    ],
     'features' => [
         [
             'title' => 'Pendaftaran PKL',
@@ -36,7 +38,7 @@
             <div class="space-y-2">
                 <p class="text-sm font-bold">INSTALASI APLIKASI</p>
                 <h1 class="flex text-heading-xl">
-                    Selamat Datang <br> di {{ $app_name }}
+                    Selamat Datang <br> di {{ $system['name'] }}
                 </h1>
                 <p class="text-subheading">Kelola PKL Sekolah Lebih Mudah!</p>
                 <p class="pt-6 text-justify">Internara membantu siswa, guru, dan pembimbing mengelola PKL secara
@@ -60,11 +62,9 @@
             </div>
             <div
                 class="flex flex-col items-center justify-center w-full gap-4 mt-8 lg:justify-start lg:flex-row-reverse">
-                <button class="btn btn-neutral btn-wide" wire:click="next">
-                    <span>Mulai Instalasi</span>
-                    <span><iconify-icon icon="icon-park-outline:right-c"></iconify-icon></span>
-                </button>
-                <span class="text-sm font-medium text-gray-600">{{ 'Version ' . $app_version }}</span>
+                <x-button class="btn-neutral" action="next" icon="icon-park-outline:right-c" reverse>Mulai
+                    Instalasi</x-button>
+                <span class="text-sm font-medium text-gray-700">{{ 'Version ' . $system['version'] }}</span>
             </div>
         </div>
     </div>

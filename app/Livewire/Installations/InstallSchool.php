@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Installations;
 
-use Livewire\Attributes\{Layout, On, Title};
+use Livewire\Attributes\On;
 use Livewire\Component;
 
-#[Title('Instalasi | Pengaturan Data Sekolah')]
-#[Layout('components.layouts.guest')]
 class InstallSchool extends Component
 {
     public function back()
@@ -14,14 +12,17 @@ class InstallSchool extends Component
         return $this->redirectRoute('install', navigate: true);
     }
 
-    #[On('school-data-saved')]
-    public function handleSchoolSaved()
+    #[On('school-setting-saved')]
+    public function next()
     {
         return $this->redirectRoute('install.department', navigate: true);
     }
 
     public function render()
     {
-        return view('livewire.installations.install-school');
+        return view('livewire.installations.install-school')
+            ->layout('components.layouts.guest', [
+                'title' => ('Instalasi | Pengaturan Sekolah | '.config('app.name', 'Internara')),
+            ]);
     }
 }

@@ -38,7 +38,7 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<?php if(!empty($messages)): ?>
+<!--[if BLOCK]><![endif]--><?php if(!empty($messages)): ?>
     <?php if (isset($component)) { $__componentOriginalc5711d836f933e61eafca8928e9a27a5 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc5711d836f933e61eafca8928e9a27a5 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.alerts','data' => ['messages' => $messages,'component' => $component]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -58,5 +58,5 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginalc5711d836f933e61eafca8928e9a27a5; ?>
 <?php unset($__componentOriginalc5711d836f933e61eafca8928e9a27a5); ?>
 <?php endif; ?>
-<?php endif; ?>
+<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/flash-messages.blade.php ENDPATH**/ ?>

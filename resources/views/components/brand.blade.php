@@ -1,9 +1,10 @@
 @props([
-    'APP_NAME' => config('app.name', 'Internara'),
-    'APP_LOGO' => asset('images/logo.png'),
+    'name' => app(\App\Services\SystemService::class)->first()->name,
 ])
 
-<a class="text-lg btn btn-ghost hover:bg-inherit basic-transition" href="{{ url('/') }}" wire:navigate>
-    <span><x-logo url="{{ $APP_LOGO }}" /></span>
-    <span>{{ $APP_NAME }}</span>
+<a href="{{ url('/') }}" wire:navigate>
+    <div class="flex items-center gap-2 text-lg font-bold hover:bg-inherit basic-transition">
+        <span><x-logo /></span>
+        <span>{{ $name }}</span>
+    </div>
 </a>

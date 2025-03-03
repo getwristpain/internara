@@ -1,9 +1,9 @@
 @props([
-    'title' => '',
-    'favicon' => '',
+    'title' => null,
+    'favicon' => null,
 ])
 
-<x-layouts.app :$title>
+<x-layouts.app :$title :$favicon>
     <div class="flex flex-col wh-full">
         <x-navbar></x-navbar>
 

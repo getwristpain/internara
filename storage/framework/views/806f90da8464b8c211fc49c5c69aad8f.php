@@ -7,10 +7,11 @@
         <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
         <!-- Title -->
-        <title><?php echo e(($title ?? '' ? $title . ' | ' : '') . config('app.name', 'Internara')); ?></title>
+        <title><?php echo e($title ?? config('app.name', 'Internara')); ?></title>
 
         <!-- Favicon -->
-        <link rel="shortcut icon" href="<?php echo e($favicon ?? asset('images/logo.png')); ?>" type="image/x-icon">
+        <link rel="shortcut icon" href="<?php echo e($favicon ?? asset(config('app.logo', 'images/logo.png'))); ?>"
+            type="image/x-icon">
 
         <!-- Scripts -->
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>

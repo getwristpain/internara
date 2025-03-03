@@ -1,21 +1,38 @@
 @props([
     'action' => '',
-    'component' => [
-        'buttonStyles' => 'btn',
-    ],
     'disabled' => false,
     'icon' => null,
+    'iconEffect' => '',
     'reverse' => false,
 ])
 
-<button wire:click.prevent="{{ $action }}"
+<button x-data="{
+    rotated: false,
+    action: @js($action),
+    iconEffect: @js($iconEffect),
+}"
+    @click="
+        if (iconEffect === 'rotate') {
+            rotated = !rotated;
+        }
+
+        if (action.startsWith('$dispatch')) {
+            let match = action.match(/\$dispatch\('([^']+)'\)/);
+            if (match) {
+                $dispatch(match[1]);
+            }
+        } else if (action) {
+            $wire.call(action);
+        }
+    "
     {{ $attributes->merge([
-        'class' => implode(' ', [$component['buttonStyles'], !$reverse ?: 'flex-row-reverse']),
+        'class' => implode(' ', ['btn', !$reverse ?: 'flex-row-reverse']),
         'disabled' => $disabled,
     ]) }}>
 
-    @if (isset($icon))
-        <iconify-icon icon="{{ $icon }}"></iconify-icon>
+    @if ($icon)
+        <iconify-icon class="transition-transform duration-300" :class="{ 'rotate-180': rotated }"
+            icon="{{ $icon }}"></iconify-icon>
     @endif
 
     <span>{{ $slot }}</span>

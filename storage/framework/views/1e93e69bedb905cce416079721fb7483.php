@@ -2,7 +2,7 @@
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
-    'url' => asset('images/logo.png'),
+    'url' => asset(app(\App\Services\SystemService::class)->first()->logo),
     'alt' => 'Logo',
 ]));
 
@@ -20,7 +20,7 @@ unset($__propNames);
 unset($__newAttributes);
 
 foreach (array_filter(([
-    'url' => asset('images/logo.png'),
+    'url' => asset(app(\App\Services\SystemService::class)->first()->logo),
     'alt' => 'Logo',
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
@@ -34,7 +34,9 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<div <?php echo e($attributes->merge(['class' => 'avatar w-4 scale-125'])); ?>>
-    <img class="aspect-square object-cover object-center" src="<?php echo e($url); ?>" alt="<?php echo e($alt); ?>">
+<div <?php echo e($attributes->merge(['class' => 'w-4 scale-125 avatar relative'])); ?>>
+    <!-- Logo Images -->
+    <img class="object-cover object-center transition-opacity duration-300 aspect-square" src="<?php echo e($url); ?>"
+        alt="<?php echo e($alt); ?>">
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/logo.blade.php ENDPATH**/ ?>

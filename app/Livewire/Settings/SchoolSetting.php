@@ -2,84 +2,68 @@
 
 namespace App\Livewire\Settings;
 
-use Livewire\Component;
-use App\Helpers\Uploader;
 use App\Helpers\Formatter;
-use Livewire\WithFileUploads;
-use App\Services\SchoolService;
+use App\Helpers\Uploader;
 use App\Services\AddressService;
+use App\Services\SchoolService;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class SchoolSetting extends Component
 {
     use WithFileUploads;
 
     protected SchoolService $schoolService;
+
     protected AddressService $addressService;
 
+    public bool $isDirty = false;
+
     public array $school = [];
+
     public array $addressOptions = [];
 
     public function __construct()
     {
-        $this->schoolService = new SchoolService();
-        $this->addressService = new AddressService();
+        $this->schoolService = new SchoolService;
+        $this->addressService = new AddressService;
     }
 
     public function mount()
     {
-        $this->initData();
+        $this->init();
     }
 
-    public function updated($propertyName)
+    protected function init()
     {
-        match (true) {
-            ($propertyName === 'school.logo_file') => $this->validate(['school.logo_file' => 'required|image|max:1024|mimes:png,jpg,jpeg,webp']),
-            str_starts_with($propertyName, 'school.address.') => $this->updateSchoolAddress(),
-            default => null,
-        };
-    }
+        $this->reset([
+            'addressOptions',
+            'isDirty',
+            'school',
+        ]);
 
-    public function save()
-    {
-        $this->validate(array_merge(
-            collect($this->schoolService->rules())
-                ->mapWithKeys(fn($rule, $key) => ["school.$key" => $rule])
-                ->toArray(),
-            empty($this->school['logo_path']) ? ['school.logo_file' => 'required'] : []
-        ));
-
-        $this->handleSchoolLogo();
-        $this->storeData();
-        $this->initData();
-
-        $this->dispatch('school-setting-saved');
-    }
-
-    public function render()
-    {
-        return view('livewire.settings.school-setting');
-    }
-
-    protected function initData()
-    {
         $this->getSchoolData();
         $this->getAddressOptions();
     }
 
     protected function getSchoolData()
     {
-        $schoolData = $this->schoolService->getSchoolData()->toArray();
+        $schoolData = $this->schoolService->first()?->toArray() ?? null;
+
+        if (! empty($schoolData['logo'])) {
+            $schoolData['logo_preview'] = Uploader::getPublicUrl($schoolData['logo']);
+        }
 
         $this->reset('school');
-        $this->school = $schoolData ?: [
-            'logo_file' => '',
+        $this->school = $schoolData ?? [
+            'logo' => '',
             'address' => [
                 'province_id' => '',
                 'regency_id' => '',
                 'district_id' => '',
                 'village_id' => '',
                 'postal_code' => '',
-            ]
+            ],
         ];
     }
 
@@ -95,6 +79,17 @@ class SchoolSetting extends Component
         return $this->addressOptions ?? [];
     }
 
+    public function updated($propertyName)
+    {
+        match (true) {
+            ($propertyName === 'school.logo') => $this->validate(['school.logo' => 'required|image|max:1024|mimes:png,jpg,jpeg,webp']),
+            str_starts_with($propertyName, 'school.address.') => $this->updateSchoolAddress(),
+            default => null,
+        };
+
+        $this->isDirty = true;
+    }
+
     protected function updateSchoolAddress()
     {
         $districtId = $this->school['address']['district_id'] ?? '';
@@ -104,16 +99,46 @@ class SchoolSetting extends Component
         $this->school['address']['postal_code'] = $this->addressService->getPostalCode($districtId, $villageId);
     }
 
-    /**
-     * @return void
-     */
+    public function save()
+    {
+        if ($this->isDirty) {
+            $schoolId = $this->school['id'] ?? null;
+
+            $this->validate(array_merge(
+                [
+                    'school.name' => 'required|string|max:255|unique:schools,name'.($schoolId ? ",{$schoolId}" : ''),
+                    'school.address' => 'nullable|array',
+                    'school.phone' => 'nullable|string|max:255|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+                    'school.fax' => 'nullable|string|max:255|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+                    'school.email' => 'nullable|email|max:255|unique:schools,email'.($schoolId ? ",{$schoolId}" : ''),
+                    'school.website' => 'nullable|string|max:255',
+                    'school.principal_name' => 'nullable|string|max:255',
+                ],
+                empty($this->school['logo']) ? ['school.logo' => 'required'] : []
+            ));
+
+            $this->handleSchoolLogo();
+            $this->storeData();
+        }
+
+        $this->init();
+        $this->dispatch('school-setting-saved');
+    }
+
     protected function handleSchoolLogo(): void
     {
-        if (isset($this->school['logo_file'])) {
-            $this->school['logo_path'] = Uploader::upload($this->school['logo_file'], 'schools/logo');
-            if (empty($this->school['logo_path'])) {
-                flash()->error('Gagal mengunggah logo sekolah.');
-            }
+        if (empty($this->school['logo'])) {
+            $this->addError('school.logo', 'Logo sekolah wajib diunggah.');
+
+            return;
+        }
+
+        if (! is_string($this->school['logo'])) {
+            $this->school['logo'] = Uploader::upload($this->school['logo'], 'schools/logo');
+        }
+
+        if (empty($this->school['logo'])) {
+            flash()->error('Gagal mengunggah logo sekolah.');
         }
     }
 
@@ -122,12 +147,19 @@ class SchoolSetting extends Component
      */
     protected function storeData(): void
     {
-        $storedData = $this->schoolService->storeSchoolData($this->school);
+        $storedData = $this->schoolService->updateOrCreate(['id' => $this->school['id'] ?? ''], $this->school);
+
         if (empty($storedData)) {
             flash()->error('Gagal menyimpan data sekolah.');
+
             return;
         }
 
         flash()->success('Data sekolah berhasil disimpan.');
+    }
+
+    public function render()
+    {
+        return view('livewire.settings.school-setting');
     }
 }

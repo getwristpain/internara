@@ -15,19 +15,29 @@ class Uploader extends Helper
         parent::__construct();
     }
 
-    public static function upload(UploadedFile $file, string $path, string $fileName = '', string $storage = 'public'): string
+    public static function getPublicUrl($url): string
     {
-        $fileName = self::generateFileName($fileName, $file->getClientOriginalExtension());
-        self::storeAs($file, $path, $fileName, $storage);
-        return implode('/', [$path, $fileName]);
+        return asset('storage/' . $url);
     }
 
-    protected function generateFileName(string $fileName = '', string $extension = ''): string
+    public static function upload(UploadedFile $file, string $path, string $fileName = '', string $storage = 'public'): string
+    {
+        try {
+            $fileName = self::generateFileName($fileName, $file->getClientOriginalExtension());
+            self::storeAs($file, $path, $fileName, $storage);
+            return implode('/', [$path, $fileName]);
+        } catch (\Throwable $th) {
+            static::debug('error', 'Failed to upload file', $th);
+            throw $th;
+        }
+    }
+
+    protected static function generateFileName(string $fileName = '', string $extension = ''): string
     {
         return parent::key($fileName ?: md5(uniqid())) . '.' . $extension;
     }
 
-    protected function storeAs(UploadedFile $file, string $path, string $fileName, string $storage = 'public')
+    protected static function storeAs(UploadedFile $file, string $path, string $fileName, string $storage = 'public')
     {
         return $file->storeAs($path, $fileName, $storage);
     }

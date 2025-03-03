@@ -1,6 +1,8 @@
-@props(['name', 'submit', 'messages' => session('messages', [])])
+@props(['disabled' => false, 'name', 'submit', 'messages' => session('messages', [])])
 
-<form id="{{ $name }}" name="{{ $name }}" wire:submit.prevent="{{ $submit }}">
+<form
+    {{ $attributes->merge(['id' => $name, 'name' => $name, 'class' => $disabled ? 'disabled' : '', 'disabled' => $disabled]) }}
+    wire:submit.prevent="{{ $submit }}">
     @if (isset($header))
         <div>
             {{ $header }}

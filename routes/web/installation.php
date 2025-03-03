@@ -1,12 +1,10 @@
 <?php
 
-use App\Livewire\Installations\{
-    InstallComplete,
-    InstallDepartment,
-    InstallOwner,
-    InstallSchool,
-    InstallWelcome
-};
+use App\Livewire\Installations\InstallComplete;
+use App\Livewire\Installations\InstallDepartment;
+use App\Livewire\Installations\InstallOwner;
+use App\Livewire\Installations\InstallSchool;
+use App\Livewire\Installations\InstallWelcome;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/install')

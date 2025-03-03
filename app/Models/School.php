@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class School extends Model
 {
     protected $fillable = [
-        'name',
         'address',
-        'phone',
-        'fax',
         'email',
-        'website',
-        'logo_path',
+        'fax',
+        'logo',
+        'name',
+        'phone',
         'principal_name',
+        'website',
     ];
 
     protected $casts = [
@@ -26,7 +26,7 @@ class School extends Model
         parent::boot();
 
         static::creating(function ($school) {
-            $school->logo_path = $school->logo_path ?? asset('images/logo.png');
+            $school->logo = $school->logo ?? asset('images/logo.png');
         });
     }
 }

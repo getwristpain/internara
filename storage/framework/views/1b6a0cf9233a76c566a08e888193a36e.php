@@ -1,7 +1,7 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
 
 $__newAttributes = [];
-$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['name', 'submit', 'messages' => session('messages', [])]));
+$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['disabled' => false, 'name', 'submit', 'messages' => session('messages', [])]));
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
@@ -16,7 +16,7 @@ $attributes = new \Illuminate\View\ComponentAttributeBag($__newAttributes);
 unset($__propNames);
 unset($__newAttributes);
 
-foreach (array_filter((['name', 'submit', 'messages' => session('messages', [])]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
+foreach (array_filter((['disabled' => false, 'name', 'submit', 'messages' => session('messages', [])]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 }
 
@@ -28,13 +28,16 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<form id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" wire:submit.prevent="<?php echo e($submit); ?>">
-    <?php if(isset($header)): ?>
+<form
+    <?php echo e($attributes->merge(['id' => $name, 'name' => $name, 'class' => $disabled ? 'disabled' : '', 'disabled' => $disabled])); ?>
+
+    wire:submit.prevent="<?php echo e($submit); ?>">
+    <!--[if BLOCK]><![endif]--><?php if(isset($header)): ?>
         <div>
             <?php echo e($header); ?>
 
         </div>
-    <?php endif; ?>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     <div class="flex flex-col gap-4">
         <?php if (isset($component)) { $__componentOriginal5b09c79149dfb771c232996af5f9dae4 = $component; } ?>
@@ -63,11 +66,11 @@ unset($__defined_vars); ?>
 
     </div>
 
-    <?php if(isset($footer)): ?>
+    <!--[if BLOCK]><![endif]--><?php if(isset($footer)): ?>
         <div class="flex justify-end w-full gap-4">
             <?php echo e($footer); ?>
 
         </div>
-    <?php endif; ?>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 </form>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/form.blade.php ENDPATH**/ ?>

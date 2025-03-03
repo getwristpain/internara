@@ -2,28 +2,31 @@
 
 namespace App\Helpers;
 
+use App\Debugger;
 use Exception;
-use ReflectionClass;
 use Illuminate\Support\Str;
+use ReflectionClass;
 
 class Helper
 {
+    use Debugger;
+
     public static function key(string $key): string
     {
-        return now()->timestamp . '-' . $key . '-' . Str::random(8);
+        return (string) (now()->timestamp.'-'.$key.'-'.Str::random(8));
     }
 
     /**
      * Sanitize input based on the given rules
      *
-     * @param mixed $input The input to be sanitized
-     * @param mixed $rules The sanitization rules (e.g., 'string', 'email', 'int', 'html', or an array of allowed values)
+     * @param  mixed  $input  The input to be sanitized
+     * @param  mixed  $rules  The sanitization rules (e.g., 'string', 'email', 'int', 'html', or an array of allowed values)
      * @return mixed The sanitized value
      */
     public static function sanitize($input, $rules)
     {
         if (is_array($input)) {
-            return array_map(fn($item) => self::sanitize($item, $rules), $input);
+            return array_map(fn ($item) => self::sanitize($item, $rules), $input);
         }
 
         if (is_array($rules)) {
@@ -44,8 +47,7 @@ class Helper
     /**
      * Convert any value to a string representation.
      *
-     * @param mixed $value The value to be converted.
-     *
+     * @param  mixed  $value  The value to be converted.
      * @return string The string representation of the value.
      */
     public static function stringify($value): string
@@ -63,7 +65,7 @@ class Helper
     /**
      * Convert an object to an array for better readability, including private and protected properties.
      *
-     * @param object $object The object to be converted.
+     * @param  object  $object  The object to be converted.
      * @return array The converted array representation.
      */
     public static function objectToArray(object $object): array

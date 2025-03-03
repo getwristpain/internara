@@ -15,7 +15,11 @@
 
     .disabled,
     .disabled:disabled {
-        @apply disabled:no-interact disabled:cursor-not-allowed disabled:opacity-60;
+        @apply disabled:no-interact no-interact cursor-not-allowed opacity-60 disabled:cursor-not-allowed disabled:opacity-60;
+    }
+
+    .loading-disabled {
+        @apply disabled animate-pulse;
     }
 
     .no-interact {
