@@ -26,29 +26,48 @@ class Service
         $this->cacheTTL = $cacheTTL;
     }
 
+    protected function queryCached(Closure $callback, string $key, array $filters = [])
+    {
+        try {
+            $cacheKey = $this->generateCacheKey($key, $filters);
+
+            return Cache::remember($cacheKey, $this->cacheTTL, fn() => $callback($this->model));
+        } catch (\Throwable $th) {
+            $this->debug('error', 'Failed to execute cache query.', $th);
+            throw $th;
+        }
+    }
+
+    private function generateCacheKey(string $key, array $filters = []): string
+    {
+        $cacheFilters = empty($filters) ? '' : md5(serialize($filters));
+
+        return implode(':', [$this->cacheKey, $key, $cacheFilters]);
+    }
+
     public function getAll(): Collection
     {
-        return $this->queryCached(fn ($model) => $model->all(), 'all');
+        return $this->queryCached(fn($model) => $model->all(), 'all');
     }
 
     public function getWhere(array $where, array $with = []): Collection
     {
-        return $this->queryCached(fn ($model) => $model->with($with)->where($where)->get(), 'find_all', $where);
+        return $this->queryCached(fn($model) => $model->with($with)->where($where)->get(), 'find_all', $where);
     }
 
     public function first(): ?Model
     {
-        return $this->queryCached(fn ($model) => $model->first(), 'first');
+        return $this->queryCached(fn($model) => $model->first(), 'first');
     }
 
     public function find(string|int $id, array $with = []): ?Model
     {
-        return $this->queryCached(fn ($model) => $model->with($with)->find($id), 'id', ['id' => $id]);
+        return $this->queryCached(fn($model) => $model->with($with)->find($id), 'id', ['id' => $id]);
     }
 
     public function firstWhere(array $where, array $with = []): ?Model
     {
-        return $this->queryCached(fn ($model) => $model->with($with)->where($where)->first(), 'find_one', $where);
+        return $this->queryCached(fn($model) => $model->with($with)->where($where)->first(), 'find_one', $where);
     }
 
     public function create(array $data): Model
@@ -176,24 +195,5 @@ class Service
             $this->debug('error', 'Failed to execute transaction.', $th);
             throw $th;
         }
-    }
-
-    protected function queryCached(Closure $callback, string $key, array $filters = [])
-    {
-        try {
-            $cacheKey = $this->generateCacheKey($key, $filters);
-
-            return Cache::remember($cacheKey, $this->cacheTTL, fn () => $callback($this->model));
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to execute cache query.', $th);
-            throw $th;
-        }
-    }
-
-    private function generateCacheKey(string $key, array $filters = []): string
-    {
-        $cacheFilters = empty($filters) ? '' : md5(serialize($filters));
-
-        return implode(':', [$this->cacheKey, $key, $cacheFilters]);
     }
 }

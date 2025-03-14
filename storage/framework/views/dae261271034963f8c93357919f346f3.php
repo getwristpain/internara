@@ -38,12 +38,12 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<!--[if BLOCK]><![endif]--><?php if(isset($label)): ?>
+<?php if(isset($label)): ?>
     <div class="flex gap-1">
         <label class="<?php echo e(!$required ?: 'required'); ?>" for="<?php echo e($name); ?>"><?php echo e($label); ?></label>
-        <!--[if BLOCK]><![endif]--><?php if(isset($hint)): ?>
+        <?php if(isset($hint)): ?>
             <span class="text-sm text-gray-500">(<?php echo e($hint); ?>)</span>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     </div>
-<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+<?php endif; ?>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/forms/input-label.blade.php ENDPATH**/ ?>

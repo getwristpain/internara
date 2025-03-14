@@ -16,11 +16,27 @@ class Formatter extends Helper
 
     public static function formatOptions(array $data): array
     {
-        return collect($data)  // Convert the data to a collection
-            ->map(fn($item) => [  // Map each item to a new array
-                'value' => $item['id'],  // Set the value key to the item's id
-                'label' => $item['name'],  // Set the label key to the item's name
+        return collect($data)
+            ->map(fn($item) => [
+                'value' => $item['id'],
+                'label' => $item['name'],
             ])
-            ->toArray();  // Convert the collection back to an array
+            ->toArray();
+    }
+
+    public static function abbrev(string $value): string
+    {
+        // Hilangkan spasi berlebih dan pastikan format bersih
+        $value = trim(preg_replace('/\s+/', ' ', $value));
+
+        // Jika ada lebih dari satu kata, ambil huruf pertama dari setiap kata
+        if (str_contains($value, ' ')) {
+            preg_match_all('/\b([A-Z])/', $value, $matches);
+            return strtoupper(implode('', $matches[1]));
+        }
+
+        // Jika hanya satu kata, ambil huruf pertama dari setiap suku kata utama
+        preg_match_all('/\b[A-Z]|(?:(?<![aeiou])([b-df-hj-np-tv-z]))/i', ucfirst($value), $matches);
+        return strtoupper(implode('', array_filter($matches[0])));
     }
 }

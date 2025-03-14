@@ -67,11 +67,16 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <?php
-    $iconClass =
+    $iconStyle =
         'absolute text-lg text-gray-400 left-3 ' .
         ($type === 'textarea' ? 'top-4' : 'top-1/2 transform -translate-y-1/2');
 
     $messages = !empty($messages) ? $message : ($errors->has($model) ? $errors->get($model) : []);
+
+    $inputStyle = implode(' ', [
+        'input input-bordered w-full py-3 pl-10 pr-3 focus:outline-none focus:ring-2 disabled:disabled',
+        !empty($messages) ? 'border-error focus:ring-error' : 'focus:ring-neutral',
+    ]);
 ?>
 
 <div class="flex flex-col w-full gap-2">
@@ -97,7 +102,7 @@ unset($__defined_vars); ?>
 
     <div class="flex items-center gap-2">
         <div class="relative w-full">
-            <iconify-icon class="<?php echo e($iconClass); ?>"
+            <iconify-icon class="<?php echo e($iconStyle); ?>"
                 icon="<?php echo e(match ($type) {
                     'email' => 'mdi:email',
                     'password' => 'mdi:password',
@@ -116,55 +121,57 @@ unset($__defined_vars); ?>
             <!--[if BLOCK]><![endif]--><?php if($type === 'textarea'): ?>
                 <textarea id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
                     <?php if($model): ?> wire:model.live.debounce.1000ms="<?php echo e($model); ?>" <?php endif; ?>
-                    placeholder="<?php echo e($placeholder); ?>" autocomplete="<?php echo e($name); ?>"
                     <?php echo e($attributes->merge([
-                        'class' => implode(
-                            ' ' . [
-                                'w-full py-3 pl-10 pr-3 input input-bordered min-h-40 focus:outline-none focus:ring-2 focus:ring-neutral disabled:disabled',
-                                !empty($errorMessages) ? 'border-error focus:ring-error' : '',
-                            ],
-                        ),
-                        'disabled' => $disabled,
+                        'class' => $inputStyle . 'min-h-40',
+                        'autocomplete' => $name,
                         'autofocus' => $autofocus,
-                        'required' => $required,
-                        'maxlength' => $max,
+                        'disabled' => $disabled,
+                        'max' => $max,
+                        'min' => $min,
                         'pattern' => $pattern,
+                        'placeholder' => $placeholder,
+                        'required' => $required,
+                        'step' => $step,
+                        'style' => 'font-weight: inherit',
+                        'title' => $placeholder,
                     ])); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error"></textarea>
             <?php elseif($type === 'date'): ?>
                 <input id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" type="<?php echo e($type); ?>"
                     <?php if($model): ?> wire:model.live="<?php echo e($model); ?>" <?php endif; ?>
-                    placeholder="<?php echo e($placeholder); ?>" autocomplete="<?php echo e($name); ?>"
                     <?php echo e($attributes->merge([
-                        'class' =>
-                            'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral disabled:disabled' .
-                            (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
-                        'disabled' => $disabled,
+                        'class' => $inputStyle,
+                        'autocomplete' => $name,
                         'autofocus' => $autofocus,
-                        'required' => $required,
+                        'disabled' => $disabled,
                         'max' => $max,
                         'min' => $min,
-                        'step' => $step,
                         'pattern' => $pattern,
+                        'placeholder' => $placeholder,
+                        'required' => $required,
+                        'step' => $step,
+                        'style' => 'font-weight: inherit',
+                        'title' => $placeholder,
                     ])); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error">
             <?php else: ?>
                 <input id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" type="<?php echo e($type); ?>"
                     <?php if($model): ?> wire:model.live.debounce.1000ms="<?php echo e($model); ?>" <?php endif; ?>
-                    placeholder="<?php echo e($placeholder); ?>" autocomplete="<?php echo e($name); ?>"
                     <?php echo e($attributes->merge([
-                        'class' =>
-                            'w-full pl-10 input input-bordered focus:outline-none focus:ring-2 focus:ring-neutral disabled:disabled' .
-                            (empty($errorMessages) ? '' : ' border-error focus:ring-error'),
-                        'disabled' => $disabled,
+                        'class' => $inputStyle,
+                        'autocomplete' => $name,
                         'autofocus' => $autofocus,
-                        'required' => $required,
+                        'disabled' => $disabled,
                         'max' => $max,
                         'min' => $min,
-                        'step' => $step,
                         'pattern' => $pattern,
+                        'placeholder' => $placeholder,
+                        'required' => $required,
+                        'step' => $step,
+                        'style' => 'font-weight: inherit',
+                        'title' => $placeholder,
                     ])); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error">

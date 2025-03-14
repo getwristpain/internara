@@ -22,7 +22,7 @@ class InstallSchool extends Component
     {
         return view('livewire.installations.install-school')
             ->layout('components.layouts.guest', [
-                'title' => ('Instalasi | Pengaturan Sekolah | '.config('app.name', 'Internara')),
+                'title' => ('Konfigurasi Sekolah | Instalasi | '.config('app.name', 'Internara')),
             ]);
     }
 }

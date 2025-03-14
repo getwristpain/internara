@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Department;
+use App\Models\School;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-class DepartmentSeeder extends Seeder
+class SchoolSeeder extends Seeder
 {
     protected array $data = [
         [
@@ -14,13 +13,15 @@ class DepartmentSeeder extends Seeder
             'code' => 'TKJ',
             'classrooms' => [
                 [
-                    'name' => 'XII TKJ A',
+                    'level' => 'XII',
+                    'name' => 'A',
                     'code' => 'XII-TKJ-A',
                 ],
                 [
-                    'name' => 'XII TKJ B',
+                    'level' => 'XII',
+                    'name' => 'B',
                     'code' => 'XII-TKJ-B',
-                ]
+                ],
             ],
         ],
         [
@@ -28,15 +29,17 @@ class DepartmentSeeder extends Seeder
             'code' => 'TKGSP',
             'classrooms' => [
                 [
-                    'name' => 'XII TKGSP A',
+                    'level' => 'XII',
+                    'name' => 'A',
                     'code' => 'XII-TKGSP-A',
                 ],
                 [
-                    'name' => 'XII TKGSP B',
+                    'level' => 'XII',
+                    'name' => 'B',
                     'code' => 'XII-TKGSP-B',
-                ]
+                ],
             ],
-        ]
+        ],
     ];
 
     /**
@@ -44,10 +47,20 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        collect($this->data)->each(function ($department) {
-            $departmentModel = Department::create([
-                'name' => $department['name'],
+        $school = School::first() ?? School::create([
+            'name' => 'Nama Sekolah',
+            'address' => [],
+            'email' => 'school@example.com',
+            'phone' => '1234567890',
+            'principal_name' => 'Kepala Sekolah',
+            'website' => 'http://example.com',
+        ]);
+
+        collect($this->data)->each(function ($department) use ($school) {
+            $departmentModel = $school->departments()->create([
                 'code' => $department['code'],
+                'name' => $department['name'],
+                'school_id' => $school->id,
             ]);
 
             collect($department['classrooms'])->each(function ($classroom) use ($departmentModel) {

@@ -6,12 +6,12 @@
         </div>
 
         <div class="flex-1">
-            @livewire('departments.department-setting', key(App\Helpers\Helper::key('department-setting')))
+            @livewire('departments.department-form', ['key' => \App\Helpers\Helper::key('department-form')])
         </div>
 
         <div class="flex items-center justify-end gap-4">
             <x-button class="btn-ghost" action="back">Kembali</x-button>
-            <x-button class="btn-primary" action="$dispatch('save-departments-clicked')">Lanjut</x-button>
+            <x-button class="btn-primary" action="next">Lanjut</x-button>
         </div>
     </div>
 </div>
