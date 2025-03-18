@@ -39,16 +39,17 @@
         <div class="relative w-full">
             <iconify-icon class="{{ $iconStyle }}"
                 icon="{{ match ($type) {
-                    'email' => 'mdi:email',
-                    'password' => 'mdi:password',
-                    'number' => 'tabler:number-123',
-                    'search' => 'ion:search-sharp',
                     'address' => 'mdi:address-marker',
-                    'person' => 'mdi:user',
+                    'email' => 'mdi:email',
                     'idcard' => 'mingcute:idcard-fill',
-                    'phone' => 'mdi:phone',
                     'mobile' => 'basil:mobile-phone-outline',
+                    'name' => 'mdi:user',
+                    'number' => 'tabler:number-123',
+                    'password' => 'mdi:password',
+                    'person' => 'mdi:user',
+                    'phone' => 'mdi:phone',
                     'postcode' => 'material-symbols:local-post-office-rounded',
+                    'search' => 'ion:search-sharp',
                     'time' => 'lineicons:alarm-clock',
                     default => $icon,
                 } }}"></iconify-icon>

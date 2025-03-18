@@ -4,10 +4,10 @@ namespace App\Livewire\Auth;
 
 use Livewire\Component;
 
-class RegisterOwner extends Component
+class RegisterOwnerForm extends Component
 {
     public function render()
     {
-        return view('livewire.auth.register-owner');
+        return view('livewire.auth.register-owner-form');
     }
 }
