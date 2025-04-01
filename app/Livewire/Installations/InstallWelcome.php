@@ -4,9 +4,6 @@ namespace App\Livewire\Installations;
 
 use Livewire\Component;
 
-/**
- * @mixin \Livewire\Component
- */
 class InstallWelcome extends Component
 {
     public function next()

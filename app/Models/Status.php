@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Status extends Model
 {
@@ -13,9 +13,9 @@ class Status extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'type',
-        'description'
+        'key',
+        'value',
+        'description',
     ];
 
     /**
@@ -28,13 +28,13 @@ class Status extends Model
         parent::boot();
 
         static::creating(function ($status) {
-            $status->name = Str::lower($status->name);
-            $status->type = Str::lower($status->type);
+            $status->key = Str::lower($status->key);
+            $status->value = Str::lower($status->value);
         });
 
         static::updating(function ($status) {
-            $status->name = Str::lower($status->name);
-            $status->type = Str::lower($status->type);
+            $status->key = Str::lower($status->key);
+            $status->value = Str::lower($status->value);
         });
     }
 }

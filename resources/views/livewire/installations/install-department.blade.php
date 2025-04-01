@@ -11,7 +11,7 @@
 
         <div class="flex items-center justify-end gap-4">
             <x-button class="btn-ghost" action="back">Kembali</x-button>
-            <x-button class="btn-primary" action="next">Lanjut</x-button>
+            <x-button class="btn-primary" action="next" icon="icon-park-outline:right-c" reverse>Lanjut</x-button>
         </div>
     </div>
 </div>

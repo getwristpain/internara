@@ -33,6 +33,11 @@ $attributes = [
         'name' => 'nama jurusan',
         'description' => 'deskripsi jurusan',
     ],
+    'owner' => [
+        'name' => 'nama pengguna',
+        'email' => 'email pengguna',
+        'password' => 'kata sandi pengguna',
+    ],
     'password' => 'kata sandi',
     'phone' => 'nomor telepon',
     'postal_code' => 'kode pos',

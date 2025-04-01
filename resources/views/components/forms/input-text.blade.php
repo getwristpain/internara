@@ -5,6 +5,7 @@
     'hideMessages' => false,
     'hint' => null,
     'icon' => 'tabler:edit',
+    'inputClass' => '',
     'label' => null,
     'max' => null,
     'messages' => [],
@@ -29,10 +30,11 @@
     $inputStyle = implode(' ', [
         'input input-bordered w-full py-3 pl-10 pr-3 focus:outline-none focus:ring-2 disabled:disabled',
         !empty($messages) ? 'border-error focus:ring-error' : 'focus:ring-neutral',
+        $inputClass,
     ]);
 @endphp
 
-<div class="flex flex-col w-full gap-2">
+<div {{ $attributes->merge(['class' => implode(' ', ['flex flex-col w-full gap-2', $disabled ? 'disabled' : ''])]) }}>
     <x-forms.input-label :$name :$label :$required :$hint></x-forms.input-label>
 
     <div class="flex items-center gap-2">
@@ -55,10 +57,9 @@
                 } }}"></iconify-icon>
 
             @if ($type === 'textarea')
-                <textarea id="{{ $name }}" name="{{ $name }}"
+                <textarea class="{{ $inputStyle . ' min-h-40' }}" id="{{ $name }}" name="{{ $name }}"
                     @if ($model) wire:model.live.debounce.1000ms="{{ $model }}" @endif
                     {{ $attributes->merge([
-                        'class' => $inputStyle . 'min-h-40',
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,
@@ -73,10 +74,10 @@
                     ]) }}
                     aria-describedby="{{ $name }}-error"></textarea>
             @elseif ($type === 'date')
-                <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}"
+                <input class="{{ $inputStyle }}" id="{{ $name }}" name="{{ $name }}"
+                    type="{{ $type }}"
                     @if ($model) wire:model.live="{{ $model }}" @endif
                     {{ $attributes->merge([
-                        'class' => $inputStyle,
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,
@@ -91,10 +92,10 @@
                     ]) }}
                     aria-describedby="{{ $name }}-error">
             @else
-                <input id="{{ $name }}" name="{{ $name }}" type="{{ $type }}"
+                <input class="{{ $inputStyle }}" id="{{ $name }}" name="{{ $name }}"
+                    type="{{ $type }}"
                     @if ($model) wire:model.live.debounce.1000ms="{{ $model }}" @endif
                     {{ $attributes->merge([
-                        'class' => $inputStyle,
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,

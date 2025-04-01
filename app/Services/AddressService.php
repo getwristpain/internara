@@ -2,19 +2,13 @@
 
 namespace App\Services;
 
+use App\Helpers\Async;
 use App\Helpers\Formatter;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 
 class AddressService extends Service
 {
-    protected int $cacheTTL = 86400;
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected int $cacheTTL = 604800;
 
     public function getProvinces(): Collection
     {
@@ -23,24 +17,23 @@ class AddressService extends Service
 
     public function getRegencies(string $provinceId): Collection
     {
-        return $this->fetchData("regencies/{$provinceId}", "regencies_{$provinceId}");
+        return $this->fetchDataIfNotEmpty($provinceId, "regencies/{$provinceId}", "regencies_{$provinceId}");
     }
 
     public function getDistricts(string $regencyId): Collection
     {
-        return $this->fetchData("districts/{$regencyId}", "districts_{$regencyId}");
+        return $this->fetchDataIfNotEmpty($regencyId, "districts/{$regencyId}", "districts_{$regencyId}");
     }
 
     public function getSubdistricts(string $districtId): Collection
     {
-        return $this->fetchData("villages/{$districtId}", "villages_{$districtId}", true);
+        return $this->fetchDataIfNotEmpty($districtId, "villages/{$districtId}", "villages_{$districtId}", true);
     }
 
     public function getPostalCode(array $location = []): ?string
     {
         return $this->getSubdistricts($location['district_id'] ?? '')
-            ->where('id', $location['subdistrict_id'] ?? '')
-            ->first()['postal_code'] ?? null;
+            ->firstWhere('id', $location['subdistrict_id'] ?? '')['postal_code'] ?? null;
     }
 
     public function getFullAddress(...$address): string
@@ -48,38 +41,34 @@ class AddressService extends Service
         return implode(', ', array_filter($address));
     }
 
-    public function getOptions(array $location = [])
+    public function getAddressOptions(array $location): array
     {
-        return [
-            'provinces' => Formatter::formatOptions($this->getProvinces()->toArray()),
-            'regencies' => Formatter::formatOptions($this->getRegencies($location['province_id'] ?? '')->toArray()),
-            'districts' => Formatter::formatOptions($this->getDistricts($location['regency_id'] ?? '')->toArray()),
-            'subdistricts' => Formatter::formatOptions($this->getSubdistricts($location['district_id'] ?? '')->toArray()),
-        ];
+        return collect([
+            'provinces' => $this->getProvinces(),
+            'regencies' => $this->getRegencies($location['province_id'] ?? ''),
+            'districts' => $this->getDistricts($location['regency_id'] ?? ''),
+            'subdistricts' => $this->getSubdistricts($location['district_id'] ?? ''),
+        ])->map(fn ($data) => Formatter::formatOptions($data->toArray()))->all();
     }
 
     private function fetchData(string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
     {
-        try {
-            $cacheKey ??= $endpoint;
+        $cacheKey ??= $endpoint;
 
-            return Cache::remember($cacheKey, $this->cacheTTL, function () use ($endpoint, $includePostalCode) {
-                $response = Http::get("https://wilayah.id/api/{$endpoint}.json");
-                if ($response->failed()) {
-                    return collect([]);
-                }
+        $data = Async::fetch($cacheKey, "https://wilayah.id/api/{$endpoint}.json", $this->cacheTTL);
 
-                $json = $response->json();
-                $meta = $json['meta'] ?? [];
+        return isset($data['error'])
+            ? collect([])
+            : collect($data['data'] ?? [])->map(fn ($item) => [
+                'id' => $item['code'] ?? '',
+                'name' => $item['name'] ?? '',
+                'postal_code' => $includePostalCode ? ($item['postal_code'] ?? '') : null,
+                'meta' => $data['meta'] ?? [],
+            ])->filter();
+    }
 
-                return collect($json['data'] ?? [])->map(fn ($item) => array_merge([
-                    'id' => $item['code'] ?? '',
-                    'name' => $item['name'] ?? '',
-                ], $includePostalCode ? ['postal_code' => $item['postal_code'] ?? ''] : [], ['meta' => $meta]));
-            });
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to fetch address data.', $th);
-            throw $th;
-        }
+    private function fetchDataIfNotEmpty(?string $id, string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
+    {
+        return empty($id) ? collect([]) : $this->fetchData($endpoint, $cacheKey, $includePostalCode);
     }
 }

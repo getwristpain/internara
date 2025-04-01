@@ -8,6 +8,7 @@ $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'hideMessages' => false,
     'hint' => null,
     'icon' => 'tabler:edit',
+    'inputClass' => '',
     'label' => null,
     'max' => null,
     'messages' => [],
@@ -42,6 +43,7 @@ foreach (array_filter(([
     'hideMessages' => false,
     'hint' => null,
     'icon' => 'tabler:edit',
+    'inputClass' => '',
     'label' => null,
     'max' => null,
     'messages' => [],
@@ -76,10 +78,11 @@ unset($__defined_vars); ?>
     $inputStyle = implode(' ', [
         'input input-bordered w-full py-3 pl-10 pr-3 focus:outline-none focus:ring-2 disabled:disabled',
         !empty($messages) ? 'border-error focus:ring-error' : 'focus:ring-neutral',
+        $inputClass,
     ]);
 ?>
 
-<div class="flex flex-col w-full gap-2">
+<div <?php echo e($attributes->merge(['class' => implode(' ', ['flex flex-col w-full gap-2', $disabled ? 'disabled' : ''])])); ?>>
     <?php if (isset($component)) { $__componentOriginalabddde62786fb871e8a66d2206a4e797 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalabddde62786fb871e8a66d2206a4e797 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-label','data' => ['name' => $name,'label' => $label,'required' => $required,'hint' => $hint]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -104,25 +107,25 @@ unset($__defined_vars); ?>
         <div class="relative w-full">
             <iconify-icon class="<?php echo e($iconStyle); ?>"
                 icon="<?php echo e(match ($type) {
-                    'email' => 'mdi:email',
-                    'password' => 'mdi:password',
-                    'number' => 'tabler:number-123',
-                    'search' => 'ion:search-sharp',
                     'address' => 'mdi:address-marker',
-                    'person' => 'mdi:user',
+                    'email' => 'mdi:email',
                     'idcard' => 'mingcute:idcard-fill',
-                    'phone' => 'mdi:phone',
                     'mobile' => 'basil:mobile-phone-outline',
+                    'name' => 'mdi:user',
+                    'number' => 'tabler:number-123',
+                    'password' => 'mdi:password',
+                    'person' => 'mdi:user',
+                    'phone' => 'mdi:phone',
                     'postcode' => 'material-symbols:local-post-office-rounded',
+                    'search' => 'ion:search-sharp',
                     'time' => 'lineicons:alarm-clock',
                     default => $icon,
                 }); ?>"></iconify-icon>
 
             <!--[if BLOCK]><![endif]--><?php if($type === 'textarea'): ?>
-                <textarea id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
+                <textarea class="<?php echo e($inputStyle . ' min-h-40'); ?>" id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
                     <?php if($model): ?> wire:model.live.debounce.1000ms="<?php echo e($model); ?>" <?php endif; ?>
                     <?php echo e($attributes->merge([
-                        'class' => $inputStyle . 'min-h-40',
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,
@@ -138,10 +141,10 @@ unset($__defined_vars); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error"></textarea>
             <?php elseif($type === 'date'): ?>
-                <input id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" type="<?php echo e($type); ?>"
+                <input class="<?php echo e($inputStyle); ?>" id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
+                    type="<?php echo e($type); ?>"
                     <?php if($model): ?> wire:model.live="<?php echo e($model); ?>" <?php endif; ?>
                     <?php echo e($attributes->merge([
-                        'class' => $inputStyle,
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,
@@ -157,10 +160,10 @@ unset($__defined_vars); ?>
 
                     aria-describedby="<?php echo e($name); ?>-error">
             <?php else: ?>
-                <input id="<?php echo e($name); ?>" name="<?php echo e($name); ?>" type="<?php echo e($type); ?>"
+                <input class="<?php echo e($inputStyle); ?>" id="<?php echo e($name); ?>" name="<?php echo e($name); ?>"
+                    type="<?php echo e($type); ?>"
                     <?php if($model): ?> wire:model.live.debounce.1000ms="<?php echo e($model); ?>" <?php endif; ?>
                     <?php echo e($attributes->merge([
-                        'class' => $inputStyle,
                         'autocomplete' => $name,
                         'autofocus' => $autofocus,
                         'disabled' => $disabled,

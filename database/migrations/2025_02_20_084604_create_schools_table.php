@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('logo');
+            $table->string('logo')->nullable();
             $table->json('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('fax')->nullable();

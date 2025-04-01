@@ -3,12 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Debugger;
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
-use function Laravel\Prompts\{text, confirm, password, select};
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\password;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
 
 class AppInstall extends Command
 {
@@ -78,7 +81,7 @@ class AppInstall extends Command
     {
         $this->info('Checking environment file...');
 
-        if (!File::exists(base_path('.env'))) {
+        if (! File::exists(base_path('.env'))) {
             $this->info('.env file does not exist, creating it...');
 
             if (File::exists(base_path('.env.example'))) {
@@ -113,7 +116,7 @@ class AppInstall extends Command
                 'APP_TIMEZONE' => config('app.timezone', 'Asia/Jakarta'),
                 'APP_LOCALE' => config('app.locale', 'id'),
                 'APP_FALLBACK_LOCALE' => config('app.fallback_locale', 'en'),
-                'APP_FAKER_LOCALE' => config('app.faker_locale', 'id_ID')
+                'APP_FAKER_LOCALE' => config('app.faker_locale', 'id_ID'),
             ];
 
             foreach ($envConfig as $key => $value) {
@@ -134,8 +137,9 @@ class AppInstall extends Command
     {
         $this->info('Configuring database...');
 
-        if (!confirm('Do you want to configure the database connection?')) {
+        if (! confirm('Do you want to configure the database connection?')) {
             $this->info('Skipping database configuration.');
+
             return;
         }
 
@@ -146,7 +150,7 @@ class AppInstall extends Command
             $dbConfig = [
                 'DB_CONNECTION' => 'sqlite',
             ];
-            $this->info("SQLite database will be stored at: " . database_path('database.sqlite'));
+            $this->info('SQLite database will be stored at: '.database_path('database.sqlite'));
         } else {
             $dbConfig = [
                 'DB_CONNECTION' => $dbType,
@@ -154,7 +158,7 @@ class AppInstall extends Command
                 'DB_PORT' => text('Database port', $dbType === 'pgsql' ? '5432' : '3306'),
                 'DB_DATABASE' => text('Database name', 'laravel'),
                 'DB_USERNAME' => text('Database username', 'root'),
-                'DB_PASSWORD' => password('Database password')
+                'DB_PASSWORD' => password('Database password'),
             ];
         }
 
@@ -198,6 +202,7 @@ class AppInstall extends Command
 
         if (File::exists(public_path('storage'))) {
             $this->info('Skipped! Storage link already exists.');
+
             return;
         }
 
@@ -216,7 +221,9 @@ class AppInstall extends Command
             File::cleanDirectory(storage_path('framework/cache/data'));
             File::cleanDirectory(storage_path('framework/livewire-temp'));
             File::cleanDirectory(storage_path('logs'));
-            File::deleteDirectory(public_path('uploads'));
+            File::cleanDirectory(storage_path('app/private/cache'));
+            File::cleanDirectory(storage_path('app/private/livewire-tmp'));
+            File::deleteDirectory(storage_path('app/public/uploads'));
 
             $this->info('Storage cleaned successfully.');
         } catch (\Throwable $th) {
@@ -251,9 +258,6 @@ class AppInstall extends Command
 
     /**
      * Abort the installation process with an error message.
-     *
-     * @param string $message
-     * @param \Throwable|null $exception
      */
     private function abort(string $message, ?\Throwable $exception = null)
     {
@@ -264,20 +268,18 @@ class AppInstall extends Command
 
     /**
      * Run an Artisan command.
-     *
-     * @param string $command
-     * @param array $arguments
-     * @param string $startMessage
-     * @param string $successMessage
-     * @param string $errorMessage
      */
     private function executeCommand(string $command, array $arguments = [], string $startMessage = '', string $successMessage = '', string $errorMessage = '', bool $abort = true)
     {
-        if ($startMessage) $this->info($startMessage);
+        if ($startMessage) {
+            $this->info($startMessage);
+        }
 
         try {
             $this->call($command, $arguments);
-            if ($successMessage) $this->info($successMessage);
+            if ($successMessage) {
+                $this->info($successMessage);
+            }
         } catch (\Throwable $th) {
             if ($abort) {
                 $this->abort($errorMessage ?: "Error executing command: $command", $th);
@@ -289,8 +291,6 @@ class AppInstall extends Command
 
     /**
      * Run a shell command.
-     *
-     * @param string $command
      */
     private function runShellCommand(string $command)
     {
@@ -298,7 +298,7 @@ class AppInstall extends Command
         $process->setTimeout(300);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw new \RuntimeException($process->getErrorOutput());
         }
 
@@ -307,18 +307,18 @@ class AppInstall extends Command
 
     /**
      * Update the .env file with a new value.
-     *
-     * @param string $key
-     * @param string|int|bool $value
-     * @param bool $rewrite
      */
     private function updateEnv(string $key, string|int|bool $value, bool $rewrite = true)
     {
         $key = Str::upper(Str::slug($key, '_'));
         $envPath = base_path('.env');
 
-        if (!File::exists($envPath)) $this->checkEnvFile();
-        if (!$rewrite && !empty(env($key))) return;
+        if (! File::exists($envPath)) {
+            $this->checkEnvFile();
+        }
+        if (! $rewrite && ! empty(env($key))) {
+            return;
+        }
 
         $envContent = File::get($envPath);
         $envPattern = "/^{$key}=.*/m";

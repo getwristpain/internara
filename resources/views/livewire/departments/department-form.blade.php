@@ -12,9 +12,8 @@
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-2 text-sm font-medium">
                         <span class="w-fit">+ Jurusan Baru:</span>
-                        <div class="w-fit max-w-[15%]">
-                            <x-forms.input-text class="input-sm" required type="text" model="new_department.code" />
-                        </div>
+                        <x-forms.input-text class="max-w-28" required type="text" model="new_department.code"
+                            inputClass="input-sm" />
                         <span class="divider divider-strip"></span>
                         <span class="flex-1">{{ $new_department['name'] }}</span>
                     </div>

@@ -23,15 +23,6 @@ class School extends Model
         'address' => 'array',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($school) {
-            $school->logo = $school->logo ?? asset('images/logo.png');
-        });
-    }
-
     /**
      * Get all of the departments for the School
      */

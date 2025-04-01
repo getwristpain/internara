@@ -67,17 +67,16 @@ unset($__defined_vars); ?>
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-2 text-sm font-medium">
                         <span class="w-fit">+ Jurusan Baru:</span>
-                        <div class="w-fit max-w-[15%]">
-                            <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
+                        <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalec8317d4b42b6916a726c612ebf39f70 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'input-sm','required' => true,'type' => 'text','model' => 'new_department.code']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'max-w-28','required' => true,'type' => 'text','model' => 'new_department.code','inputClass' => 'input-sm']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-text'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['class' => 'input-sm','required' => true,'type' => 'text','model' => 'new_department.code']); ?>
+<?php $component->withAttributes(['class' => 'max-w-28','required' => true,'type' => 'text','model' => 'new_department.code','inputClass' => 'input-sm']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalec8317d4b42b6916a726c612ebf39f70)): ?>
@@ -88,7 +87,6 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginalec8317d4b42b6916a726c612ebf39f70; ?>
 <?php unset($__componentOriginalec8317d4b42b6916a726c612ebf39f70); ?>
 <?php endif; ?>
-                        </div>
                         <span class="divider divider-strip"></span>
                         <span class="flex-1"><?php echo e($new_department['name']); ?></span>
                     </div>

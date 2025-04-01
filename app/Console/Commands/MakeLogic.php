@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Debugger;
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MakeLogic extends Command
 {
@@ -48,6 +48,7 @@ class MakeLogic extends Command
 
         if ($this->isReservedClassName($className)) {
             $this->handleError("The class name '$className' is reserved and cannot be used.");
+
             return;
         }
 
@@ -73,19 +74,19 @@ class MakeLogic extends Command
         $this->createDirectoryIfNeeded($fullPath);
 
         $namespace = $this->buildNamespace($subPath);
-        $filePath = $fullPath . '/' . $className . '.php';
+        $filePath = $fullPath.'/'.$className.'.php';
 
         return [$namespace, $filePath, $className];
     }
 
     private function buildNamespace(string $subPath): string
     {
-        return 'App' . ($subPath ? '\\' . str_replace('/', '\\', trim($subPath, '/')) : '');
+        return 'App'.($subPath ? '\\'.str_replace('/', '\\', trim($subPath, '/')) : '');
     }
 
     private function createDirectoryIfNeeded(string $fullPath): void
     {
-        if (!File::exists($fullPath)) {
+        if (! File::exists($fullPath)) {
             File::makeDirectory($fullPath, 0755, true);
         }
     }
@@ -94,14 +95,16 @@ class MakeLogic extends Command
     {
         if (File::exists($filePath)) {
             $this->handleError("Class already exists at $filePath");
+
             return true;
         }
+
         return false;
     }
 
     private function validateExtendsClass(?string $extends): ?string
     {
-        if (!$extends) {
+        if (! $extends) {
             return null;
         }
 
@@ -120,10 +123,10 @@ class MakeLogic extends Command
     private function generateClassContent(string $namespace, string $className, ?string $extends): string
     {
         $template = File::get(resource_path('templates/__class_template.stub'));
-        $extendsStatement = $extends ? "extends " . class_basename($extends) : '';
+        $extendsStatement = $extends ? 'extends '.class_basename($extends) : '';
 
         $useStatement = $extends ? "\nuse $extends;\n" : '';
-        $classStatement = $extends ? $className . ' ' . $extendsStatement : $className;
+        $classStatement = $extends ? $className.' '.$extendsStatement : $className;
 
         return str_replace(
             ['{{ namespace }}', '{{ useStatement }}', '{{ classStatement }}'],
@@ -132,7 +135,7 @@ class MakeLogic extends Command
         );
     }
 
-    private function handleError(string $message, \Throwable|null $th = null)
+    private function handleError(string $message, \Throwable|array|string $th = [])
     {
         $this->debug('error', $message, $th);
         $this->error($message);

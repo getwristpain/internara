@@ -52,6 +52,7 @@ class SchoolSeeder extends Seeder
             'address' => [],
             'email' => 'school@example.com',
             'phone' => '1234567890',
+            'fax' => '1234567890',
             'principal_name' => 'Kepala Sekolah',
             'website' => 'http://example.com',
         ]);

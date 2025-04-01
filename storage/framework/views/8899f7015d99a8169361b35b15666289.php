@@ -44,7 +44,9 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<div class="w-full space-y-2 <?php echo e($disabled ? 'disabled' : ''); ?>">
+<div class="w-full space-y-2 <?php echo e($disabled ? 'disabled' : ''); ?>" wire:loading.class="disabled"
+    wire:target="<?php echo e($options); ?>">
+
     <?php if (isset($component)) { $__componentOriginalabddde62786fb871e8a66d2206a4e797 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalabddde62786fb871e8a66d2206a4e797 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-label','data' => ['name' => $name,'label' => $label,'required' => $required,'hint' => $hint]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -67,17 +69,17 @@ unset($__defined_vars); ?>
 <?php endif; ?>
 
     <div class="space-y-4">
-        <div class="layout-cols">
+        <div class="items-center layout-cols">
             <?php if (isset($component)) { $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_province')).'','name' => ''.e($name . '_province').'','model' => ''.e($model . '.province_id').'','options' => ''.e($options . '.provinces').'','placeholder' => 'Provinsi','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_province')).'','name' => ''.e($name . '_province').'','model' => ''.e($model . '.province_id').'','options' => ''.e($options . '.provinces').'','placeholder' => 'Provinsi','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-select'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_province')).'','name' => ''.e($name . '_province').'','model' => ''.e($model . '.province_id').'','options' => ''.e($options . '.provinces').'','placeholder' => 'Provinsi','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
+<?php $component->withAttributes(['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_province')).'','name' => ''.e($name . '_province').'','model' => ''.e($model . '.province_id').'','options' => ''.e($options . '.provinces').'','placeholder' => 'Provinsi','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1)): ?>
@@ -88,16 +90,17 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1; ?>
 <?php unset($__componentOriginala66ae9345597a416d0fc3f5e4474bdd1); ?>
 <?php endif; ?>
+
             <?php if (isset($component)) { $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_regency')).'','name' => ''.e($name . '_regency').'','model' => ''.e($model . '.regency_id').'','options' => ''.e($options . '.regencies').'','placeholder' => 'Kabupaten/Kota','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_regency')).'','name' => ''.e($name . '_regency').'','model' => ''.e($model . '.regency_id').'','options' => ''.e($options . '.regencies').'','placeholder' => 'Kabupaten/Kota','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-select'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_regency')).'','name' => ''.e($name . '_regency').'','model' => ''.e($model . '.regency_id').'','options' => ''.e($options . '.regencies').'','placeholder' => 'Kabupaten/Kota','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
+<?php $component->withAttributes(['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_regency')).'','name' => ''.e($name . '_regency').'','model' => ''.e($model . '.regency_id').'','options' => ''.e($options . '.regencies').'','placeholder' => 'Kabupaten/Kota','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1)): ?>
@@ -108,16 +111,17 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1; ?>
 <?php unset($__componentOriginala66ae9345597a416d0fc3f5e4474bdd1); ?>
 <?php endif; ?>
+
             <?php if (isset($component)) { $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_district')).'','name' => ''.e($name . '_district').'','model' => ''.e($model . '.district_id').'','options' => ''.e($options . '.districts').'','placeholder' => 'Kecamatan','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_district')).'','name' => ''.e($name . '_district').'','model' => ''.e($model . '.district_id').'','options' => ''.e($options . '.districts').'','placeholder' => 'Kecamatan','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-select'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_district')).'','name' => ''.e($name . '_district').'','model' => ''.e($model . '.district_id').'','options' => ''.e($options . '.districts').'','placeholder' => 'Kecamatan','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
+<?php $component->withAttributes(['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_district')).'','name' => ''.e($name . '_district').'','model' => ''.e($model . '.district_id').'','options' => ''.e($options . '.districts').'','placeholder' => 'Kecamatan','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1)): ?>
@@ -133,14 +137,14 @@ unset($__defined_vars); ?>
         <div class="items-center layout-cols">
             <?php if (isset($component)) { $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_subdistrict')).'','name' => ''.e($name . '_subdistrict').'','model' => ''.e($model . '.subdistrict_id').'','options' => ''.e($options . '.subdistricts').'','placeholder' => 'Desa/Kelurahan','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-select','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_subdistrict')).'','name' => ''.e($name . '_subdistrict').'','model' => ''.e($model . '.subdistrict_id').'','options' => ''.e($options . '.subdistricts').'','placeholder' => 'Desa/Kelurahan','required' => $required,'searchbar' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-select'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_select_subdistrict')).'','name' => ''.e($name . '_subdistrict').'','model' => ''.e($model . '.subdistrict_id').'','options' => ''.e($options . '.subdistricts').'','placeholder' => 'Desa/Kelurahan','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
+<?php $component->withAttributes(['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_select_subdistrict')).'','name' => ''.e($name . '_subdistrict').'','model' => ''.e($model . '.subdistrict_id').'','options' => ''.e($options . '.subdistricts').'','placeholder' => 'Desa/Kelurahan','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required),'searchbar' => true]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginala66ae9345597a416d0fc3f5e4474bdd1)): ?>
@@ -151,18 +155,17 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginala66ae9345597a416d0fc3f5e4474bdd1; ?>
 <?php unset($__componentOriginala66ae9345597a416d0fc3f5e4474bdd1); ?>
 <?php endif; ?>
-            <div class="flex w-full gap-4">
-                <div class="flex-1">
-                    <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
+
+            <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalec8317d4b42b6916a726c612ebf39f70 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_street')).'','type' => 'text','name' => ''.e($name . '_street').'','model' => ''.e($model . '.street').'','placeholder' => 'RT/RW/Nama Jalan/Nomor Bangunan (Opsional)']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_street')).'','type' => 'text','name' => ''.e($name . '_street').'','model' => ''.e($model . '.street').'','placeholder' => 'RT/RW/Nama Jalan/Nomor Bangunan (Opsional)']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-text'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_street')).'','type' => 'text','name' => ''.e($name . '_street').'','model' => ''.e($model . '.street').'','placeholder' => 'RT/RW/Nama Jalan/Nomor Bangunan (Opsional)']); ?>
+<?php $component->withAttributes(['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_street')).'','type' => 'text','name' => ''.e($name . '_street').'','model' => ''.e($model . '.street').'','placeholder' => 'RT/RW/Nama Jalan/Nomor Bangunan (Opsional)']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalec8317d4b42b6916a726c612ebf39f70)): ?>
@@ -173,18 +176,17 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginalec8317d4b42b6916a726c612ebf39f70; ?>
 <?php unset($__componentOriginalec8317d4b42b6916a726c612ebf39f70); ?>
 <?php endif; ?>
-                </div>
-                <div class="w-1/3">
-                    <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
+
+            <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalec8317d4b42b6916a726c612ebf39f70 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => $required]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'max-w-40','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => $required]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-text'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required)]); ?>
+<?php $component->withAttributes(['class' => 'max-w-40','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($required)]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalec8317d4b42b6916a726c612ebf39f70)): ?>
@@ -195,8 +197,6 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginalec8317d4b42b6916a726c612ebf39f70; ?>
 <?php unset($__componentOriginalec8317d4b42b6916a726c612ebf39f70); ?>
 <?php endif; ?>
-                </div>
-            </div>
         </div>
     </div>
 </div>

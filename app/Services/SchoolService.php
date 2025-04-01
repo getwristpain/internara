@@ -3,13 +3,11 @@
 namespace App\Services;
 
 use App\Models\School;
-use App\Services\Service;
-use App\Services\ClassroomService;
-use App\Services\DepartmentService;
 
 class SchoolService extends Service
 {
     protected DepartmentService $departmentService;
+
     protected ClassroomService $classroomService;
 
     /*
@@ -24,7 +22,19 @@ class SchoolService extends Service
 
     public function first(): ?School
     {
-        return $this->model->with(['departments', 'departments.classrooms'])->first() ?? new School([
+        $school = $this->model->with(['departments', 'departments.classrooms'])->first();
+
+        if ($school && empty($school->address)) {
+            $school->address = [
+                'province_id' => '',
+                'regency_id' => '',
+                'district_id' => '',
+                'subdistrict_id' => '',
+                'postal_code' => '',
+            ];
+        }
+
+        return $school ?? new School([
             'logo' => '',
             'address' => [
                 'province_id' => '',
@@ -56,7 +66,7 @@ class SchoolService extends Service
                         ['code' => $classroomData['code']],
                         [
                             'level' => $classroomData['level'],
-                            'name' => $classroomData['name']
+                            'name' => $classroomData['name'],
                         ]
                     );
                 });

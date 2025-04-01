@@ -40,9 +40,15 @@ class Service
 
     private function generateCacheKey(string $key, array $filters = []): string
     {
-        $cacheFilters = empty($filters) ? '' : md5(serialize($filters));
+        try {
+            $filters = array_filter($filters);
+            $filters = empty($filters) ? '' : '.' . http_build_query($filters);
 
-        return implode(':', [$this->cacheKey, $key, $cacheFilters]);
+            return "{$this->cacheKey}.{$key}{$filters}";
+        } catch (\Throwable $th) {
+            $this->debug('error', 'Failed to generate cache key.', $th);
+            throw $th;
+        }
     }
 
     public function getAll(): Collection

@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('type');
-            $table->string('description');
-            $table->morphs('statusable');
+            $table->string('key')->unique();
+            $table->string('value');
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }

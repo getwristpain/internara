@@ -2,11 +2,12 @@
 
 namespace App\Livewire\Departments;
 
-use Livewire\Component;
+use App\Helpers\Arr;
 use App\Helpers\Formatter;
-use Illuminate\Support\Str;
 use App\Services\SchoolService;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DepartmentForm extends Component
 {
@@ -20,7 +21,7 @@ class DepartmentForm extends Component
         'id' => '',
         'code' => '',
         'name' => '',
-        'classrooms' => []
+        'classrooms' => [],
     ];
 
     public array $new_classroom = [
@@ -60,7 +61,7 @@ class DepartmentForm extends Component
 
     public function toggleClassrooms(int $departmentId)
     {
-        $this->showClassrooms[$departmentId] = !$this->showClassrooms[$departmentId];
+        $this->showClassrooms[$departmentId] = ! $this->showClassrooms[$departmentId];
     }
 
     public function openClassroomModal(string $departmentCode)
@@ -108,7 +109,7 @@ class DepartmentForm extends Component
     {
         $classroomName = Formatter::abbrev($classroomName);
         $components = [$classroomLevel, $departmentCode, $classroomName];
-        $filteredComponents = array_filter($components, fn($component) => !empty($component));
+        $filteredComponents = Arr::filter($components);
 
         return Str::upper(implode('-', $filteredComponents));
     }
@@ -187,7 +188,7 @@ class DepartmentForm extends Component
     protected function storeDepartments()
     {
         $this->schoolService->storeDepartments($this->departments);
-        flash()->success('Jurusan dan Kelas berhasil diperbarui.');
+        flash()->success('Jurusan atau Kelas berhasil diperbarui.');
     }
 
     public function render()

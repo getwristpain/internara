@@ -56,23 +56,68 @@ class SchoolForm extends Component
 
     protected function getAddressOptions()
     {
-        $this->addressOptions = $this->addressService->getOptions($this->school['address'] ?? []);
+        $this->addressOptions = $this->addressService->getAddressOptions($this->school['address'] ?? []);
     }
 
     public function updated($propertyName)
     {
         match (true) {
             ($propertyName === 'school.logo') => $this->validate(['school.logo' => 'required|image|max:1024|mimes:png,jpg,jpeg,webp']),
-            str_starts_with($propertyName, 'school.address.') => $this->updateSchoolAddress(),
-            default => null,
+            str_starts_with($propertyName, 'school.address.') => $this->updateSchoolAddress($propertyName),
+            default => null
         };
 
         $this->isDirty = true;
     }
 
-    protected function updateSchoolAddress()
+    protected function updateSchoolAddress(string $propertyName)
     {
+        match ($propertyName) {
+            'school.address.province_id' => $this->updateProvince(),
+            'school.address.regency_id' => $this->updateRegency(),
+            'school.address.district_id' => $this->updateDistrict(),
+            'school.address.subdistrict_id' => $this->updateSubdistrict(),
+            default => null
+        };
+
         $this->getAddressOptions();
+    }
+
+    protected function updateProvince()
+    {
+        $changedAddress = [
+            'regency_id' => '',
+            'district_id' => '',
+            'subdistrict_id' => '',
+            'postal_code' => '',
+        ];
+
+        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+    }
+
+    protected function updateRegency()
+    {
+        $changedAddress = [
+            'district_id' => '',
+            'subdistrict_id' => '',
+            'postal_code' => '',
+        ];
+
+        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+    }
+
+    protected function updateDistrict()
+    {
+        $changedAddress = [
+            'subdistrict_id' => '',
+            'postal_code' => '',
+        ];
+
+        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+    }
+
+    protected function updateSubdistrict()
+    {
         $this->school['address']['postal_code'] = $this->addressService->getPostalCode($this->school['address'] ?? []);
     }
 
@@ -99,7 +144,7 @@ class SchoolForm extends Component
         }
 
         $this->init();
-        $this->dispatch('school-setting-saved');
+        $this->dispatch('school-saved');
     }
 
     protected function handleSchoolLogo(): void
