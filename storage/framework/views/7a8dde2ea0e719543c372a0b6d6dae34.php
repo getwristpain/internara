@@ -58,13 +58,13 @@ unset($__defined_vars); ?>
 
     type="button">
 
-    <!--[if BLOCK]><![endif]--><?php if(isset($icon)): ?>
+    <?php if(isset($icon)): ?>
         <iconify-icon class="transition-transform duration-300" :class="{ 'rotate-180': rotated }"
             icon="<?php echo e($icon); ?>"></iconify-icon>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
-    <!--[if BLOCK]><![endif]--><?php if(!$hideLabel): ?>
+    <?php if(!$hideLabel): ?>
         <span><?php echo e($slot); ?></span>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </button>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/button.blade.php ENDPATH**/ ?>

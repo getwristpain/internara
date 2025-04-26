@@ -2,10 +2,11 @@
 
 $__newAttributes = [];
 $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
-    'hint' => null,
-    'label' => null,
+    'model' => '',
     'name' => '',
+    'label' => '',
     'required' => false,
+    'disabled' => false,
 ]));
 
 foreach ($attributes->all() as $__key => $__value) {
@@ -22,10 +23,11 @@ unset($__propNames);
 unset($__newAttributes);
 
 foreach (array_filter(([
-    'hint' => null,
-    'label' => null,
+    'model' => '',
     'name' => '',
+    'label' => '',
     'required' => false,
+    'disabled' => false,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 }
@@ -38,12 +40,13 @@ foreach ($attributes->all() as $__key => $__value) {
 
 unset($__defined_vars); ?>
 
-<?php if(isset($label)): ?>
-    <div class="flex gap-1">
-        <label class="<?php echo e(!$required ?: 'required'); ?>" for="<?php echo e($name); ?>"><?php echo e($label); ?></label>
-        <?php if(isset($hint)): ?>
-            <span class="text-sm text-gray-500">(<?php echo e($hint); ?>)</span>
-        <?php endif; ?>
-    </div>
-<?php endif; ?>
-<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/forms/input-label.blade.php ENDPATH**/ ?>
+<div>
+    <label class="flex items-center cursor-pointer <?php echo e($required ? 'required' : ''); ?> <?php echo e($disabled ? 'disabled' : ''); ?>"
+        for="<?php echo e($name); ?>">
+        <input class="checkbox checkbox-sm checkbox-neutral rounded-full" id="<?php echo e($name); ?>"
+            name="<?php echo e($name); ?>" wire:model.live="<?php echo e($model); ?>" type="checkbox"
+            <?php echo e($required ? 'required' : ''); ?> <?php echo e($disabled ? 'disabled' : ''); ?> />
+        <span class="pl-2"><?php echo e($label); ?></span>
+    </label>
+</div>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-checkbox.blade.php ENDPATH**/ ?>

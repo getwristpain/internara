@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Installations;
+namespace App\Livewire\Installations\Pages;
 
 use App\Services\InstallerService;
 use Livewire\Component;
@@ -21,7 +21,7 @@ class InstallDepartment extends Component
 
     protected function checkIfInstallSchoolCompleted()
     {
-        return $this->installerService->checkIfCompleted('install.school') ?: $this->back();
+        return $this->installerService->isCompleted('install.school') ?: $this->back();
     }
 
     public function back()
@@ -39,11 +39,6 @@ class InstallDepartment extends Component
 
     public function render()
     {
-        /** @var \Livewire\Component $view */
-        $view = view('livewire.installations.install-department');
-
-        return $view->layout('components.layouts.guest', [
-            'title' => ('Konfigurasi Jurusan | Instalasi | '.config('app.name', 'Internara')),
-        ]);
+        return view('livewire.installations.pages.install-department');
     }
 }

@@ -32,14 +32,14 @@ unset($__defined_vars); ?>
     <?php echo e($attributes->merge(['id' => $name, 'name' => $name, 'class' => implode(' ', ['flex flex-col gap-8', $disabled ? 'disabled' : '']), 'disabled' => $disabled])); ?>
 
     wire:submit.prevent="<?php echo e($submit); ?>">
-    <!--[if BLOCK]><![endif]--><?php if(isset($header)): ?>
+    <?php if(isset($header)): ?>
         <div>
             <?php echo e($header); ?>
 
         </div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
-    <!--[if BLOCK]><![endif]--><?php if(!empty($messages)): ?>
+    <?php if(!empty($messages)): ?>
         <div class="flex flex-col gap-4">
             <?php if (isset($component)) { $__componentOriginal5b09c79149dfb771c232996af5f9dae4 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5b09c79149dfb771c232996af5f9dae4 = $attributes; } ?>
@@ -61,18 +61,18 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginal5b09c79149dfb771c232996af5f9dae4); ?>
 <?php endif; ?>
         </div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 
     <div class="flex flex-col gap-4">
         <?php echo e($body ?? $slot); ?>
 
     </div>
 
-    <!--[if BLOCK]><![endif]--><?php if(isset($footer)): ?>
+    <?php if(isset($footer)): ?>
         <div class="flex justify-end w-full gap-4">
             <?php echo e($footer); ?>
 
         </div>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </form>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/form.blade.php ENDPATH**/ ?>

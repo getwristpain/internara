@@ -70,7 +70,7 @@ unset($__defined_vars); ?>
 
 <?php
     $iconStyle =
-        'absolute text-lg text-gray-400 left-3 ' .
+        'absolute text-lg text-gray-400 left-3 z-[2] ' .
         ($type === 'textarea' ? 'top-4' : 'top-1/2 transform -translate-y-1/2');
 
     $messages = !empty($messages) ? $message : ($errors->has($model) ? $errors->get($model) : []);

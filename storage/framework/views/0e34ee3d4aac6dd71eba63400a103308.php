@@ -74,7 +74,7 @@ unset($__defined_vars); ?>
 ?>
 
 <div <?php echo e($attributes->merge(['class' => $disabled ? 'disabled' : ''])); ?>>
-    <div class="flex flex-col w-full gap-2 pt-1">
+    <div class="flex flex-col w-full gap-2">
         <div class="flex flex-col w-full gap-2">
             <?php if (isset($component)) { $__componentOriginald8ba2b4c22a13c55321e34443c386276 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald8ba2b4c22a13c55321e34443c386276 = $attributes; } ?>
@@ -125,9 +125,9 @@ unset($__defined_vars); ?>
                     @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) { open = !open } { rotated = !rotated}"
                     tabindex="0" title="<?php echo e($placeholder); ?>">
                     <div
-                        class="flex pt-1 gap-4 justify-between w-full items-center overflow-hidden cursor-pointer input input-bordered focus:ring-2 focus:ring-neutral <?php echo e($disabled ? 'disabled' : ''); ?>">
+                        class="flex gap-4 justify-between w-full items-center overflow-hidden cursor-pointer input input-bordered focus:ring-2 focus:ring-neutral pt-1 <?php echo e($disabled ? 'disabled' : ''); ?>">
                         <span><iconify-icon class="text-gray-400 scale-125" icon="tabler:selector"></iconify-icon></span>
-                        <span class="overflow-x-hidden flex-1 w-full text-gray-500 text-nowrap <?php echo e($badgeClass); ?>"
+                        <span class="overflow-x-hidden w-full text-gray-500 text-nowrap <?php echo e($badgeClass); ?>"
                             x-text="filteredOptions().find(option => option.value === selected)?.label || '<?php echo e($placeholder); ?>'"></span>
                         <!--[if BLOCK]><![endif]--><?php if(!$hideDropdownIcon): ?>
                             <span><iconify-icon class="text-gray-400 scale-125" :class="{ 'rotate-180': rotated }"
@@ -136,7 +136,7 @@ unset($__defined_vars); ?>
                     </div>
                 </div>
 
-                <div class="absolute z-50 w-full bg-base border border-gray-300 rounded-lg top-12" x-show="open"
+                <div class="absolute z-50 w-full border border-gray-300 rounded-lg bg-base top-12" x-show="open"
                     @click.away="open = false" @keydown.window.escape="open = false" tabindex="0">
                     <!-- Search Input -->
                     <template x-if="showSearch">

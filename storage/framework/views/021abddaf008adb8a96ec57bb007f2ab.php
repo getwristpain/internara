@@ -165,4 +165,5 @@
 <?php if (isset($__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab)): ?>
 <?php $component = $__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab; ?>
 <?php unset($__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab); ?>
-<?php endif; ?><?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/schools/school-form.blade.php ENDPATH**/ ?>
+<?php endif; ?>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/schools/school-form.blade.php ENDPATH**/ ?>

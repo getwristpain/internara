@@ -17,7 +17,7 @@ class InstallSchool extends Component
     }
 
     #[On('school-saved')]
-    protected function handleSchoolSaved()
+    public function handleSchoolSaved()
     {
         $this->installerService->markAsCompleted('install.school');
 
@@ -26,7 +26,7 @@ class InstallSchool extends Component
 
     public function back()
     {
-        return $this->redirectRoute('install.welcome', navigate: true);
+        return $this->redirectRoute('install', navigate: true);
     }
 
     public function next()

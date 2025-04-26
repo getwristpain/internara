@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Installations;
+namespace App\Livewire\Installations\Pages;
 
 use App\Services\InstallerService;
 use Livewire\Attributes\On;
@@ -23,12 +23,12 @@ class InstallOwner extends Component
 
     protected function checkIfInstallDepartmentCompleted()
     {
-        return $this->installerService->checkIfCompleted('install.department') ?: $this->back();
+        return $this->installerService->isCompleted('install.department') ?: $this->back();
     }
 
     protected function checkIfInstallOwnerCompleted()
     {
-        return ! $this->installerService->checkIfCompleted('install.owner') ?: $this->next();
+        return ! $this->installerService->isCompleted('install.owner') ?: $this->next();
     }
 
     #[On('owner-account-registered')]
@@ -51,11 +51,6 @@ class InstallOwner extends Component
 
     public function render()
     {
-        /** @var \Livewire\Component $view */
-        $view = view('livewire.installations.install-owner');
-
-        return $view->layout('components.layouts.guest', [
-            'title' => ('Konfigurasi Administrator | Instalasi | '.config('app.name')),
-        ]);
+        return view('livewire.installations.pages.install-owner');
     }
 }

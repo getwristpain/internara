@@ -19,8 +19,6 @@
 <?php unset($__componentOriginal8409bfce3af0b2dbdf42828f1fb2f3d0); ?>
 <?php endif; ?>
 
-    <iconify-icon icon="mdi:phone"></iconify-icon>
-
     <div class="max-w-4xl mx-auto space-y-16 wh-full">
         <div class="flex flex-col max-w-4xl gap-4 mx-auto text-center">
             <h1 class="text-heading-lg">Konfigurasi Data Sekolah</h1>

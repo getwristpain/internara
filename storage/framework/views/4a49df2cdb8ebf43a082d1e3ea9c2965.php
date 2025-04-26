@@ -44,22 +44,22 @@ unset($__defined_vars); ?>
     <div class="flex w-full">
         <div class="relative flex items-center w-full h-2 rounded-full bg-primary bg-opacity-10">
             <div class="absolute flex items-center justify-between w-full">
-                <!--[if BLOCK]><![endif]--><?php for($i = 1; $i < $steps; $i++): ?>
+                <?php for($i = 1; $i < $steps; $i++): ?>
                     <div
                         class="flex items-center justify-center w-full h-2 <?php echo e($currentStep > $i ? 'bg-primary bg-opacity-70' : 'bg-primary-100'); ?>">
                         <span class="before:content-['']"></span>
                     </div>
-                <?php endfor; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endfor; ?>
             </div>
             <div class="absolute flex items-center justify-between w-full gap-4">
-                <!--[if BLOCK]><![endif]--><?php for($i = 0; $i < $steps; $i++): ?>
+                <?php for($i = 0; $i < $steps; $i++): ?>
                     <div
                         class="flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs text-base-100 <?php echo e($currentStep > $i ? 'bg-primary' : 'bg-primary-100'); ?>">
-                        <!--[if BLOCK]><![endif]--><?php if($currentStep > $i): ?>
+                        <?php if($currentStep > $i): ?>
                             <iconify-icon icon="mingcute:check-fill"></iconify-icon>
-                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?>
                     </div>
-                <?php endfor; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endfor; ?>
             </div>
         </div>
     </div>

@@ -8,7 +8,7 @@ class Uploader extends Helper
 {
     public static function getPublicUrl($url): string
     {
-        return asset("storage/{$url}");
+        return asset("{$url}");
     }
 
     public static function upload(UploadedFile $file, string $path, string $fileName = '', string $storage = 'public'): string

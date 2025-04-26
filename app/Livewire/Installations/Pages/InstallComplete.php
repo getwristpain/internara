@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Installations;
+namespace App\Livewire\Installations\Pages;
 
 use App\Services\InstallerService;
 use App\Services\SystemService;
@@ -25,7 +25,7 @@ class InstallComplete extends Component
 
     protected function checkIfInstallOwnerCompleted()
     {
-        return $this->installerService->checkIfCompleted('install.owner') ?: $this->back();
+        return $this->installerService->isCompleted('install.owner') ?: $this->back();
     }
 
     public function back()
@@ -60,9 +60,6 @@ class InstallComplete extends Component
 
     public function render()
     {
-        return view('livewire.installations.install-complete')
-            ->layout('components.layouts.guest', [
-                'title' => ('Instalasi Selesai | Instalasi | '.config('app.name')),
-            ]);
+        return view('livewire.installations.pages.install-complete');
     }
 }

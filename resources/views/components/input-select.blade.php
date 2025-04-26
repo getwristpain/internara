@@ -31,7 +31,7 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => $disabled ? 'disabled' : '']) }}>
-    <div class="flex flex-col w-full gap-2 pt-1">
+    <div class="flex flex-col w-full gap-2">
         <div class="flex flex-col w-full gap-2">
             <x-label :name="$name" :label="$label" :required="$required" :hint="$hint" />
 
@@ -63,9 +63,9 @@
                     @click="if (!{{ $disabled ? 'true' : 'false' }}) { open = !open } { rotated = !rotated}"
                     tabindex="0" title="{{ $placeholder }}">
                     <div
-                        class="flex pt-1 gap-4 justify-between w-full items-center overflow-hidden cursor-pointer input input-bordered focus:ring-2 focus:ring-neutral {{ $disabled ? 'disabled' : '' }}">
+                        class="flex gap-4 justify-between w-full items-center overflow-hidden cursor-pointer input input-bordered focus:ring-2 focus:ring-neutral pt-1 {{ $disabled ? 'disabled' : '' }}">
                         <span><iconify-icon class="text-gray-400 scale-125" icon="tabler:selector"></iconify-icon></span>
-                        <span class="overflow-x-hidden flex-1 w-full text-gray-500 text-nowrap {{ $badgeClass }}"
+                        <span class="overflow-x-hidden w-full text-gray-500 text-nowrap {{ $badgeClass }}"
                             x-text="filteredOptions().find(option => option.value === selected)?.label || '{{ $placeholder }}'"></span>
                         @if (!$hideDropdownIcon)
                             <span><iconify-icon class="text-gray-400 scale-125" :class="{ 'rotate-180': rotated }"
@@ -74,7 +74,7 @@
                     </div>
                 </div>
 
-                <div class="absolute z-50 w-full bg-base border border-gray-300 rounded-lg top-12" x-show="open"
+                <div class="absolute z-50 w-full border border-gray-300 rounded-lg bg-base top-12" x-show="open"
                     @click.away="open = false" @keydown.window.escape="open = false" tabindex="0">
                     <!-- Search Input -->
                     <template x-if="showSearch">

@@ -49,8 +49,8 @@ unset($__defined_vars); ?>
 
     wire:loading.class="disabled" wire:loading.attr="disabled">
     <span><?php echo e($slot); ?></span>
-    <!--[if BLOCK]><![endif]--><?php if($icon && !$hideIcon): ?>
+    <?php if($icon && !$hideIcon): ?>
         <iconify-icon icon="<?php echo e($icon); ?>"></iconify-icon>
-    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+    <?php endif; ?>
 </button>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/submit.blade.php ENDPATH**/ ?>

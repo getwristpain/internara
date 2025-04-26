@@ -1,7 +1,10 @@
 <?php $attributes ??= new \Illuminate\View\ComponentAttributeBag;
 
 $__newAttributes = [];
-$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames((['messages' => []]));
+$__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
+    'attributes' => new \Illuminate\View\ComponentAttributeBag(),
+    'messages' => [],
+]));
 
 foreach ($attributes->all() as $__key => $__value) {
     if (in_array($__key, $__propNames)) {
@@ -16,7 +19,10 @@ $attributes = new \Illuminate\View\ComponentAttributeBag($__newAttributes);
 unset($__propNames);
 unset($__newAttributes);
 
-foreach (array_filter((['messages' => []]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
+foreach (array_filter(([
+    'attributes' => new \Illuminate\View\ComponentAttributeBag(),
+    'messages' => [],
+]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
     $$__key = $$__key ?? $__value;
 }
 
@@ -35,4 +41,4 @@ unset($__defined_vars); ?>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </ul>
 <?php endif; ?>
-<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/forms/input-error.blade.php ENDPATH**/ ?>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-error.blade.php ENDPATH**/ ?>
