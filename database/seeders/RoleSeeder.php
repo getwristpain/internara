@@ -12,6 +12,8 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
+        Role::truncate();
+
         $data = [
             'guest', 'owner', 'admin', 'staff', 'student', 'teacher', 'supervisor',
         ];

@@ -51,6 +51,8 @@ class SchoolForm extends Component
 
         if (! empty($this->school['logo'])) {
             $this->school['logo_preview'] = Uploader::getPublicUrl($this->school['logo']);
+        } else {
+            $this->school['logo_preview'] = null;
         }
     }
 
@@ -92,7 +94,7 @@ class SchoolForm extends Component
             'postal_code' => '',
         ];
 
-        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+        $this->school['address'] = array_replace($this->school['address'] ?? [], $changedAddress ?? []);
     }
 
     protected function updateRegency()
@@ -103,7 +105,7 @@ class SchoolForm extends Component
             'postal_code' => '',
         ];
 
-        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+        $this->school['address'] = array_replace($this->school['address'] ?? [], $changedAddress ?? []);
     }
 
     protected function updateDistrict()
@@ -113,7 +115,7 @@ class SchoolForm extends Component
             'postal_code' => '',
         ];
 
-        $this->school['address'] = array_replace($this->school['address'], $changedAddress);
+        $this->school['address'] = array_replace($this->school['address'] ?? [], $changedAddress ?? []);
     }
 
     protected function updateSubdistrict()

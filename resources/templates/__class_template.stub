@@ -4,8 +4,8 @@ namespace {{ namespace }};
 {{ useStatement }}
 class {{ classStatement }}
 {
-    /*
-     * Class constructor
+    /**
+     * Class constructor.
      */
     public function __construct()
     {

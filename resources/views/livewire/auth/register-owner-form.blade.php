@@ -1,5 +1,6 @@
 <div class="w-full">
-    <x-form name="register-owner-form" submit="registerOwner">
+    <x-form name="register-owner-form" submit="registerOwner" wire:target="registerOwner" wire:loading.attr="disabled"
+        wire:loading.class="disabled">
         <x-forms.input-text type="name" name="owner_name" model="owner.name" label="Nama Lengkap"
             placeholder="Masukkan nama lengkap..." required autofocus />
         <x-forms.input-text type="email" name="owner_email" model="owner.email" label="Email"

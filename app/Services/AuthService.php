@@ -20,7 +20,7 @@ class AuthService extends Service
         $data['password'] = Hash::make($data['password']);
 
         if (in_array($roles, ['owner'])) {
-            return $this->updateOrCreate($data)->syncRoles($roles) ? true : false;
+            return $this->updateOrCreate(['email' => $data['email']], $data)->syncRoles($roles) ? true : false;
         }
 
         return $this->create($data)->syncRoles($roles) ? true : false;

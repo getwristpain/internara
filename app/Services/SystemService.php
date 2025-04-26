@@ -6,7 +6,7 @@ use App\Models\System;
 
 class SystemService extends Service
 {
-    /*
+    /**
      * Class constructor.
      */
     public function __construct()
@@ -14,8 +14,19 @@ class SystemService extends Service
         parent::__construct(new System);
     }
 
-    public function first(): ?System
+    /**
+     * Get the first system record.
+     */
+    public function first(): System
     {
+        if (! $this->isInstalled()) {
+            return new System([
+                'name' => config('app.name', 'Internara'),
+                'logo' => config('app.logo', 'images/logo.png'),
+                'installed' => false,
+            ]);
+        }
+
         return parent::first() ?? new System([
             'name' => config('app.name', 'Internara'),
             'logo' => config('app.logo', 'images/logo.png'),
@@ -23,8 +34,13 @@ class SystemService extends Service
         ]);
     }
 
+    /**
+     * Check if the system is installed.
+     */
     public function isInstalled(): bool
     {
-        return $this->model?->installed ?? false;
+        $system = System::first();
+
+        return $system->installed ?? false;
     }
 }

@@ -14,10 +14,6 @@ class InstallerMiddleware
 
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -29,10 +25,10 @@ class InstallerMiddleware
             $isInstalled = app(SystemService::class)->isInstalled();
 
             if ($isInstalled && $this->isInstallRoute($request)) {
-                return redirect()->route('dashboard');
+                return redirect()->route('login');
             }
 
-            if (!$isInstalled && !$this->isInstallRoute($request)) {
+            if (! $isInstalled && ! $this->isInstallRoute($request)) {
                 return redirect()->route('install');
             }
 
@@ -45,9 +41,6 @@ class InstallerMiddleware
 
     /**
      * Determine if the request is a Livewire request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
      */
     private function isLivewireRequest(Request $request): bool
     {
@@ -56,9 +49,6 @@ class InstallerMiddleware
 
     /**
      * Determine if the request is for an install route.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool
      */
     private function isInstallRoute(Request $request): bool
     {

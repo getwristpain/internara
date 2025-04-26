@@ -19,7 +19,8 @@
     {{ $attributes->merge([
         'class' => implode(' ', ['btn', !$reverse ?: 'flex-row-reverse']),
         'disabled' => $disabled,
-    ]) }}>
+    ]) }}
+    type="button">
 
     @isset($icon)
         <iconify-icon class="transition-transform duration-300" :class="{ 'rotate-180': rotated }"

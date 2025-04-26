@@ -8,12 +8,11 @@ class System extends Model
 {
     /**
      * The attributes that are mass assignable.
-     *
      */
     protected $fillable = [
         'name',
         'logo',
-        'installed'
+        'installed',
     ];
 
     /**
@@ -30,7 +29,13 @@ class System extends Model
 
         static::creating(function ($system) {
             $system->name ??= config('app.name');
-            $system->logo ??= asset(config('app.logo', 'images/logo.png'));
+            $system->logo ??= config('app.logo', 'images/logo.png');
+            $system->installed ??= false;
+        });
+
+        static::updating(function ($system) {
+            $system->name ??= config('app.name');
+            $system->logo ??= config('app.logo', 'images/logo.png');
             $system->installed ??= false;
         });
     }

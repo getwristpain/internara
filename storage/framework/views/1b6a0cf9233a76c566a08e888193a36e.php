@@ -29,7 +29,7 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <form
-    <?php echo e($attributes->merge(['id' => $name, 'name' => $name, 'class' => $disabled ? 'disabled' : '', 'disabled' => $disabled])); ?>
+    <?php echo e($attributes->merge(['id' => $name, 'name' => $name, 'class' => implode(' ', ['flex flex-col gap-8', $disabled ? 'disabled' : '']), 'disabled' => $disabled])); ?>
 
     wire:submit.prevent="<?php echo e($submit); ?>">
     <!--[if BLOCK]><![endif]--><?php if(isset($header)): ?>
@@ -39,8 +39,9 @@ unset($__defined_vars); ?>
         </div>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
-    <div class="flex flex-col gap-4">
-        <?php if (isset($component)) { $__componentOriginal5b09c79149dfb771c232996af5f9dae4 = $component; } ?>
+    <!--[if BLOCK]><![endif]--><?php if(!empty($messages)): ?>
+        <div class="flex flex-col gap-4">
+            <?php if (isset($component)) { $__componentOriginal5b09c79149dfb771c232996af5f9dae4 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal5b09c79149dfb771c232996af5f9dae4 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.flash-messages','data' => ['messages' => $messages]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('flash-messages'); ?>
@@ -59,7 +60,8 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginal5b09c79149dfb771c232996af5f9dae4; ?>
 <?php unset($__componentOriginal5b09c79149dfb771c232996af5f9dae4); ?>
 <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
     <div class="flex flex-col gap-4">
         <?php echo e($body ?? $slot); ?>

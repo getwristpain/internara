@@ -48,7 +48,7 @@ class SchoolSeeder extends Seeder
     public function run(): void
     {
         $school = School::first() ?? School::create([
-            'name' => 'Nama Sekolah',
+            'name' => 'Internara',
             'address' => [],
             'email' => 'school@example.com',
             'phone' => '1234567890',

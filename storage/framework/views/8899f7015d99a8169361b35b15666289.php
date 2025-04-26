@@ -156,7 +156,8 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginala66ae9345597a416d0fc3f5e4474bdd1); ?>
 <?php endif; ?>
 
-            <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
+            <div class="flex items-center w-full gap-4">
+                <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalec8317d4b42b6916a726c612ebf39f70 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'w-full','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_street')).'','type' => 'text','name' => ''.e($name . '_street').'','model' => ''.e($model . '.street').'','placeholder' => 'RT/RW/Nama Jalan/Nomor Bangunan (Opsional)']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-text'); ?>
@@ -177,7 +178,7 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalec8317d4b42b6916a726c612ebf39f70); ?>
 <?php endif; ?>
 
-            <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
+                <?php if (isset($component)) { $__componentOriginalec8317d4b42b6916a726c612ebf39f70 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalec8317d4b42b6916a726c612ebf39f70 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.forms.input-text','data' => ['class' => 'max-w-40','wire:key' => ''.e(\App\Helpers\Helper::key('input_text_postal_code')).'','name' => ''.e($name . '_postal_code').'','model' => ''.e($model . '.postal_code').'','placeholder' => 'Kode Pos','required' => $required]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('forms.input-text'); ?>
@@ -197,6 +198,7 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginalec8317d4b42b6916a726c612ebf39f70; ?>
 <?php unset($__componentOriginalec8317d4b42b6916a726c612ebf39f70); ?>
 <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>

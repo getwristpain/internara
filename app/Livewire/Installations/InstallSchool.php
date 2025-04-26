@@ -15,21 +15,32 @@ class InstallSchool extends Component
         $this->installerService = new InstallerService;
     }
 
+    public function mount()
+    {
+        $this->checkIfInstallWelcomeCompleted();
+    }
+
+    protected function checkIfInstallWelcomeCompleted()
+    {
+        return $this->installerService->checkIfCompleted('install.welcome') ?: $this->back();
+    }
+
     #[On('school-saved')]
     public function handleSchoolSaved()
     {
-        $this->installerService->markAsCompleted('install.school');
-        $this->next();
+        if ($this->installerService->markAsCompleted('install.school')) {
+            return $this->next();
+        }
     }
 
     public function back()
     {
-        return $this->redirectRoute('install', navigate: true);
+        return $this->redirectRoute('install');
     }
 
     public function next()
     {
-        return $this->redirectRoute('install.department', navigate: true);
+        return $this->redirectRoute('install.department');
     }
 
     public function render()

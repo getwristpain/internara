@@ -41,10 +41,10 @@ class RegisterOwnerForm extends Component
             return flash()->error('Gagal membuat akun administrator.');
         }
 
-        $this->reset(['owner']);
-
         flash()->success('Akun administrator berhasil dibuat.');
         $this->dispatch('owner-account-registered');
+
+        $this->reset(['owner']);
     }
 
     public function render()

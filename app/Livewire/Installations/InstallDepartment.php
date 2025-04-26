@@ -26,14 +26,15 @@ class InstallDepartment extends Component
 
     public function back()
     {
-        return $this->redirectRoute('install.school', navigate: true);
+        return $this->redirectRoute('install.school');
     }
 
     public function next()
     {
-        $this->installerService->markAsCompleted('install.department');
+        if ($this->installerService->markAsCompleted('install.department')) {
+            return $this->redirectRoute('install.owner');
+        }
 
-        return $this->redirectRoute('install.owner', navigate: true);
     }
 
     public function render()

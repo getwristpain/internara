@@ -20,23 +20,23 @@ class InstallerService extends Service
         $this->statusService = new StatusService;
     }
 
-    public function markAsCompleted(string $key)
+    public function markAsCompleted(string $key): bool
     {
-        try {
-            match ($key) {
-                'install.school' => $this->setStatus('install.school', 'completed'),
-                'install.department' => $this->setStatus('install.department', 'completed'),
-                'install.owner' => $this->setStatus('install.owner', 'completed'),
-                'install.system' => $this->setStatus('install.system', 'completed'),
-                default => $this->debug('error', 'Invalid key provided.'),
-            };
-        } catch (\Throwable $th) {
-            $this->debug('error', $th->getMessage(), $th);
-            throw $th;
+        if ($this->isCompleted($key)) {
+            return true;
         }
+
+        return match ($key) {
+            'install.welcome' => $this->setStatus('install.welcome', 'completed'),
+            'install.school' => $this->setStatus('install.school', 'completed'),
+            'install.department' => $this->setStatus('install.department', 'completed'),
+            'install.owner' => $this->setStatus('install.owner', 'completed'),
+            'install.system' => $this->setStatus('install.system', 'completed'),
+            default => false,
+        };
     }
 
-    public function checkIfCompleted(string $key): bool
+    public function isCompleted(string $key): bool
     {
         return empty($this->statusService->firstWhere(['key' => $key, 'value' => 'completed'])) ? false : true;
     }

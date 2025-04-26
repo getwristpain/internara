@@ -82,7 +82,7 @@ class Helper
         return $array;
     }
 
-    public static function handleError(string $level, string $message, Throwable|array|string $context = []): string
+    public static function handleError(string $level, string $message, \Throwable|array|string $context = []): string
     {
         return app(self::class)->debug($level, $message, $context);
     }

@@ -3,15 +3,19 @@
 namespace App\Livewire\Installations;
 
 use App\Services\InstallerService;
+use App\Services\SystemService;
 use Livewire\Component;
 
 class InstallComplete extends Component
 {
     protected InstallerService $installerService;
 
+    protected SystemService $systemService;
+
     public function __construct()
     {
         $this->installerService = new InstallerService;
+        $this->systemService = new SystemService;
     }
 
     public function mount()
@@ -26,30 +30,39 @@ class InstallComplete extends Component
 
     public function back()
     {
-        return $this->redirectRoute('install.owner', navigate: true);
+        return $this->redirectRoute('install.owner');
     }
 
     public function next()
     {
-        $this->markInstallSystemCompleted();
-        $this->login();
+        if (! $this->markInstallSystemCompleted()) {
+            return flash()->error('Gagal menyelesaikan instalasi sistem. Silakan coba lagi.');
+        }
+
+        return $this->redirectToLogin();
     }
 
-    protected function markInstallSystemCompleted()
+    protected function markInstallSystemCompleted(): bool
     {
         $system = $this->installerService->first();
-        $system->update(['installed' => true]);
 
-        $this->installerService->markAsCompleted('install.system');
+        if ($this->installerService->markAsCompleted('install.system') && $system->update(['installed' => true])) {
+            return true;
+        }
+
+        return false;
     }
 
-    protected function login()
+    protected function redirectToLogin()
     {
-        return $this->redirectRoute('login', navigate: true);
+        return $this->redirectRoute('login');
     }
 
     public function render()
     {
-        return view('livewire.installations.install-complete');
+        return view('livewire.installations.install-complete')
+            ->layout('components.layouts.guest', [
+                'title' => ('Instalasi Selesai | Instalasi | '.config('app.name')),
+            ]);
     }
 }

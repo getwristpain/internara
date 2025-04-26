@@ -10,7 +10,6 @@ class SchoolObserver
     /**
      * Handle the School "created" event.
      *
-     * @param  \App\Models\School  $school
      * @return void
      */
     public function created(School $school)
@@ -21,7 +20,6 @@ class SchoolObserver
     /**
      * Handle the School "updated" event.
      *
-     * @param  \App\Models\School  $school
      * @return void
      */
     public function updated(School $school)
@@ -32,17 +30,24 @@ class SchoolObserver
     /**
      * Update the System data based on the School data.
      *
-     * @param  \App\Models\School  $school
      * @return void
      */
     protected function updateSystem(School $school)
     {
         $system = System::first();
-        if ($system) {
-            $system->update([
+
+        if (! $system) {
+            $system->create([
                 'name' => $school->name,
                 'logo' => $school->logo,
             ]);
+
+            return;
         }
+
+        $system->update([
+            'name' => $school->name,
+            'logo' => $school->logo,
+        ]);
     }
 }
