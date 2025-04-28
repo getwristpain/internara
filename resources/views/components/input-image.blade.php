@@ -59,7 +59,7 @@
             wire:model="{{ $model }}" x-ref="fileInput" @change="updatePreview($event)">
 
         <!-- Drop Area -->
-        <div class="basic-transition bg-gray-100 border-4 border-dashed rounded-lg cursor-pointer hover:bg-gray-200 relative"
+        <div class="basic-transition bg-gray-100 border-4 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-300 relative"
             @click="$refs.fileInput.click()">
             <div class="wh-full p-4">
                 <template x-if="preview">

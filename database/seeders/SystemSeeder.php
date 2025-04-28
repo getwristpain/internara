@@ -14,6 +14,7 @@ class SystemSeeder extends Seeder
     {
         $data = [
             'name' => config('app.name', 'Internara'),
+            'version' => config('app.version', '1.0.0'),
             'logo' => config('app.logo', 'images/logo.png'),
             'installed' => false,
         ];

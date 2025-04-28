@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Schools;
+namespace App\Livewire\Schools\Components;
 
 use App\Helpers\Uploader;
 use App\Services\AddressService;
@@ -184,6 +184,6 @@ class SchoolForm extends Component
 
     public function render()
     {
-        return view('livewire.schools.school-form');
+        return view('livewire.schools.components.school-form');
     }
 }

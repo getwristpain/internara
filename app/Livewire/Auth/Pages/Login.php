@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Auth;
+namespace App\Livewire\Auth\Pages;
 
 use App\Services\SystemService;
 use Livewire\Component;
@@ -16,11 +16,10 @@ class Login extends Component
 
     public function render()
     {
-        $appName = $this->systemService->first()->name ?? '';
-
-        return view('livewire.auth.login')
-            ->layout('components.layouts.guest', [
-                'title' => "Login | {$appName}",
-            ]);
+        return view('livewire.auth.pages.login')
+            ->extends('layouts.guest', [
+                'title' => 'Masuk | '.$this->systemService->first()->name,
+            ])
+            ->section('content');
     }
 }

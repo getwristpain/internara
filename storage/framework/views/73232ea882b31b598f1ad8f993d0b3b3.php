@@ -39,16 +39,34 @@
             </div>
         </div>
         <div class="flex items-center justify-end">
-            <x-button class="btn-primary btn-wide shadow-lg" icon="icon-park-outline:right-c" reverse
-                action="next">Masuk Untuk
-                Melanjutkan</x-button>
+            <?php if (isset($component)) { $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.button','data' => ['class' => 'btn-primary btn-wide shadow-lg','icon' => 'icon-park-outline:right-c','reverse' => true,'action' => 'next']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('button'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'btn-primary btn-wide shadow-lg','icon' => 'icon-park-outline:right-c','reverse' => true,'action' => 'next']); ?>Masuk Untuk
+                Melanjutkan <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $attributes = $__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__attributesOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561)): ?>
+<?php $component = $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
+<?php unset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
+<?php endif; ?>
         </div>
     </div>
 
-    @teleport('body')
+    <template x-teleport="<?php echo e('body'); ?>">
         <div class="fixed top-0 left-0 -z-10 wh-screen overflow-hidden">
             <img class="absolute inset-0 object-cover w-full h-full opacity-60"
-                src="{{ asset('images/backgrounds/bg-congrate.png') }}" alt="Background">
+                src="<?php echo e(asset('images/backgrounds/bg-congrate.png')); ?>" alt="Background">
         </div>
-    @endteleport
+    </template>
 </div>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/installations/pages/install-complete.blade.php ENDPATH**/ ?>

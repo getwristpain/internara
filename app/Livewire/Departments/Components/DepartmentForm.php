@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Departments;
+namespace App\Livewire\Departments\Components;
 
 use App\Helpers\Arr;
 use App\Helpers\Formatter;
@@ -193,6 +193,6 @@ class DepartmentForm extends Component
 
     public function render()
     {
-        return view('livewire.departments.department-form');
+        return view('livewire.departments.components.department-form');
     }
 }

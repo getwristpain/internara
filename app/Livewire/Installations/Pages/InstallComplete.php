@@ -16,16 +16,8 @@ class InstallComplete extends Component
     {
         $this->installerService = new InstallerService;
         $this->systemService = new SystemService;
-    }
 
-    public function mount()
-    {
-        $this->checkIfInstallOwnerCompleted();
-    }
-
-    protected function checkIfInstallOwnerCompleted()
-    {
-        return $this->installerService->isCompleted('install.owner') ?: $this->back();
+        $this->installerService->isCompleted('install.owner') ?: $this->back();
     }
 
     public function back()
@@ -55,11 +47,15 @@ class InstallComplete extends Component
 
     protected function redirectToLogin()
     {
-        return $this->redirectRoute('login');
+        return $this->redirectRoute('login', navigate: true);
     }
 
     public function render()
     {
-        return view('livewire.installations.pages.install-complete');
+        return view('livewire.installations.pages.install-complete')
+            ->extends('layouts.guest', [
+                'title' => 'Instalasi Selesai | Instalasi | '.config('app.name'),
+            ])
+            ->section('content');
     }
 }

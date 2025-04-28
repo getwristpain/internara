@@ -77,7 +77,7 @@ unset($__defined_vars); ?>
         </div>
         <div class="flex-col flex-1 hidden md:flex">
             <ul class="flex flex-col h-full gap-4 justify-evenly">
-                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php $__currentLoopData = $features; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <li class="flex items-center">
                         <div class="px-4 py-2">
                             <iconify-icon class="text-4xl" icon="<?php echo e($feature['icon']); ?>"></iconify-icon>
@@ -87,7 +87,7 @@ unset($__defined_vars); ?>
                             <p><?php echo e($feature['description']); ?></p>
                         </div>
                     </li>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
         </div>
         <div class="flex flex-col items-center justify-center w-full gap-4">
@@ -110,7 +110,8 @@ unset($__defined_vars); ?>
 <?php $component = $__componentOriginald0f1fd2689e4bb7060122a5b91fe8561; ?>
 <?php unset($__componentOriginald0f1fd2689e4bb7060122a5b91fe8561); ?>
 <?php endif; ?>
-            <span class="text-sm font-medium"><?php echo e('Versi ' . config('app.version', '1.0.0')); ?></span>
+            <span class="text-sm font-medium"><?php echo e('Versi ' . $system['version']); ?></span>
         </div>
     </div>
-</div><?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/installations/pages/install-welcome.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/installations/pages/install-welcome.blade.php ENDPATH**/ ?>

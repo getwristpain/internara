@@ -5,16 +5,16 @@
 @tailwind utilities;
 
 @layer base {
+    * {
+        @apply custom-scrollbar m-0 box-border p-0;
+    }
+
     body {
         @apply wh-screen text-body min-h-screen overflow-x-hidden antialiased;
     }
 
     .basic-transition {
         @apply transition duration-300 ease-in-out;
-    }
-
-    .bg-base {
-        @apply bg-base-100 bg-opacity-70 backdrop-blur-lg;
     }
 
     .disabled,
@@ -93,22 +93,6 @@
         @apply relative -top-1 text-xs text-error content-['*'];
     }
 
-    .scrollbar-hidden::-webkit-scrollbar {
-        @apply hidden;
-    }
-
-    .scrollbar-styled::-webkit-scrollbar {
-        @apply w-2;
-    }
-
-    .scrollbar-styled::-webkit-scrollbar-track {
-        @apply rounded-full bg-base-100;
-    }
-
-    .scrollbar-styled::-webkit-scrollbar-thumb {
-        @apply basic-transition rounded-full bg-gray-300 hover:bg-gray-400;
-    }
-
     .text-body {
         @apply font-rethink text-base font-normal text-neutral antialiased;
     }
@@ -135,5 +119,49 @@
 
     .content {
         @apply before:content-[''];
+    }
+}
+
+@layer utilities {
+    .bg-base {
+        @apply bg-base-100 bg-opacity-70 backdrop-blur-lg;
+    }
+
+    @layer utilities {
+        .custom-scrollbar {
+            scrollbar-width: auto;
+            scrollbar-color: theme("colors.neutral") theme("colors.base-100");
+
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: theme("colors.neutral");
+            border-radius: 9999px;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: theme("colors.neutral-600");
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: theme("colors.base-100");
+            border-radius: 9999px;
+            transition: background-color 0.3s ease;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track:hover {
+            background-color: theme("colors.gray.300");
+        }
+    }
+
+    .scrollbar-hidden::-webkit-scrollbar {
+        display: none;
     }
 }

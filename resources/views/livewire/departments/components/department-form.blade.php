@@ -4,7 +4,7 @@
     <div class="p-4 bg-gray-100 border rounded-xl">
         <x-form name="department-form" submit="addDepartment">
             <div class="flex w-full gap-4">
-                <x-forms.input-text required type="text" model="new_department.name"
+                <x-input-text required type="text" model="new_department.name"
                     placeholder="Masukkan nama jurusan baru..." hideMessages />
                 <button class="btn btn-neutral" type="submit">Tambah</button>
             </div>
@@ -12,13 +12,13 @@
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-2 text-sm font-medium">
                         <span class="w-fit">+ Jurusan Baru:</span>
-                        <x-forms.input-text class="max-w-28" required type="text" model="new_department.code"
+                        <x-input-text class="max-w-28" required type="text" model="new_department.code"
                             inputClass="input-sm" />
                         <span class="divider divider-strip"></span>
                         <span class="flex-1">{{ $new_department['name'] }}</span>
                     </div>
-                    <x-forms.input-error :messages="$errors->get('new_department.code')"></x-forms.input-error>
-                    <x-forms.input-error :messages="$errors->get('new_department.name')"></x-forms.input-error>
+                    <x-input-error :messages="$errors->get('new_department.code')"></x-input-error>
+                    <x-input-error :messages="$errors->get('new_department.name')"></x-input-error>
                 </div>
             @endif
         </x-form>
@@ -117,9 +117,9 @@
         <x-slot name="body">
             <x-form name="classroom-form" submit="addClassroom">
                 <div class="flex flex-col items-center gap-4 md:flex-row">
-                    <x-forms.input-select class="md:w-1/4" required name="classroom_level" model="new_classroom.level"
+                    <x-input-select class="md:w-1/4" required name="classroom_level" model="new_classroom.level"
                         options="classroomLevelOptions" placeholder="Pilih Tingkatan" />
-                    <x-forms.input-text required name="classroom_name" model="new_classroom.name"
+                    <x-input-text required name="classroom_name" model="new_classroom.name"
                         placeholder="Nama kelas baru..." />
                 </div>
                 @if (!empty($new_classroom['code']))
@@ -128,16 +128,16 @@
                             <span class="font-semibold">+ Kelas Baru: </span>{{ $new_classroom['code'] }}
                         </div>
 
-                        <x-forms.input-error :messages="$errors->get('new_classroom.code')" />
+                        <x-input-error :messages="$errors->get('new_classroom.code')" />
                     </div>
                 @endif
             </x-form>
         </x-slot>
         <x-slot name="footer">
             <x-button class="btn-ghost" action="closeClassroomModal">Batal</x-button>
-            <x-forms.submit form="classroom-form" hideIcon>
+            <x-submit form="classroom-form" hideIcon>
                 Tambah
-            </x-forms.submit>
+            </x-submit>
         </x-slot>
     </x-modal>
 </div>

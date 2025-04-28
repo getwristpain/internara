@@ -136,7 +136,7 @@ unset($__defined_vars); ?>
                     </div>
                 </div>
 
-                <div class="absolute z-50 w-full border border-gray-300 rounded-lg bg-base top-12" x-show="open"
+                <div class="absolute z-50 w-full border border-gray-300 rounded-lg bg-base-100 top-12" x-show="open"
                     @click.away="open = false" @keydown.window.escape="open = false" tabindex="0">
                     <!-- Search Input -->
                     <template x-if="showSearch">
@@ -149,7 +149,7 @@ unset($__defined_vars); ?>
                     <!-- Options List -->
                     <div class="overflow-y-auto max-h-60">
                         <template x-for="option in filteredOptions()" :key="option.value">
-                            <div class="p-2 cursor-pointer hover:bg-white/70 basic-transition"
+                            <div class="p-2 cursor-pointer hover:bg-gray-300 basic-transition"
                                 @click="if (!<?php echo e($disabled ? 'true' : 'false'); ?>) {
                                 selected = option.value;
                                 open = false;
@@ -163,7 +163,7 @@ unset($__defined_vars); ?>
 
                     <!-- Create New Option -->
                     <template x-if="isCreatingNew()">
-                        <div class="p-2 cursor-pointer hover:bg-white/70 basic-transition" @click="addOption()"
+                        <div class="p-2 cursor-pointer hover:bg-gray-300 basic-transition" @click="addOption()"
                             tabindex="0">
                             <span x-text="'Create new: ' + search"></span>
                         </div>

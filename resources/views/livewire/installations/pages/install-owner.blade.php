@@ -8,12 +8,12 @@
         </div>
 
         <div class="flex-1">
-            @livewire('auth.register-owner-form', ['key' => App\Helpers\Helper::key('register-owner-form')])
+            @livewire('auth.components.register-owner-form')
         </div>
 
         <div class="flex items-center justify-end gap-4 pb-8">
             <x-button class="btn-ghost" action="back">Kembali</x-button>
-            <x-forms.submit form="register-owner-form">Buat Akun</x-forms.submit>
+            <x-submit class="shadow-lg" form="register-owner-form">Buat Akun</x-submit>
         </div>
     </div>
 </div>

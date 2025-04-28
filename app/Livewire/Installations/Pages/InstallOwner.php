@@ -13,22 +13,8 @@ class InstallOwner extends Component
     public function __construct()
     {
         $this->installerService = new InstallerService;
-    }
-
-    public function mount()
-    {
-        $this->checkIfInstallDepartmentCompleted();
-        $this->checkIfInstallOwnerCompleted();
-    }
-
-    protected function checkIfInstallDepartmentCompleted()
-    {
-        return $this->installerService->isCompleted('install.department') ?: $this->back();
-    }
-
-    protected function checkIfInstallOwnerCompleted()
-    {
-        return ! $this->installerService->isCompleted('install.owner') ?: $this->next();
+        $this->installerService->isCompleted('install.departments') ?: $this->back();
+        ! $this->installerService->isCompleted('install.owner') ?: $this->next();
     }
 
     #[On('owner-account-registered')]
@@ -41,16 +27,20 @@ class InstallOwner extends Component
 
     public function next()
     {
-        $this->redirectRoute('install.complete');
+        return $this->redirectRoute('install.complete', navigate: true);
     }
 
     public function back()
     {
-        $this->redirectRoute('install.department');
+        $this->redirectRoute('install.departments', navigate: true);
     }
 
     public function render()
     {
-        return view('livewire.installations.pages.install-owner');
+        return view('livewire.installations.pages.install-owner')
+            ->extends('layouts.guest', [
+                'title' => 'Konfigurasi Administrator | Instalasi | '.config('app.name'),
+            ])
+            ->section('content');
     }
 }

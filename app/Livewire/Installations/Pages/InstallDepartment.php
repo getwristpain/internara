@@ -12,16 +12,7 @@ class InstallDepartment extends Component
     public function __construct()
     {
         $this->installerService = new InstallerService;
-    }
-
-    public function mount()
-    {
-        $this->checkIfInstallSchoolCompleted();
-    }
-
-    protected function checkIfInstallSchoolCompleted()
-    {
-        return $this->installerService->isCompleted('install.school') ?: $this->back();
+        $this->installerService->isCompleted('install.school') ?: $this->back();
     }
 
     public function back()
@@ -31,7 +22,7 @@ class InstallDepartment extends Component
 
     public function next()
     {
-        if ($this->installerService->markAsCompleted('install.department')) {
+        if ($this->installerService->markAsCompleted('install.departments')) {
             return $this->redirectRoute('install.owner');
         }
 
@@ -39,6 +30,10 @@ class InstallDepartment extends Component
 
     public function render()
     {
-        return view('livewire.installations.pages.install-department');
+        return view('livewire.installations.pages.install-department')
+            ->extends('layouts.guest', [
+                'title' => 'Konfigurasi Jurusan dan Kelas | Instalasi | '.config('app.name'),
+            ])
+            ->section('content');
     }
 }

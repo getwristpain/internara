@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Auth;
+namespace App\Livewire\Auth\Components;
 
 use App\Services\AuthService;
 use Illuminate\Validation\Rules\Password;
@@ -49,6 +49,6 @@ class RegisterOwnerForm extends Component
 
     public function render()
     {
-        return view('livewire.auth.register-owner-form');
+        return view('livewire.auth.components.register-owner-form');
     }
 }

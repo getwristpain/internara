@@ -31,7 +31,7 @@ class InstallSchool extends Component
 
     public function next()
     {
-        return $this->redirectRoute('install.department', navigate: true);
+        return $this->redirectRoute('install.departments', navigate: true);
     }
 
     public function render()

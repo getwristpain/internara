@@ -9,12 +9,12 @@
         </div>
 
         <div>
-            @livewire('schools.school-form', ['key' => \App\Helpers\Helper::key('school-form')])
+            @livewire('schools.components.school-form')
         </div>
 
         <div class="flex items-center justify-end w-full gap-4">
             <x-button class="btn-ghost" action="back">Kembali</x-button>
-            <x-submit form="school_form">Lanjut</x-submit>
+            <x-submit class="shadow-lg" form="school_form">Lanjut</x-submit>
         </div>
     </div>
 </div>

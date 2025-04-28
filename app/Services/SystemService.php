@@ -22,6 +22,7 @@ class SystemService extends Service
         if (! $this->isInstalled()) {
             return new System([
                 'name' => config('app.name', 'Internara'),
+                'version' => config('app.version', '1.0.0'),
                 'logo' => config('app.logo', 'images/logo.png'),
                 'installed' => false,
             ]);
@@ -29,6 +30,7 @@ class SystemService extends Service
 
         return parent::first() ?? new System([
             'name' => config('app.name', 'Internara'),
+            'version' => config('app.version', '1.0.0'),
             'logo' => config('app.logo', 'images/logo.png'),
             'installed' => false,
         ]);

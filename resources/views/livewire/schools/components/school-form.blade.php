@@ -8,7 +8,8 @@
             placeholder="mail@example.com" />
     </div>
 
-    <x-input-address name="school_address" model="school.address" label="Alamat Sekolah" options="addressOptions" />
+    <x-input-address name="school_address" model="school.address" label="Alamat Sekolah" options="addressOptions"
+        :key="\App\Helpers\Helper::key('school_address')" />
 
     <div class="layout-cols">
         <x-input-text type="phone" name="school_phone" model="school.phone" label="Telepon Sekolah"

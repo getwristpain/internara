@@ -20,6 +20,11 @@ class InstallerService extends Service
         $this->statusService = new StatusService;
     }
 
+    public function getSystem(): System
+    {
+        return $this->systemService->first();
+    }
+
     public function markAsCompleted(string $key): bool
     {
         if ($this->isCompleted($key)) {
@@ -29,7 +34,7 @@ class InstallerService extends Service
         return match ($key) {
             'install.welcome' => $this->setStatus('install.welcome', 'completed'),
             'install.school' => $this->setStatus('install.school', 'completed'),
-            'install.department' => $this->setStatus('install.department', 'completed'),
+            'install.departments' => $this->setStatus('install.departments', 'completed'),
             'install.owner' => $this->setStatus('install.owner', 'completed'),
             'install.system' => $this->setStatus('install.system', 'completed'),
             default => false,

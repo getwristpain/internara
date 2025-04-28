@@ -47,7 +47,7 @@
         <div class="flex flex-col items-center justify-center w-full gap-4">
             <x-button class="shadow-lg btn-primary btn-wide" action="next" icon="icon-park-outline:right-c"
                 reverse>Mulai Instalasi</x-button>
-            <span class="text-sm font-medium">{{ 'Versi ' . config('app.version', '1.0.0') }}</span>
+            <span class="text-sm font-medium">{{ 'Versi ' . $system['version'] }}</span>
         </div>
     </div>
 </div>

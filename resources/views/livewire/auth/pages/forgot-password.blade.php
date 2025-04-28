@@ -9,13 +9,13 @@
                     </div>
                 </x-slot>
                 <x-slot name="body">
-                    <x-forms.input-text type="email" name="email" model="email" label="Email"
+                    <x-input-text type="email" name="email" model="email" label="Email"
                         placeholder="Masukkan email anda" required />
                 </x-slot>
 
                 <x-slot name="footer">
                     <x-button class="btn-outline btn-neutral" action="back">Batal</x-button>
-                    <x-forms.submit>Kirim Email Pemulihan</x-forms.submit>
+                    <x-submit>Kirim Email Pemulihan</x-submit>
                 </x-slot>
             </x-form>
         </div>

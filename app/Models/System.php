@@ -11,6 +11,7 @@ class System extends Model
      */
     protected $fillable = [
         'name',
+        'version',
         'logo',
         'installed',
     ];
@@ -29,12 +30,14 @@ class System extends Model
 
         static::creating(function ($system) {
             $system->name ??= config('app.name');
+            $system->version ??= config('app.version', '1.0.0');
             $system->logo ??= config('app.logo', 'images/logo.png');
             $system->installed ??= false;
         });
 
         static::updating(function ($system) {
             $system->name ??= config('app.name');
+            $system->version ??= config('app.version', '1.0.0');
             $system->logo ??= config('app.logo', 'images/logo.png');
             $system->installed ??= false;
         });

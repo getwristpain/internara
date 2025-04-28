@@ -74,14 +74,14 @@
 
     <?php if (isset($component)) { $__componentOriginale1e7305c7d90b77a598370405b2aceb7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginale1e7305c7d90b77a598370405b2aceb7 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-address','data' => ['name' => 'school_address','model' => 'school.address','label' => 'Alamat Sekolah','options' => 'addressOptions']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.input-address','data' => ['name' => 'school_address','model' => 'school.address','label' => 'Alamat Sekolah','options' => 'addressOptions','key' => \App\Helpers\Helper::key('school_address')]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('input-address'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['name' => 'school_address','model' => 'school.address','label' => 'Alamat Sekolah','options' => 'addressOptions']); ?>
+<?php $component->withAttributes(['name' => 'school_address','model' => 'school.address','label' => 'Alamat Sekolah','options' => 'addressOptions','key' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(\App\Helpers\Helper::key('school_address'))]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginale1e7305c7d90b77a598370405b2aceb7)): ?>
@@ -165,5 +165,4 @@
 <?php if (isset($__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab)): ?>
 <?php $component = $__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab; ?>
 <?php unset($__componentOriginalf9a5f060e1fbbcbc7beb643b113b10ab); ?>
-<?php endif; ?>
-<?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/schools/school-form.blade.php ENDPATH**/ ?>
+<?php endif; ?><?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/livewire/schools/components/school-form.blade.php ENDPATH**/ ?>

@@ -9,9 +9,13 @@ class InstallWelcome extends Component
 {
     protected InstallerService $installerService;
 
+    public array $system = [];
+
     public function __construct()
     {
         $this->installerService = new InstallerService;
+
+        $this->system = $this->installerService->getSystem()->toArray();
     }
 
     public function next()
@@ -25,7 +29,7 @@ class InstallWelcome extends Component
     {
         return view('livewire.installations.pages.install-welcome')
             ->extends('layouts.guest', [
-                'title' => 'Selamat Datang | Instalasi | '.config('app.name', 'Internara'),
+                'title' => 'Selamat Datang | Instalasi | '.$this->system['name'],
             ])
             ->section('content');
     }

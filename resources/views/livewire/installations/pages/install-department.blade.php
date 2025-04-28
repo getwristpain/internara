@@ -11,12 +11,13 @@
         </div>
 
         <div class="flex-1">
-            @livewire('departments.department-form', ['key' => \App\Helpers\Helper::key('department-form')])
+            @livewire('departments.components.department-form')
         </div>
 
         <div class="flex items-center justify-end gap-4 pb-8">
             <x-button class="btn-ghost" action="back">Kembali</x-button>
-            <x-button class="btn-primary" action="next" icon="icon-park-outline:right-c" reverse>Lanjut</x-button>
+            <x-button class="btn-primary shadow-lg" action="next" icon="icon-park-outline:right-c"
+                reverse>Lanjut</x-button>
         </div>
     </div>
 </div>

@@ -1,16 +1,16 @@
 <div class="wh-full flex flex-col items-center p-8">
     <div class="border rounded-xl p-8 mt-8 w-full max-w-lg space-y-8">
         <x-form name="register" submit="register">
-            <x-forms.input-text name="name" model="user.name" label="Nama Lengkap" placeholder="Masukkan nama lengkap"
+            <x-input-text name="name" model="user.name" label="Nama Lengkap" placeholder="Masukkan nama lengkap"
                 required />
-            <x-forms.input-text type="email" name="email" model="user.email" label="Email"
-                placeholder="Masukkan email" required />
-            <x-forms.input-text type="password" name="password" model="user.password" label="Password"
+            <x-input-text type="email" name="email" model="user.email" label="Email" placeholder="Masukkan email"
+                required />
+            <x-input-text type="password" name="password" model="user.password" label="Password"
                 placeholder="Masukkan password" required />
-            <x-forms.input-text type="password" name="password_confirmation" model="user.password_confirmation"
+            <x-input-text type="password" name="password_confirmation" model="user.password_confirmation"
                 label="Konfirmasi Password" placeholder="Masukkan konfirmasi password" required />
             <div class="mt-4 w-full">
-                <x-forms.submit class="w-full">Daftar Akun</x-forms.submit>
+                <x-submit class="w-full">Daftar Akun</x-submit>
             </div>
         </x-form>
 
