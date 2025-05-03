@@ -21,7 +21,7 @@ class Uploader extends Helper
 
             return implode('/', ['storage', $path, $fileName]);
         } catch (\Throwable $th) {
-            parent::handleError('error', 'Failed to upload file', $th);
+            app(self::class)->debug('error', 'Failed to upload file', $th);
             throw $th;
         }
     }

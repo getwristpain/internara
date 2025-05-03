@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'auth'], function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', Login::class)->name('login');
-        Route::get('/register', Register::class)->name('register');
         Route::get('/forgot-password', ForgotPassword::class)->name('forgot-password');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/new_user', Register::class)->name('register');
     });
 });

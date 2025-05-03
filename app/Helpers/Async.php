@@ -43,7 +43,8 @@ class Async extends Helper
                 return $data;
             }
         } catch (Throwable $th) {
-            self::handleError('error', "API request failed for {$cacheKey}", $th);
+            app(self::class)->debug('error', "API request failed for {$cacheKey}", $th);
+            throw $th;
         }
 
         return ['error' => 'Failed to fetch data'];
@@ -59,7 +60,8 @@ class Async extends Helper
                     ->delay(now()->addSeconds(1));
             }
         } catch (Throwable $th) {
-            self::handleError('error', 'Failed to store data in cache or storage', $th);
+            app(self::class)->debug('error', 'Failed to store data in cache or storage', $th);
+            throw $th;
         }
     }
 
@@ -72,7 +74,8 @@ class Async extends Helper
             Cache::forget($cacheKey);
             Storage::delete($filename);
         } catch (Throwable $th) {
-            self::handleError('error', 'Failed to delete cache and storage', $th);
+            app(self::class)->debug('error', 'Failed to delete cache and storage', $th);
+            throw $th;
         }
     }
 }

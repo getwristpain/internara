@@ -11,9 +11,12 @@ class Helper
 {
     use Debugger;
 
-    public static function key(string $key): string
+    public static function key(string $identifier): string
     {
-        return (string) (now()->timestamp.'-'.$key.'-'.Str::random(8));
+        $items = [$identifier, now()->timestamp, Str::random(8)];
+        $filteredItems = self::array_filter($items);
+
+        return (string) implode('-', $filteredItems);
     }
 
     /**
@@ -82,8 +85,8 @@ class Helper
         return $array;
     }
 
-    public static function handleError(string $level, string $message, \Throwable|array|string $context = []): string
+    public static function array_filter(...$items): array
     {
-        return app(self::class)->debug($level, $message, $context);
+        return array_filter(array_merge(...$items), fn ($item) => ! empty($item));
     }
 }

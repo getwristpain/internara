@@ -17,8 +17,9 @@ class StatusService extends Service
 
     public function getStatus(string $key, string $value = ''): ?Status
     {
+
         $conditions = ['key' => $key, 'value' => $value];
-        $filteredCondition = Helper::filter($conditions);
+        $filteredCondition = Helper::array_filter($conditions);
 
         return $this->firstWhere($filteredCondition);
     }

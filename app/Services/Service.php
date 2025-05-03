@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Debugger;
+use App\Helpers\Helper;
 use Closure;
+use DateInterval;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -13,27 +16,144 @@ class Service
 {
     use Debugger;
 
-    protected Model|Collection|null $model;
+    protected ?Model $model;
 
-    protected string $cacheKey;
+    protected string $modelName;
 
-    protected int $cacheTTL;
+    protected callable|DateInterval|DateTimeInterface|int|null $cacheTTL;
 
-    public function __construct(?Model $model = null, int $cacheTTL = 60)
+    protected function __construct(?Model $model = null, callable|DateInterval|DateTimeInterface|int|null $cacheTTL = 60)
     {
-        $this->model = $model ?? new Collection;
-        $this->cacheKey = Str::lower(class_basename($model));
+        $this->model = $model;
+        $this->modelName = Str::lower(class_basename($model ?? ''));
         $this->cacheTTL = $cacheTTL;
     }
 
-    protected function queryCached(Closure $callback, string $key, array $filters = [])
+    protected function collection(array $items = []): Collection
+    {
+        return new Collection($items);
+    }
+
+    protected function getAll(array $with = []): Collection
     {
         try {
-            $cacheKey = $this->generateCacheKey($key, $filters);
+            if (! empty($with)) {
+                return $this->model->with($with)->get();
+            }
 
-            return Cache::remember($cacheKey, $this->cacheTTL, fn() => $callback($this->model));
+            return $this->model->all();
         } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to execute cache query.', $th);
+            $this->debug('error', "Failed to get all {$this->modelName}(s) data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function getWhere(array $where, array $with = []): Collection
+    {
+        try {
+            if (! empty($with)) {
+                return $this->model->where($where)->with($with)->get();
+            }
+
+            return $this->model->where($where)->get();
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to get {$this->modelName}(s) data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function first(array $with = []): ?Model
+    {
+        try {
+            if (! empty($with)) {
+                return $this->model->with($with)->first();
+            }
+
+            return $this->model->first();
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to get the first {$this->modelName} record.");
+            throw $th;
+        }
+    }
+
+    protected function firstOrInit(array $with = [], array $attributes = []): Model|Collection
+    {
+        try {
+            if (! isset($this->model)) {
+                return $this->collection($attributes);
+            }
+
+            return $this->first($with) ?? new $this->model($attributes);
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to get the first or init {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function firstOrCreate(array $attributes, array $values = [], array $with = []): Model
+    {
+        try {
+            if (! empty($with)) {
+                return $this->model->with($with)->firstOrCreate($attributes, $values);
+            }
+
+            return $this->model->firstOrCreate($attributes, $values);
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to get the first or create new {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function firstWhere(array $where, array $with = []): ?Model
+    {
+        try {
+            if (! empty($with)) {
+                return $this->model->where($where)->with($with)->first();
+            }
+
+            return $this->model->where($where)->first();
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to get with conditions for the first {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function create(array $data): ?Model
+    {
+        try {
+            return $this->model->create($data);
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to create a new {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function update(array $attributes, array $options = []): bool
+    {
+        try {
+            return $this->model->update($attributes, $options);
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to update {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function updateOrCreate(array $attributes, array $values = []): ?Model
+    {
+        try {
+            return $this->model->updateOrCreate($attributes, $values);
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to update or create a new {$this->modelName} data.", $th);
+            throw $th;
+        }
+    }
+
+    protected function delete(array $where): bool
+    {
+        try {
+            return $this->model->where($where)->delete();
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to delete {$this->modelName} data.");
             throw $th;
         }
     }
@@ -41,164 +161,26 @@ class Service
     private function generateCacheKey(string $key, array $filters = []): string
     {
         try {
-            $filters = array_filter($filters);
-            $filters = empty($filters) ? '' : '.' . http_build_query($filters);
+            $filtered = Helper::array_filter($filters);
+            $queryString = $filtered ? '.'.http_build_query($filtered) : '';
 
-            return "{$this->cacheKey}.{$key}{$filters}";
+            return "{$this->modelName}.{$key}{$queryString}";
         } catch (\Throwable $th) {
             $this->debug('error', 'Failed to generate cache key.', $th);
             throw $th;
         }
     }
 
-    public function getAll(): Collection
-    {
-        return $this->queryCached(fn($model) => $model->all(), 'all');
-    }
-
-    public function getWhere(array $where, array $with = []): Collection
-    {
-        return $this->queryCached(fn($model) => $model->with($with)->where($where)->get(), 'find_all', $where);
-    }
-
-    public function first(): ?Model
-    {
-        return $this->queryCached(fn($model) => $model->first(), 'first');
-    }
-
-    public function find(string|int $id, array $with = []): ?Model
-    {
-        return $this->queryCached(fn($model) => $model->with($with)->find($id), 'id', ['id' => $id]);
-    }
-
-    public function firstWhere(array $where, array $with = []): ?Model
-    {
-        return $this->queryCached(fn($model) => $model->with($with)->where($where)->first(), 'find_one', $where);
-    }
-
-    public function create(array $data): Model
+    protected function cachedQuery(Closure $callback, string $key, array $filters, callable|DateInterval|DateTimeInterface|int|null $ttl = 60): mixed
     {
         try {
-            return $this->model->create($data);
+            return Cache::remember(
+                $this->generateCacheKey($key, $filters),
+                $ttl ?? $this->cacheTTL,
+                fn () => $callback($this->model)
+            );
         } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to create model.', $th);
-            throw $th;
-        }
-    }
-
-    public function update(string|int $id, array $data): Model
-    {
-        try {
-            $model = $this->find($id);
-            if ($model->update($data)) {
-                Cache::forget($this->generateCacheKey('id', ['id' => $id]));
-            }
-
-            return $model;
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to update model.', $th);
-            throw $th;
-        }
-    }
-
-    public function updateOrCreate(array $where, array $data): Model
-    {
-        try {
-            $model = $this->model->updateOrCreate($where, $data);
-            Cache::forget($this->generateCacheKey('id', ['id' => $model->id]));
-
-            return $model;
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to update or create model.', $th);
-            throw $th;
-        }
-    }
-
-    public function delete(string|int $id): bool
-    {
-        try {
-            $model = $this->find($id);
-            if ($model->delete()) {
-                Cache::forget($this->generateCacheKey('id', ['id' => $id]));
-            }
-
-            return true;
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to delete model.', $th);
-            throw $th;
-        }
-    }
-
-    public function forceDelete(string|int $id): bool
-    {
-        try {
-            $model = $this->find($id);
-            if ($model->forceDelete()) {
-                Cache::forget($this->generateCacheKey('id', ['id' => $id]));
-            }
-
-            return true;
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to force delete model.', $th);
-            throw $th;
-        }
-    }
-
-    public function restore(string|int $id): bool
-    {
-        try {
-            $model = $this->find($id);
-            if ($model->restore()) {
-                Cache::forget($this->generateCacheKey('id', ['id' => $id]));
-            }
-
-            return true;
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to restore model.', $th);
-            throw $th;
-        }
-    }
-
-    public function bulkAction(array $ids, string $action, array $attributes = []): void
-    {
-        try {
-            $query = $this->model->whereIn('id', $ids);
-
-            switch ($action) {
-                case 'insert':
-                    $this->model->insert($attributes);
-                    break;
-                case 'upsert':
-                    $this->model->upsert($attributes, ['id'], array_keys($attributes[0]));
-                    break;
-                case 'update':
-                    $query->update($attributes);
-                    break;
-                case 'delete':
-                    $query->delete();
-                    break;
-                case 'restore':
-                    $query->restore();
-                    break;
-                case 'forceDelete':
-                    $query->forceDelete();
-                    break;
-                default:
-                    $query->$action();
-                    break;
-            }
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to perform bulk action.', $th);
-            throw $th;
-        }
-    }
-
-    public function transaction(Closure $callback)
-    {
-        try {
-            return $this->model->getConnection()->transaction($callback);
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to execute transaction.', $th);
+            $this->debug('error', $th->getMessage(), $th);
             throw $th;
         }
     }

@@ -216,15 +216,21 @@ class AppInstall extends Command
     {
         $this->info('Cleaning storage...');
 
-        try {
-            File::cleanDirectory(storage_path('framework/views'));
-            File::cleanDirectory(storage_path('framework/cache/data'));
-            File::cleanDirectory(storage_path('framework/livewire-temp'));
-            File::cleanDirectory(storage_path('logs'));
-            File::cleanDirectory(storage_path('app/private/cache'));
-            File::cleanDirectory(storage_path('app/private/livewire-tmp'));
-            File::deleteDirectory(storage_path('app/public/uploads'));
+        $foldersToClean = [
+            'app/private/cache',
+            'app/private/livewire-tmp',
+            'app/public/uploads',
+            'framework/cache/data',
+            'framework/livewire-temp',
+            'framework/views',
+            'logs',
+        ];
 
+        try {
+            foreach ($foldersToClean as $folder) {
+                $path = storage_path($folder);
+                File::cleanDirectory(storage_path($path));
+            }
             $this->info('Storage cleaned successfully.');
         } catch (\Throwable $th) {
             $this->abort('Failed to clean storage.', $th);

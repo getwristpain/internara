@@ -41,7 +41,8 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <div>
-    <label class="flex items-center cursor-pointer <?php echo e($required ? 'required' : ''); ?> <?php echo e($disabled ? 'disabled' : ''); ?>"
+    <label
+        class="flex items-center cursor-pointer w-fit <?php echo e($required ? 'required' : ''); ?> <?php echo e($disabled ? 'disabled' : ''); ?>"
         for="<?php echo e($name); ?>">
         <input class="checkbox checkbox-sm checkbox-neutral rounded-full" id="<?php echo e($name); ?>"
             name="<?php echo e($name); ?>" wire:model.live="<?php echo e($model); ?>" type="checkbox"

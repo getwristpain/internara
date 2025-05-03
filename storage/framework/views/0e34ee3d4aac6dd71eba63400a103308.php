@@ -129,10 +129,10 @@ unset($__defined_vars); ?>
                         <span><iconify-icon class="text-gray-400 scale-125" icon="tabler:selector"></iconify-icon></span>
                         <span class="overflow-x-hidden w-full text-gray-500 text-nowrap <?php echo e($badgeClass); ?>"
                             x-text="filteredOptions().find(option => option.value === selected)?.label || '<?php echo e($placeholder); ?>'"></span>
-                        <!--[if BLOCK]><![endif]--><?php if(!$hideDropdownIcon): ?>
+                        <?php if(!$hideDropdownIcon): ?>
                             <span><iconify-icon class="text-gray-400 scale-125" :class="{ 'rotate-180': rotated }"
                                     icon="icon-park-outline:down-c"></iconify-icon></span>
-                        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -171,7 +171,7 @@ unset($__defined_vars); ?>
                 </div>
             </div>
         </div>
-        <!--[if BLOCK]><![endif]--><?php if($errors->has($model) && !$hideError): ?>
+        <?php if($errors->has($model) && !$hideError): ?>
             <div class="mt-2">
                 <?php if (isset($component)) { $__componentOriginalf94ed9c5393ef72725d159fe01139746 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf94ed9c5393ef72725d159fe01139746 = $attributes; } ?>
@@ -194,7 +194,7 @@ unset($__defined_vars); ?>
 <?php unset($__componentOriginalf94ed9c5393ef72725d159fe01139746); ?>
 <?php endif; ?>
             </div>
-        <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+        <?php endif; ?>
     </div>
 </div>
 <?php /**PATH /home/reasnovynt/Projects/apps/getwristpain/internara/resources/views/components/input-select.blade.php ENDPATH**/ ?>

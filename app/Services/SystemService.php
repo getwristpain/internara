@@ -15,25 +15,22 @@ class SystemService extends Service
     }
 
     /**
-     * Get the first system record.
+     * Get the system record.
      */
-    public function first(): System
+    public function getSystem()
     {
-        if (! $this->isInstalled()) {
-            return new System([
-                'name' => config('app.name', 'Internara'),
-                'version' => config('app.version', '1.0.0'),
-                'logo' => config('app.logo', 'images/logo.png'),
-                'installed' => false,
-            ]);
-        }
-
-        return parent::first() ?? new System([
+        $attributes = [
             'name' => config('app.name', 'Internara'),
             'version' => config('app.version', '1.0.0'),
             'logo' => config('app.logo', 'images/logo.png'),
             'installed' => false,
-        ]);
+        ];
+
+        if (! $this->isInstalled()) {
+            return new System($attributes);
+        }
+
+        return parent::firstOrInit(attributes: $attributes);
     }
 
     /**
@@ -41,8 +38,6 @@ class SystemService extends Service
      */
     public function isInstalled(): bool
     {
-        $system = System::first();
-
-        return $system->installed ?? false;
+        return System::first()->installed ?? false;
     }
 }

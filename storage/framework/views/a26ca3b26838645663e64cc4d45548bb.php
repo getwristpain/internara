@@ -50,12 +50,12 @@ unset($__defined_vars); ?>
             @keydown.window.escape="closeModal()">
             <div class="flex flex-col w-full overflow-y-visible">
                 <div class="relative flex items-center justify-end gap-4 px-8 py-4 font-bold bg-gray-100 rounded-t-xl">
-                    <!--[if BLOCK]><![endif]--><?php if(isset($header)): ?>
+                    <?php if(isset($header)): ?>
                         <div class="flex-1 w-full flex gap-2 items-center">
                             <?php echo e($header); ?>
 
                         </div>
-                    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                    <?php endif; ?>
 
                     <div class="group">
                         <button class="btn btn-circle btn-sm bg-gray-200 group-hover:bg-gray-300 basic-transition"
@@ -71,12 +71,12 @@ unset($__defined_vars); ?>
 
                 </div>
 
-                <!--[if BLOCK]><![endif]--><?php if(isset($footer)): ?>
+                <?php if(isset($footer)): ?>
                     <div class="flex items-center justify-end gap-4 px-8 py-4 bg-gray-100 rounded-b-xl">
                         <?php echo e($footer); ?>
 
                     </div>
-                <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                <?php endif; ?>
             </div>
         </div>
     </div>

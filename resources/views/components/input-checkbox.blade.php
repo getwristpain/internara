@@ -7,7 +7,8 @@
 ])
 
 <div>
-    <label class="flex items-center cursor-pointer {{ $required ? 'required' : '' }} {{ $disabled ? 'disabled' : '' }}"
+    <label
+        class="flex items-center cursor-pointer w-fit {{ $required ? 'required' : '' }} {{ $disabled ? 'disabled' : '' }}"
         for="{{ $name }}">
         <input class="checkbox checkbox-sm checkbox-neutral rounded-full" id="{{ $name }}"
             name="{{ $name }}" wire:model.live="{{ $model }}" type="checkbox"

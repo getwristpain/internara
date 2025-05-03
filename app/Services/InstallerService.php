@@ -22,7 +22,7 @@ class InstallerService extends Service
 
     public function getSystem(): System
     {
-        return $this->systemService->first();
+        return $this->systemService->getSystem();
     }
 
     public function markAsCompleted(string $key): bool
