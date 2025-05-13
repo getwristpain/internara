@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\Formatter;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class Status extends Model
 {
@@ -13,28 +13,23 @@ class Status extends Model
      * @var array
      */
     protected $fillable = [
-        'key',
-        'value',
+        'name',
+        'type',
+        'label',
         'description',
+        'priority',
+        'color',
+        'icon',
+        'is_active',
+        'is_default',
     ];
 
-    /**
-     * The "booting" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
+    public function setAttribute($key, $value)
     {
-        parent::boot();
+        if ($key === 'name' || $key === 'type') {
+            $value = Formatter::snakecase($value);
+        }
 
-        static::creating(function ($status) {
-            $status->key = Str::lower($status->key);
-            $status->value = Str::lower($status->value);
-        });
-
-        static::updating(function ($status) {
-            $status->key = Str::lower($status->key);
-            $status->value = Str::lower($status->value);
-        });
+        return parent::setAttribute($key, $value);
     }
 }

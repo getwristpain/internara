@@ -2,26 +2,23 @@
 
 namespace App\Services;
 
-use App\Helpers\Helper;
+use App\Helpers\Sanitizer;
+use App\Helpers\Security;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Number;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 class AuthService extends Service
 {
-    protected array $permittedRoles = [
-        'user',
-        'owner',
-        'admin',
-        'staff',
-        'student',
-        'teacher',
-        'supervisor',
+    protected UserService $userService;
+
+    private array $allowedActions = [
+        'register',
+        'login',
     ];
+
+    protected string $action = 'register';
+
+    protected array $user = [];
 
     /*
      * Class constructor
@@ -29,86 +26,102 @@ class AuthService extends Service
     public function __construct()
     {
         parent::__construct(new User);
+        $this->userService = new UserService;
     }
 
-    public function register(array $data, array $roles): bool
+    private function setAction(string $action = 'register'): string
     {
-        $roles = Helper::sanitize(array_map('strtolower', $roles), $this->permittedRoles);
-        $data = $this->prepareData($data, $roles[0]);
-        $key = $this->throttleKey($data['identifier']);
+        return Sanitizer::sanitize($action, 'acceptable', $this->allowedActions);
+    }
 
-        try {
-            $this->ensureIsNotRateLimited($key);
-            // TODO: Complete the registration process
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Register failed', $th);
-            throw $th;
+    private function sanitizeUserData(array $user): array
+    {
+        return Sanitizer::sanitize($user, [
+            'name' => 'string',
+            'email' => 'email',
+            'username' => 'string',
+            'password' => 'string',
+            'password_confirmation' => 'string',
+            'status' => 'acceptabled',
+            'roles' => 'acceptabled',
+        ], [
+            'status' => $this->model->statusOptions(),
+            'roles' => $this->model->roleOptions(),
+        ]);
+    }
+
+    protected function prepareData(array $user, string $action = 'register')
+    {
+        $this->action = $this->setAction($action);
+        $this->user = $this->sanitizeUserData($user);
+    }
+
+    private function ensureIsUniqueAccount()
+    {
+        foreach ($this->user as $key => $value) {
+            if ($key == 'email' || $key == 'username') {
+                $exists = $this->exists([$key => $value]);
+                if ($exists) {
+                    $this->addError([
+                        $key => __('validation.unique', [
+                            'attribute' => $key,
+                        ]),
+                    ]);
+                }
+            }
         }
-
-        return false;
     }
 
-    protected function prepareData(array $data, $accountType = 'user'): array
+    private function ensureIsPasswordHashed()
     {
-        $data['identifier'] ??= $this->generateIdentifier($accountType);
-
-        if (isset($data['email'])) {
-            $data['email'] = Str::lower($data['email']);
+        if (isset($this->user['password'])) {
+            $this->user['password'] = Hash::make($this->user['password']);
         }
-
-        return $data;
     }
 
-    protected function generateIdentifier(string $accountType = 'user'): string
+    protected function ensureIsNotRateLimited(string $key = '')
     {
-        do {
-            $identifier = Str::lower($accountType.Number::random(8));
-        } while ($this->model->where('identifier', $identifier)->exists());
+        $rateLimiter = Security::rateLimiter(
+            $this->action,
+            $key,
+        );
 
-        return $identifier;
-    }
-
-    public function login(array $data, string $redirectTo = '')
-    {
-        $email = Str::lower($data['email']);
-        $remember = $data['remember'] ?? false;
-        $key = $this->throttleKey($email);
-
-        $this->ensureIsNotRateLimited($key);
-
-        $user = User::where('email', $email)->first();
-
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            RateLimiter::hit($key, 60);
-            throw ValidationException::withMessages([
-                'identifier' => ['Akun tidak valid.'],
+        if (! $rateLimiter->check()) {
+            $this->addError([
+                'too_many_attempts' => __('auth.throttle', [
+                    'seconds' => $rateLimiter->availableIn(),
+                ]),
             ]);
         }
 
-        RateLimiter::clear($key);
-
-        Auth::login($user, $remember);
-
-        return redirect($redirectTo ?? route('dashboard'));
+        return $rateLimiter->withMessages([
+            'too_many_attempts' => __('auth.throttle', [
+                'seconds' => $rateLimiter->availableIn(),
+            ]),
+        ]);
     }
 
-    protected function throttleKey(string $identifier): string
+    public function success(): bool
     {
-        return "login:{$identifier}";
+        return ! $this->fails();
     }
 
-    protected function ensureIsNotRateLimited(string $key): void
+    public function fails(): bool
     {
-        $maxAttempts = 5;
+        return ! empty($this->getErrors());
+    }
 
-        if (! RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            return;
+    public function register(array $user): static
+    {
+        $this->prepareData($user, 'register');
+        $this->ensureIsNotRateLimited(request()->ip());
+        $this->ensureIsUniqueAccount();
+        $this->ensureIsPasswordHashed();
+
+        if ($this->success()) {
+            $this->userService->storeUser($this->user);
         }
 
-        $seconds = RateLimiter::availableIn($key);
-
-        throw ValidationException::withMessages([
-            'identifier' => ["Terlalu banyak percobaan login. Coba lagi dalam $seconds detik."],
-        ]);
+        return $this;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Sanitizer;
 use App\Models\School;
 
 class SchoolService extends Service
@@ -20,9 +21,9 @@ class SchoolService extends Service
         $this->classroomService = new ClassroomService;
     }
 
-    public function first(): ?School
+    public function getSchool(): ?School
     {
-        $school = $this->model->with(['departments', 'departments.classrooms'])->first();
+        $school = $this->first(['departments', 'departments.classrooms']);
 
         if ($school && empty($school->address)) {
             $school->address = [
@@ -46,32 +47,51 @@ class SchoolService extends Service
         ]);
     }
 
+    protected function prepareSchoolData(array $school): array
+    {
+        $school = Sanitizer::sanitize($school, [
+            'name' => 'string',
+            'logo' => 'string',
+            'address' => 'array',
+            'email' => 'email',
+            'phone' => 'string',
+            'fax' => 'string',
+            'website' => 'string',
+            'principal_name' => 'string',
+        ]);
+
+        return $school;
+    }
+
+    public function setSchool(array $school)
+    {
+        $school = $this->prepareSchoolData($school);
+    }
+
     public function storeDepartments(array $data)
     {
-        $this->queryCached(function () use ($data) {
-            collect($data)->each(function ($departmentData) {
-                $school = parent::first();
+        return collect($data)->each(function ($departmentData) {
+            $school = $this->first();
 
-                $department = $school->departments()->updateOrCreate(
-                    ['code' => $departmentData['code']],
+            $department = $school->departments()->updateOrCreate(
+                ['code' => $departmentData['code']],
+                [
+                    'name' => $departmentData['name'],
+                    'desription' => '',
+                    'school_id' => $school->id,
+                ]
+            );
+
+            collect($departmentData['classrooms'])->each(function ($classroomData) use ($department) {
+                $department->classrooms()->updateOrCreate(
+                    ['code' => $classroomData['code']],
                     [
-                        'name' => $departmentData['name'],
-                        'desription' => '',
-                        'school_id' => $school->id,
+                        'level' => $classroomData['level'],
+                        'name' => $classroomData['name'],
                     ]
                 );
-
-                collect($departmentData['classrooms'])->each(function ($classroomData) use ($department) {
-                    $department->classrooms()->updateOrCreate(
-                        ['code' => $classroomData['code']],
-                        [
-                            'level' => $classroomData['level'],
-                            'name' => $classroomData['name'],
-                        ]
-                    );
-                });
             });
-        }, 'department', ['id' => $data['id'] ?? '']);
+        });
     }
 
     public function deleteDepartment(int $id)

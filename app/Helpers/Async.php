@@ -21,16 +21,6 @@ class Async extends Helper
         return "cache/data/{$cacheKey}.json";
     }
 
-    public static function fetch(string $cacheKey, string $url, int $ttl = 3600, array $filter = []): array
-    {
-        $cacheKey = self::generateCacheKey($cacheKey, $filter);
-        $filename = self::getCacheFilename($cacheKey);
-
-        return Cache::remember($cacheKey, $ttl, function () use ($cacheKey, $filename, $url, $filter, $ttl) {
-            return self::fetchFromApi($cacheKey, $filename, $url, $filter, $ttl);
-        });
-    }
-
     protected static function fetchFromApi(string $cacheKey, string $filename, string $url, array $filter, int $ttl): array
     {
         try {
@@ -43,7 +33,7 @@ class Async extends Helper
                 return $data;
             }
         } catch (Throwable $th) {
-            app(self::class)->debug('error', "API request failed for {$cacheKey}", $th);
+            self::debugger('error', "API request failed for {$cacheKey}", $th);
             throw $th;
         }
 
@@ -60,9 +50,19 @@ class Async extends Helper
                     ->delay(now()->addSeconds(1));
             }
         } catch (Throwable $th) {
-            app(self::class)->debug('error', 'Failed to store data in cache or storage', $th);
+            self::debugger('error', 'Failed to store data in cache or storage', $th);
             throw $th;
         }
+    }
+
+    public static function fetch(string $cacheKey, string $url, int $ttl = 3600, array $filter = []): array
+    {
+        $cacheKey = self::generateCacheKey($cacheKey, $filter);
+        $filename = self::getCacheFilename($cacheKey);
+
+        return Cache::remember($cacheKey, $ttl, function () use ($cacheKey, $filename, $url, $filter, $ttl) {
+            return self::fetchFromApi($cacheKey, $filename, $url, $filter, $ttl);
+        });
     }
 
     public static function forget(string $cacheKey, array $filter = []): void
@@ -74,7 +74,7 @@ class Async extends Helper
             Cache::forget($cacheKey);
             Storage::delete($filename);
         } catch (Throwable $th) {
-            app(self::class)->debug('error', 'Failed to delete cache and storage', $th);
+            self::debugger('error', 'Failed to delete cache and storage', $th);
             throw $th;
         }
     }

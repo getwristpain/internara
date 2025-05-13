@@ -10,6 +10,14 @@ class InstallerService extends Service
 
     protected StatusService $statusService;
 
+    protected SchoolService $schoolService;
+
+    protected DepartmentService $departmentService;
+
+    protected AuthService $authService;
+
+    private string $statusType = 'installation';
+
     /*
      * Class constructor
      */
@@ -20,34 +28,25 @@ class InstallerService extends Service
         $this->statusService = new StatusService;
     }
 
+    protected function setStatus(string $name)
+    {
+        return $this->systemService->setStatus($name, $this->statusType);
+    }
+
     public function getSystem(): System
     {
         return $this->systemService->getSystem();
     }
 
-    public function markAsCompleted(string $key): bool
+    public function installWelcome(): bool
     {
-        if ($this->isCompleted($key)) {
-            return true;
-        }
-
-        return match ($key) {
-            'install.welcome' => $this->setStatus('install.welcome', 'completed'),
-            'install.school' => $this->setStatus('install.school', 'completed'),
-            'install.departments' => $this->setStatus('install.departments', 'completed'),
-            'install.owner' => $this->setStatus('install.owner', 'completed'),
-            'install.system' => $this->setStatus('install.system', 'completed'),
-            default => false,
-        };
+        return $this->setStatus('welcome');
     }
 
-    public function isCompleted(string $key): bool
+    public function installSchool(array $school = []): bool
     {
-        return empty($this->statusService->firstWhere(['key' => $key, 'value' => 'completed'])) ? false : true;
-    }
+        $this->schoolService->setSchool($school);
 
-    protected function setStatus(string $key, string $value)
-    {
-        return $this->statusService->setStatus($key, $value);
+        return $this->setStatus('school_config');
     }
 }

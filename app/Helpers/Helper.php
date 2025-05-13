@@ -4,12 +4,24 @@ namespace App\Helpers;
 
 use App\Debugger;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use ReflectionClass;
+use Throwable;
 
-class Helper
+abstract class Helper
 {
     use Debugger;
+
+    public static function debugger(string $level, string $message, string|array|Throwable $context = []): string
+    {
+        return app(self::class)->debug($level, $message, $context);
+    }
+
+    public static function logger(string|array $messages, array $context = [], Model|string|int|null $causedBy = null)
+    {
+        return app(self::class)->log($messages, $context, $causedBy);
+    }
 
     public static function key(string $identifier): string
     {
@@ -17,34 +29,6 @@ class Helper
         $filteredItems = self::array_filter($items);
 
         return (string) implode('-', $filteredItems);
-    }
-
-    /**
-     * Sanitize input based on the given rules
-     *
-     * @param  mixed  $input  The input to be sanitized
-     * @param  mixed  $rules  The sanitization rules (e.g., 'string', 'email', 'int', 'html', or an array of allowed values)
-     * @return mixed The sanitized value
-     */
-    public static function sanitize($input, $rules)
-    {
-        if (is_array($input)) {
-            return array_map(fn ($item) => self::sanitize($item, $rules), $input);
-        }
-
-        if (is_array($rules)) {
-            return in_array($input, $rules, true) ? $input : null;
-        }
-
-        return match ($rules) {
-            'string' => trim(strip_tags($input)),
-            'email' => filter_var(trim($input), FILTER_SANITIZE_EMAIL),
-            'url' => filter_var(trim($input), FILTER_SANITIZE_URL),
-            'int' => filter_var($input, FILTER_SANITIZE_NUMBER_INT),
-            'float' => filter_var($input, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION),
-            'html' => htmlspecialchars($input, ENT_QUOTES, 'UTF-8'),
-            default => throw new Exception('The given rules are not compatible.'),
-        };
     }
 
     /**

@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
         Role::truncate();
 
         $data = [
-            'user', 'owner', 'admin', 'staff', 'student', 'teacher', 'supervisor',
+            'owner', 'admin', 'staff', 'student', 'teacher', 'supervisor',
         ];
 
         foreach ($data as $role) {

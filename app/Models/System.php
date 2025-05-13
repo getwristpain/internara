@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\HasStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class System extends Model
 {
+    use HasStatus;
+
     /**
      * The attributes that are mass assignable.
      */
@@ -13,7 +16,47 @@ class System extends Model
         'name',
         'version',
         'logo',
-        'installed',
+        'is_installed',
+    ];
+
+    public array $initialStatuses = [
+        'installation' => [
+            [
+                'name' => 'welcome',
+                'label' => 'Selamat Datang',
+                'description' => 'Halaman pembuka instalasi',
+                'priority' => 1,
+                'is_default' => true,
+            ],
+            [
+                'name' => 'school_config',
+                'label' => 'Konfigurasi Sekolah',
+                'description' => 'Masukkan nama, alamat, dsb',
+                'priority' => 2,
+                'is_default' => false,
+            ],
+            [
+                'name' => 'department_setup',
+                'label' => 'Pengaturan Jurusan',
+                'description' => 'Pengaturan jurusan yang akan diikuti PKL',
+                'priority' => 3,
+                'is_default' => false,
+            ],
+            [
+                'name' => 'owner_setup',
+                'label' => 'Buat Akun Owner',
+                'description' => 'Membuat akun owner pertama kali',
+                'priority' => 4,
+                'is_default' => false,
+            ],
+            [
+                'name' => 'complete',
+                'label' => 'Instalasi Selesai',
+                'description' => 'Semua tahap telah selesai',
+                'priority' => 5,
+                'is_default' => false,
+            ],
+        ],
     ];
 
     /**
@@ -32,14 +75,12 @@ class System extends Model
             $system->name ??= config('app.name');
             $system->version ??= config('app.version', '1.0.0');
             $system->logo ??= config('app.logo', 'images/logo.png');
-            $system->installed ??= false;
         });
 
         static::updating(function ($system) {
             $system->name ??= config('app.name');
             $system->version ??= config('app.version', '1.0.0');
             $system->logo ??= config('app.logo', 'images/logo.png');
-            $system->installed ??= false;
         });
     }
 }

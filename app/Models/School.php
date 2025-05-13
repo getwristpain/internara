@@ -12,14 +12,14 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class School extends Model
 {
     protected $fillable = [
+        'name',
+        'logo',
         'address',
         'email',
-        'fax',
-        'logo',
-        'name',
         'phone',
-        'principal_name',
+        'fax',
         'website',
+        'principal_name',
     ];
 
     protected $casts = [

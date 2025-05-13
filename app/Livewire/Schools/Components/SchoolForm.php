@@ -47,7 +47,7 @@ class SchoolForm extends Component
 
     protected function getSchool()
     {
-        $this->school = $this->schoolService->first()->toArray();
+        $this->school = $this->schoolService->getSchool()->toArray();
 
         if (! empty($this->school['logo'])) {
             $this->school['logo_preview'] = Uploader::getPublicUrl($this->school['logo']);
@@ -142,7 +142,7 @@ class SchoolForm extends Component
             ));
 
             $this->handleSchoolLogo();
-            $this->storeData();
+            $this->storeSchool();
         }
 
         $this->init();
@@ -169,7 +169,7 @@ class SchoolForm extends Component
     /**
      * Store data to database
      */
-    protected function storeData(): void
+    protected function storeSchool(): void
     {
         $storedData = $this->schoolService->updateOrCreate(['id' => $this->school['id'] ?? ''], $this->school);
 

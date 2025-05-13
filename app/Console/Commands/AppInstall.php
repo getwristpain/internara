@@ -53,6 +53,7 @@ class AppInstall extends Command
     protected function install()
     {
         $this->clearCache();
+        $this->clearLogs();
         $this->checkEnvFile();
         $this->generateAppKey();
         $this->configureEnv();
@@ -72,6 +73,11 @@ class AppInstall extends Command
     protected function clearCache()
     {
         $this->executeCommand('optimize:clear', [], 'Clearing cache...', 'Cache cleared.', 'Failed to clear cache.');
+    }
+
+    protected function clearLogs()
+    {
+        $this->executeCommand('activitylog:clean', [], 'Clearing logs...', 'Logs cleared.', 'Failed to clear logs.');
     }
 
     /**

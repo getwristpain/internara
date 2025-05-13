@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('version');
             $table->string('logo');
-            $table->boolean('installed');
+            $table->boolean('is_installed')->default(false);
             $table->timestamps();
         });
     }

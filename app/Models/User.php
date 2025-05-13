@@ -18,9 +18,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'identifier',
         'name',
         'email',
+        'username',
         'password',
         'first_login',
     ];
@@ -31,7 +31,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'identifier',
         'password',
         'remember_token',
     ];
@@ -46,6 +45,34 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+    public function roleOptions(): array
+    {
+        return [
+            'owner',
+            'admin',
+            'staff',
+            'student',
+            'teacher',
+            'supervisor',
+        ];
+    }
+
+    public function statusOptions(): array
+    {
+        return [
+            'registered',
+            'active',
+            'inactive',
+            'suspended',
+            'blocked',
+            'pending',
+            'verified',
+            'unverified',
+            'banned',
+            'deleted',
         ];
     }
 }

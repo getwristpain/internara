@@ -23,14 +23,15 @@ class SystemService extends Service
             'name' => config('app.name', 'Internara'),
             'version' => config('app.version', '1.0.0'),
             'logo' => config('app.logo', 'images/logo.png'),
-            'installed' => false,
+            'is_installed' => false,
         ];
 
-        if (! $this->isInstalled()) {
-            return new System($attributes);
-        }
+        return $this->firstOrInit($attributes);
+    }
 
-        return parent::firstOrInit(attributes: $attributes);
+    public function setStatus(string $name, string $type = ''): bool
+    {
+        return $this->model->setStatus($name, $type);
     }
 
     /**
@@ -38,6 +39,6 @@ class SystemService extends Service
      */
     public function isInstalled(): bool
     {
-        return System::first()->installed ?? false;
+        return $this->model->first()->is_installed ?? false;
     }
 }

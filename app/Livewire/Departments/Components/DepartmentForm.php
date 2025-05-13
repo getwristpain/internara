@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Departments\Components;
 
-use App\Helpers\Arr;
 use App\Helpers\Formatter;
+use App\Helpers\Helper;
 use App\Services\SchoolService;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
@@ -109,7 +109,7 @@ class DepartmentForm extends Component
     {
         $classroomName = Formatter::abbrev($classroomName);
         $components = [$classroomLevel, $departmentCode, $classroomName];
-        $filteredComponents = Arr::filter($components);
+        $filteredComponents = Helper::array_filter($components);
 
         return Str::upper(implode('-', $filteredComponents));
     }
