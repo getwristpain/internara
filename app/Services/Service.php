@@ -2,18 +2,17 @@
 
 namespace App\Services;
 
-use App\Debugger;
-use App\Helpers\Helper;
 use Closure;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
+use Throwable;
+use App\Helpers\Helper;
+use App\Helpers\Debugger;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 
 abstract class Service
 {
-    use Debugger;
-
     protected ?Model $model;
 
     protected string $modelName;
@@ -39,9 +38,8 @@ abstract class Service
             $queryString = $filtered ? '.'.http_build_query($filtered) : '';
 
             return "{$this->modelName}.{$key}{$queryString}";
-        } catch (\Throwable $th) {
-            $this->debug('error', 'Failed to generate cache key.', $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, 'Failed to generate cache key.', default: '');
         }
     }
 
@@ -53,9 +51,8 @@ abstract class Service
                 $ttl ?? $this->cacheTTL,
                 fn () => $callback($this->model)
             );
-        } catch (\Throwable $th) {
-            $this->debug('error', $th->getMessage(), $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, $th->getMessage());
         }
     }
 
@@ -83,24 +80,6 @@ abstract class Service
         return $this->getAll($with);
     }
 
-    protected function set(array $attributes, array $options = []): bool
-    {
-        try {
-            $first = $this->first();
-
-            if (! $first && ! $first->update($attributes, $options)) {
-                return false;
-            }
-
-            $this->log();
-
-            return true;
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to set {$this->model}.", $th);
-            throw $th;
-        }
-    }
-
     protected function getAll(array $with = []): ?Collection
     {
         try {
@@ -109,9 +88,8 @@ abstract class Service
             }
 
             return $this->model->all();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get all {$this->modelName}(s).", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get all {$this->modelName}(s).");
         }
     }
 
@@ -123,9 +101,8 @@ abstract class Service
             }
 
             return $this->model->where($where)->get();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get {$this->modelName}(s).", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get {$this->modelName}(s).");
         }
     }
 
@@ -137,9 +114,8 @@ abstract class Service
             }
 
             return $this->model->first();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get the first {$this->modelName} record.");
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get the first {$this->modelName} record.");
         }
     }
 
@@ -151,9 +127,8 @@ abstract class Service
             }
 
             return $this->first($with) ?? $this->model($attributes);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get the first or init {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get the first or init {$this->modelName}.", default: collect());
         }
     }
 
@@ -165,9 +140,8 @@ abstract class Service
             }
 
             return $this->model->firstOrCreate($attributes, $values);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get the first or create new {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get the first or create new {$this->modelName}.");
         }
     }
 
@@ -179,9 +153,8 @@ abstract class Service
             }
 
             return $this->model->where($where)->first();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to get with conditions for the first {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to get with conditions for the first {$this->modelName}.");
         }
     }
 
@@ -193,9 +166,8 @@ abstract class Service
             }
 
             return $this->model->find($id);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to find {$this->modelName} with id {$id}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to find {$this->modelName} with id {$id}.");
         }
     }
 
@@ -207,9 +179,8 @@ abstract class Service
             }
 
             return $this->model->findOrFail($id);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to find {$this->modelName} with id {$id}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to find {$this->modelName} with id {$id}.");
         }
     }
 
@@ -217,9 +188,8 @@ abstract class Service
     {
         try {
             return $this->model->where($where)->exists();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to check if {$this->modelName} exists.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to check if {$this->modelName} exists.", default: false);
         }
     }
 
@@ -227,9 +197,8 @@ abstract class Service
     {
         try {
             return $this->model->create($attributes);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to create a new {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to create a new {$this->modelName}.");
         }
     }
 
@@ -237,9 +206,8 @@ abstract class Service
     {
         try {
             return $this->model->where($where)->update($attributes, $options);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to update {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to update {$this->modelName}.", default: false);
         }
     }
 
@@ -251,9 +219,8 @@ abstract class Service
             }
 
             return $this->model->where($where)->first()->update($attributes, $options);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to update the first {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to update the first {$this->modelName}.", default: false);
         }
     }
 
@@ -261,9 +228,8 @@ abstract class Service
     {
         try {
             return $this->model->updateOrCreate($attributes, $values);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to update or create a new {$this->modelName}.", $th);
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to update or create a new {$this->modelName}.");
         }
     }
 
@@ -275,9 +241,8 @@ abstract class Service
             }
 
             return $this->model->find($where)->delete();
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to delete {$this->modelName}.");
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to delete {$this->modelName}", default: false);
         }
     }
 
@@ -285,9 +250,15 @@ abstract class Service
     {
         try {
             return $this->model->destroy($ids);
-        } catch (\Throwable $th) {
-            $this->debug('error', "Failed to destroy {$this->modelName}(s).");
-            throw $th;
+        } catch (Throwable $th) {
+            return $this->handleError($th, "Failed to destroy {$this->modelName}", default: false);
         }
+    }
+
+    protected function handleError(Throwable $exception, string $message = '', array $context = [], array $properties = [], mixed $default = null): mixed
+    {
+        Debugger::debug($exception, $message, $context, $properties)->storeLog();
+
+        return $default;
     }
 }

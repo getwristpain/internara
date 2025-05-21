@@ -2,7 +2,11 @@
 
 namespace App\Helpers;
 
+use Throwable;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
+use App\Helpers\Debugger;
 
 abstract class Helper
 {
@@ -133,5 +137,12 @@ abstract class Helper
         }
 
         return $items;
+    }
+
+    protected function handleError(Throwable $exception, string $message = '', array $context = [], array $properties = [], mixed $default = null): mixed
+    {
+        Debugger::debug($exception, $message, $context, $properties)->storeLog();
+
+        return $default;
     }
 }
