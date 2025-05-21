@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Debugger;
+use Throwable;
+use App\Helpers\Debugger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -15,8 +16,6 @@ use function Laravel\Prompts\text;
 
 class AppInstall extends Command
 {
-    use Debugger;
-
     /**
      * The name and signature of the console command.
      *
@@ -36,7 +35,7 @@ class AppInstall extends Command
      */
     public function handle()
     {
-        $appUrl = config('app.url', 'localhost:8000');
+        $appUrl = config('app.url', 'http://localhost:8000');
 
         $this->info('Starting installation...');
 
@@ -131,7 +130,7 @@ class AppInstall extends Command
             }
 
             $this->info('Environment configuration completed.');
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->abort('Failed to configure environment.', $th);
         }
     }
@@ -156,7 +155,7 @@ class AppInstall extends Command
             $dbConfig = [
                 'DB_CONNECTION' => 'sqlite',
             ];
-            $this->info('SQLite database will be stored at: '.database_path('database.sqlite'));
+            $this->info('SQLite database will be stored at: ' . database_path('database.sqlite'));
         } else {
             $dbConfig = [
                 'DB_CONNECTION' => $dbType,
@@ -234,11 +233,12 @@ class AppInstall extends Command
 
         try {
             foreach ($foldersToClean as $folder) {
-                $path = storage_path($folder);
-                File::cleanDirectory(storage_path($path));
+                $directory = storage_path($folder);
+                File::cleanDirectory($directory);
             }
+
             $this->info('Storage cleaned successfully.');
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->abort('Failed to clean storage.', $th);
         }
     }
@@ -255,7 +255,7 @@ class AppInstall extends Command
             $this->runShellCommand('npm run build');
 
             $this->info('Assets built successfully.');
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->abort('Failed to build assets.', $th);
         }
     }
@@ -266,16 +266,6 @@ class AppInstall extends Command
     protected function optimize()
     {
         $this->executeCommand('optimize', [], 'Optimizing application...', 'Optimization completed.', 'Unable to optimize the application.', false);
-    }
-
-    /**
-     * Abort the installation process with an error message.
-     */
-    private function abort(string $message, ?\Throwable $exception = null)
-    {
-        $this->debug('error', $message, $exception);
-        $this->error($message);
-        exit(1);
     }
 
     /**
@@ -292,12 +282,16 @@ class AppInstall extends Command
             if ($successMessage) {
                 $this->info($successMessage);
             }
-        } catch (\Throwable $th) {
-            if ($abort) {
-                $this->abort($errorMessage ?: "Error executing command: $command", $th);
-            } else {
-                $this->warn($this->debug('warning', $errorMessage ?: "Warning executing command: $command", $th));
+        } catch (Throwable $th) {
+            if (! $abort) {
+                $this->executeWithWarn($errorMessage ?: "Warning executing command: $command", $th);
+
+                return;
             }
+
+            $this->abort($errorMessage ?: "Error executing command: $command", $th);
+
+            return;
         }
     }
 
@@ -342,5 +336,21 @@ class AppInstall extends Command
         }
 
         File::put($envPath, $envContent);
+    }
+
+    /**
+     * Abort the installation process with an error message.
+     */
+    private function abort(string $message, ?Throwable $exception = null)
+    {
+        Debugger::debug($exception, $message)->storeLog();
+        $this->error($message);
+        exit(1);
+    }
+
+    private function executeWithWarn(string $message, ?Throwable $exception = null)
+    {
+        Debugger::debug($exception, $message)->storeLog();
+        $this->warn($message);
     }
 }

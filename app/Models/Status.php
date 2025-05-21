@@ -20,7 +20,7 @@ class Status extends Model
         'priority',
         'color',
         'icon',
-        'is_active',
+        'flag',
         'is_default',
     ];
 

@@ -28,25 +28,39 @@ class InstallerService extends Service
         $this->statusService = new StatusService;
     }
 
-    protected function setStatus(string $name)
+    protected function markAsCompleted(string $name): bool
     {
-        return $this->systemService->setStatus($name, $this->statusType);
+        return $this->model->markStatus($name, $this->statusType);
     }
 
-    public function getSystem(): System
+    public function performInstall(array $data, string $step = 'welcome'): bool
     {
-        return $this->systemService->getSystem();
+        return match ($step) {
+            'welcome' => $this->installWelcome(),
+            'school_config' => $this->installSchool($data),
+            'department_setup' => $this->installDepartment($data),
+            'owner_setup' => $this->installOwner($data),
+            default => false,
+        };
     }
 
     public function installWelcome(): bool
     {
-        return $this->setStatus('welcome');
+        return $this->markAsCompleted('welcome');
     }
 
-    public function installSchool(array $school = []): bool
+    public function installSchool(array $data): bool
     {
-        $this->schoolService->setSchool($school);
+        if (! $this->schoolService->setSchool($data)) {
+            return false;
+        }
 
-        return $this->setStatus('school_config');
+        return $this->markAsCompleted('school_config');
+    }
+
+    public function installDepartment(array $data): bool
+    {
+
+        return $this->markAsCompleted('department_setup');
     }
 }

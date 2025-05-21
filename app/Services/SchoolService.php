@@ -47,9 +47,16 @@ class SchoolService extends Service
         ]);
     }
 
-    protected function prepareSchoolData(array $school): array
+    public function setSchool(array $attributes): bool
     {
-        $school = Sanitizer::sanitize($school, [
+        $attributes = $this->sanitizeAttributes($attributes);
+
+        return $this->updateFirst($attributes);
+    }
+
+    protected function sanitizeAttributes(array $attributes): array
+    {
+        return Sanitizer::sanitize($attributes, [
             'name' => 'string',
             'logo' => 'string',
             'address' => 'array',
@@ -59,48 +66,5 @@ class SchoolService extends Service
             'website' => 'string',
             'principal_name' => 'string',
         ]);
-
-        return $school;
-    }
-
-    public function setSchool(array $school)
-    {
-        $school = $this->prepareSchoolData($school);
-    }
-
-    public function storeDepartments(array $data)
-    {
-        return collect($data)->each(function ($departmentData) {
-            $school = $this->first();
-
-            $department = $school->departments()->updateOrCreate(
-                ['code' => $departmentData['code']],
-                [
-                    'name' => $departmentData['name'],
-                    'desription' => '',
-                    'school_id' => $school->id,
-                ]
-            );
-
-            collect($departmentData['classrooms'])->each(function ($classroomData) use ($department) {
-                $department->classrooms()->updateOrCreate(
-                    ['code' => $classroomData['code']],
-                    [
-                        'level' => $classroomData['level'],
-                        'name' => $classroomData['name'],
-                    ]
-                );
-            });
-        });
-    }
-
-    public function deleteDepartment(int $id)
-    {
-        $this->departmentService->delete($id);
-    }
-
-    public function deleteClassroom(int $id)
-    {
-        $this->classroomService->delete($id);
     }
 }

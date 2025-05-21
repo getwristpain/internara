@@ -2,14 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Debugger;
-use Illuminate\Support\Str;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class MakeService extends Command
 {
-    use Debugger;
-
     /**
      * The name and signature of the console command.
      *
@@ -35,8 +32,7 @@ class MakeService extends Command
             $name = Str::camel($this->argument('name'));
             $this->call('make:logic', ['name' => "Services/{$name}", '--extends' => $serviceClass]);
         } catch (\Throwable $th) {
-            $message = $this->debug('error', "Failed to create service class: " . $th->getMessage(), $th);
-            $this->error($message);
+            $this->error('Failed to create service class: '.$th->getMessage());
             exit(1);
         }
     }

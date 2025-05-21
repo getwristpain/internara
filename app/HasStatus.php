@@ -2,7 +2,8 @@
 
 namespace App;
 
-use App\Helpers\Formatter;
+use App\Helpers\Helper;
+use App\Helpers\Sanitizer;
 use App\Models\Status;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -12,14 +13,12 @@ trait HasStatus
     public static function bootHasStatus()
     {
         static::created(function ($model) {
-            Status::where('model', class_basename($model))->delete();
-
             if (property_exists($model, 'initialStatuses')) {
                 foreach ($model->initialStatuses as $type => $statuses) {
                     foreach ($statuses as $status) {
                         $statuses = $model->statusables();
-                        $created = Status::create(array_merge($status, [
-                            'type' => is_string($type) ? $type : Formatter::snakecase(class_basename($model)),
+                        $created = Status::updateOrCreate(array_merge($status, [
+                            'type' => is_string($type) ? $type : '',
                         ]));
 
                         $model->statusables()->syncWithoutDetaching($created);
@@ -34,28 +33,50 @@ trait HasStatus
      */
     public function statusables(): MorphToMany
     {
-        return $this->morphToMany(Status::class, 'statusable');
+        return $this->morphToMany(Status::class, 'statusable')->withTimestamps();
     }
 
-    public function statuses(string $type = ''): Collection
+    /**
+     * Get statuses by type or all statuses if type is empty.
+     */
+    public function getStatuses(string $type = ''): ?Collection
     {
-        if (! empty($type)) {
-            return $this->statusables()->where('type', $type)->get();
+        $type = Sanitizer::sanitize($type, 'string');
+
+        return empty($type) ? $this->statusables()->get() : $this->statusables()->where('type', $type)->get();
+    }
+
+    /**
+     * Get a single status by name and type.
+     */
+    public function getStatus(string $name = '', string $type = ''): ?Status
+    {
+        [$name, $type] = Sanitizer::sanitize([$name, $type], 'string');
+
+        $conditions = Helper::array_filter(['type' => $type, 'name' => $name]);
+
+        return empty($conditions) ? $this->statusables()->first() : $this->statusables()->where($conditions)->first();
+    }
+
+    /**
+     * Update a status by conditions.
+     */
+    public function updateStatus(array $where, array $attributes = []): bool
+    {
+        $attributes = $this->sanitizeAttributes($attributes);
+        $status = $this->statusables()->where($where)->first();
+
+        if (! $status) {
+            return false;
         }
 
-        return $this->statusables()->get();
+        return $status->update($attributes);
     }
 
-    public function getStatus(string $name, string $type = ''): ?Status
-    {
-        if (! empty($type)) {
-            return $this->statusables()->where(['type' => $type, 'name' => $name])->first();
-        }
-
-        return $this->statusables()->where(['type' => Formatter::snakecase(class_basename($this)), 'name' => $name])->first();
-    }
-
-    public function setStatus(string $name, string $type = '', array $attributes = []): bool
+    /**
+     * Toggle a specific column value for a status.
+     */
+    public function markStatus(string $name, string $type = '', string $column = 'flag'): bool
     {
         $status = $this->getStatus($name, $type);
 
@@ -63,26 +84,48 @@ trait HasStatus
             return false;
         }
 
-        $status->update($attributes);
-
-        return true;
+        return $status->update([$column => (! $status->{$column})]);
     }
 
-    public function switchStatus(string $name, string $type = ''): bool
+    /**
+     * Set a status with matched name and unset others in the same type.
+     */
+    public function switchStatus(string $name, string $type = '', string $column = 'flag'): bool
     {
-        $statuses = $this->statuses($type);
-        Status::whereIn('id', $statuses->pluck('id'))
-            ->update(['is_active' => false]);
+        $statuses = $this->getStatuses($type);
 
-        return $this->setStatus($name, $type, ['is_active' => true]);
+        if ($statuses->isEmpty()) {
+            return false;
+        }
+
+        Status::whereIn('id', $statuses->pluck('id'))->update([$column => false]);
+
+        return $this->markStatus($name, $type, $column);
     }
 
-    public function switchDefaultStatus(string $name, string $type = ''): bool
+    /**
+     * Set a status as default and unset others in the same type.
+     */
+    public function setDefaultStatus(string $name, string $type = ''): bool
     {
-        $statuses = $this->statuses($type);
-        Status::whereIn('id', $statuses->pluck('id'))
-            ->update(['is_default' => false]);
+        return $this->switchStatus($name, $type, 'is_default');
+    }
 
-        return $this->setStatus($name, $type, ['is_default' => true]);
+    /**
+     * Sanitize attributes for status updates.
+     */
+    private function sanitizeAttributes(array $attributes): array
+    {
+        return Sanitizer::sanitize($attributes, [
+            'name' => 'string',
+            'type' => 'string',
+            'label' => 'string',
+            'description' => 'string',
+            'priority' => 'string',
+            'color' => 'string',
+            'icon' => 'string',
+            'flag' => 'bool',
+            'is_default' => 'bool',
+        ]);
     }
 }

@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type')->default('general');
+            $table->string('type')->nullable();
             $table->string('label')->nullable();
             $table->string('description')->nullable();
             $table->integer('priority')->nullable();
             $table->string('color')->nullable();
             $table->string('icon')->nullable();
-            $table->boolean('is_active')->default(false);
+            $table->boolean('flag')->default(false);
             $table->boolean('is_default')->default(false);
             $table->unique(['name', 'type']);
             $table->timestamps();
@@ -41,6 +41,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('statusables');
         Schema::dropIfExists('statuses');
     }
 };

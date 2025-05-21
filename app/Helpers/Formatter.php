@@ -6,14 +6,6 @@ use Illuminate\Support\Str;
 
 class Formatter extends Helper
 {
-    /*
-     * Class constructor
-     */
-    public function __construct()
-    {
-        //
-    }
-
     public static function formatOptions(array $data): array
     {
         return collect($data)

@@ -27,10 +27,15 @@ abstract class Service
         $this->cacheTTL = $cacheTTL;
     }
 
+    public function __toString(): string
+    {
+        return Helper::stringify(Helper::objectToArray($this));
+    }
+
     private function generateCacheKey(string $key, array $filters = []): string
     {
         try {
-            $filtered = Helper::array_filter($filters);
+            $filtered = Helper::filter($filters);
             $queryString = $filtered ? '.'.http_build_query($filtered) : '';
 
             return "{$this->modelName}.{$key}{$queryString}";
@@ -64,7 +69,39 @@ abstract class Service
         return new Collection($items);
     }
 
-    protected function getAll(array $with = []): Collection
+    protected function getAttributes(): array
+    {
+        return $this->model->getAttributes();
+    }
+
+    protected function get(array $with = [], array $where = []): ?Collection
+    {
+        if (! empty($where)) {
+            return $this->getWhere($where, $with);
+        }
+
+        return $this->getAll($with);
+    }
+
+    protected function set(array $attributes, array $options = []): bool
+    {
+        try {
+            $first = $this->first();
+
+            if (! $first && ! $first->update($attributes, $options)) {
+                return false;
+            }
+
+            $this->log();
+
+            return true;
+        } catch (\Throwable $th) {
+            $this->debug('error', "Failed to set {$this->model}.", $th);
+            throw $th;
+        }
+    }
+
+    protected function getAll(array $with = []): ?Collection
     {
         try {
             if (! empty($with)) {
@@ -78,7 +115,7 @@ abstract class Service
         }
     }
 
-    protected function getWhere(array $where, array $with = []): Collection
+    protected function getWhere(array $where, array $with = []): ?Collection
     {
         try {
             if (! empty($with)) {
@@ -206,9 +243,13 @@ abstract class Service
         }
     }
 
-    protected function updateFirst(array $where, array $attributes, array $options = []): bool
+    protected function updateFirst(array $attributes, array $where = [], array $options = []): bool
     {
         try {
+            if (empty($where)) {
+                return $this->model->first()->update($attributes, $options);
+            }
+
             return $this->model->where($where)->first()->update($attributes, $options);
         } catch (\Throwable $th) {
             $this->debug('error', "Failed to update the first {$this->modelName}.", $th);

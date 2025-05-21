@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Helpers\Sanitizer;
 use App\Models\System;
+use Illuminate\Database\Eloquent\Collection;
 
 class SystemService extends Service
 {
@@ -14,10 +16,7 @@ class SystemService extends Service
         parent::__construct(new System);
     }
 
-    /**
-     * Get the system record.
-     */
-    public function getSystem()
+    public function getSystem(): System|Collection|null
     {
         $attributes = [
             'name' => config('app.name', 'Internara'),
@@ -29,14 +28,31 @@ class SystemService extends Service
         return $this->firstOrInit($attributes);
     }
 
-    public function setStatus(string $name, string $type = ''): bool
+    public function setSystem(array $attributes): bool
     {
-        return $this->model->setStatus($name, $type);
+        $attributes = $this->sanitizeAttributes($attributes);
+        $system = $this->first();
+
+        if (! $system) {
+            return false;
+        }
+
+        $system->update($attributes);
+        $this->log('System has been updated successfully.');
+
+        return true;
     }
 
-    /**
-     * Check if the system is installed.
-     */
+    private function sanitizeAttributes(array $attributes): array
+    {
+        return Sanitizer::sanitize($attributes, [
+            'name' => 'string',
+            'version' => 'string',
+            'logo' => 'string',
+            'is_installed' => 'bool',
+        ]);
+    }
+
     public function isInstalled(): bool
     {
         return $this->model->first()->is_installed ?? false;

@@ -2,15 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Debugger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class MakeLogic extends Command
 {
-    use Debugger;
-
     protected $signature = 'make:logic {name : The folder/class name in format Folder/ClassName}
                             {--extends= : The class to extend from (e.g., App\\Helpers\\Formatter, Illuminate\\Console\\Command)}';
 
@@ -137,7 +134,6 @@ class MakeLogic extends Command
 
     private function handleError(string $message, \Throwable|array|string $th = [])
     {
-        $this->debug('error', $message, $th);
         $this->error($message);
         exit;
     }
