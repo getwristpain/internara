@@ -1,4 +1,4 @@
-# Internara - Internship System
+# (Unstabled) Internara - Internship System
 
 Internara is a comprehensive internship management system built with Laravel, designed specifically for schools and educational institutions to streamline and manage internship programs. This internal system allows schools to manage internship listings, track student applications, and facilitate communication between students and companies.
 
