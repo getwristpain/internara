@@ -6,6 +6,13 @@ use Illuminate\Support\Str;
 
 class Formatter extends Helper
 {
+    public static function studly(string $value): string
+    {
+        return Str::of($value)
+            ->replace([' ', '_', '-', ':'], '')
+            ->studly();
+    }
+
     public static function formatOptions(array $data): array
     {
         return collect($data)

@@ -14,33 +14,36 @@ class RateLimiterWrapper extends Helper
 
     protected $decaySeconds;
 
-    public function __construct(RateLimiter $rateLimiter, string $action = '', string $key = '', int $maxAttempts = 5, int $decaySeconds = 60)
+    protected function response(): LogicResponse
     {
-        $this->rateLimiter = $rateLimiter;
-        $this->throttleKey = $this->throttleKey($action, $key);
-        $this->maxAttempts = $maxAttempts;
-        $this->decaySeconds = $decaySeconds;
+        return new LogicResponse();
     }
 
-    public function withMessages(array $messages = []): static
+    public static function make(RateLimiter $rateLimiter, string $action = '', string $key = '', int $maxAttempts = 5, int $decaySeconds = 60): static
     {
-        if ($this->check()) {
+        $instance = new static();
+        $instance->rateLimiter = $rateLimiter;
+        $instance->throttleKey = $instance->throttleKey($action, $key);
+        $instance->maxAttempts = $maxAttempts;
+        $instance->decaySeconds = $decaySeconds;
+
+        return $instance;
+    }
+
+    public function check(): LogicResponse
+    {
+        if ($this->rateLimiter->tooManyAttempts($this->throttleKey, $this->maxAttempts)) {
             $seconds = $this->availableIn();
 
-            $message = $messages['too_many_attempts'] ?? 'Too many attempts. Please try again in :seconds seconds.';
+            $message = 'Too many attempts. Please try again in :seconds seconds.';
             $message = str_replace(':seconds', $seconds, $message);
 
-            abort(429, $message);
+            $this->response()->failure($message)
+                ->withType('RateLimiter');
         }
 
         $this->hit();
-
-        return $this;
-    }
-
-    public function check(): bool
-    {
-        return $this->rateLimiter->tooManyAttempts($this->throttleKey, $this->maxAttempts);
+        return $this->response()->success()->operator($this);
     }
 
     public function hit(): void

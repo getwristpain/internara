@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\Formatter;
 use Illuminate\Database\Eloquent\Model;
 
 class Status extends Model
@@ -24,12 +23,14 @@ class Status extends Model
         'is_default',
     ];
 
-    public function setAttribute($key, $value)
-    {
-        if ($key === 'name' || $key === 'type') {
-            $value = Formatter::snakecase($value);
-        }
-
-        return parent::setAttribute($key, $value);
-    }
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'priority' => 'integer',
+        'flag' => 'boolean',
+        'is_default' => 'boolean',
+    ];
 }

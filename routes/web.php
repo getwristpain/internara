@@ -1,11 +1,11 @@
 <?php
 
-use App\Livewire\Dashboards\Pages\Dashboard;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/', Dashboard::class)->name('dashboard');
-});
+foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
+    require $routeFile;
+}
 
-require __DIR__.'/web/installation.php';
-require __DIR__.'/web/auth.php';
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', fn () => view('Hello world!'))->name('dashboard');
+});

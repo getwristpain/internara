@@ -2,11 +2,16 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Helpers\Helper;
+use App\Helpers\Sanitizer;
+use App\Helpers\LogicResponse;
+use Illuminate\Support\Facades\Log;
 
 class Debugger extends Helper
 {
+    protected ?LogicResponse $response = null;
+
     protected Throwable $exception;
 
     protected string $message = '';
@@ -22,15 +27,23 @@ class Debugger extends Helper
         $this->isDebug = self::isDebug();
     }
 
-    public static function debug(Throwable $exception, string $message = '', array $context = [], array $properties = []): static
+    public static function debug(Throwable $exception, string $message = '', array $context = [], array $properties = [], bool $throw = false): static
     {
-        $static = new static();
-        $static->exception = $exception;
-        $static->message = Sanitizer::sanitize($message ?? $exception->getMessage(), 'message');
-        $static->context = Sanitizer::sanitize($context, 'sensitive');
-        $static->properties = $static->normalizeDebugProps($properties);
+        $instance = new static();
+        $instance->exception = $exception;
+        $instance->message = Sanitizer::sanitize($message ?? $exception->getMessage(), 'message');
+        $instance->context = Sanitizer::sanitize($context, 'sensitive');
+        $instance->properties = $instance->normalizeDebugProps($properties);
 
-        return $static;
+        $instance->response = $instance->response()->failure($exception->getMessage())
+            ->withType('Debugger')
+            ->storeLog('debug');
+
+        if ($instance->isDebug() && $throw) {
+            $instance->throw();
+        }
+
+        return $instance;
     }
 
     public static function isDebug(): bool
@@ -38,24 +51,9 @@ class Debugger extends Helper
         return app()->environment(['local', 'dev', 'development', 'test', 'testing']) && (config('app.debug', false) === true);
     }
 
-    public function storeLog(): void
+    public function response(): LogicResponse
     {
-        $properties = $this->isDebug ? $this->properties : $this->context;
-
-        Log::debug($this->message, $properties);
-    }
-
-    public function storeSession(): void
-    {
-        $properties = array_merge([
-            'message' => $this->message,
-        ], $this->isDebug ? $this->properties : $this->context);
-
-        if (! session()->has('debug')) {
-            session(['debug' => []]);
-        }
-
-        session()->push('debug', $properties);
+        return $this->response ?? new LogicResponse();
     }
 
     public function exception(): Throwable
@@ -89,9 +87,9 @@ class Debugger extends Helper
         dump($this->message, $properties);
     }
 
-    public function throw(): never
+    public function throw(): void
     {
-        throw $this->exception;
+        throw $this->exception ?? null;
     }
 
     public function throwIf(bool|callable $condition): void
@@ -125,6 +123,11 @@ class Debugger extends Helper
     public function abortUnless(bool|callable $condition, ?int $code = null, array $header = []): void
     {
         $this->abortIf(!$condition, $code, $header);
+    }
+
+    public function toArray(): array
+    {
+        return array_merge(['message' => $this->message], $this->properties);
     }
 
     protected function normalizeDebugProps(array $properties = []): array
@@ -171,19 +174,16 @@ class Debugger extends Helper
     protected function formatProperties(array $properties = []): array
     {
         $properties = array_merge([
+            'requests' => [
+                    'ip' => request()->ip() ?? '',
+                    'method' => request()->method() ?? '',
+                    'route' => request()->route() ? request()->route()->getName() : '',
+                    'url' => request()->fullUrl() ?? '',
+                    'userAgent' => request()->userAgent() ?? '',
+                    'userId' => auth()->id() ?? '',
+                ],
             'timestamp' => now()->toDateTimeString(),
         ], Sanitizer::sanitize($properties, 'sensitive'));
-
-        if ($this->isDebug()) {
-            $properties = array_merge([
-                'ip' => request()->ip() ?? '',
-                'userAgent' => request()->userAgent() ?? '',
-                'userId' => auth()->id() ?? '',
-                'url' => request()->fullUrl() ?? '',
-                'method' => request()->method() ?? '',
-                'route' => request()->route() ? request()->route()->getName() : '',
-            ], $properties);
-        }
 
         return Helper::filter($properties);
     }

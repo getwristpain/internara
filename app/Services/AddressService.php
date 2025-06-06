@@ -3,32 +3,15 @@
 namespace App\Services;
 
 use App\Helpers\Async;
-use App\Helpers\Formatter;
 use Illuminate\Support\Collection;
 
 class AddressService extends Service
 {
     protected int $cacheTTL = 604800;
 
-    private function fetchData(string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
+    public function getOptions(): array
     {
-        $cacheKey ??= $endpoint;
-
-        $data = Async::fetch($cacheKey, "https://wilayah.id/api/{$endpoint}.json", $this->cacheTTL);
-
-        return isset($data['error'])
-            ? collect([])
-            : collect($data['data'] ?? [])->map(fn ($item) => [
-                'id' => $item['code'] ?? '',
-                'name' => $item['name'] ?? '',
-                'postal_code' => $includePostalCode ? ($item['postal_code'] ?? '') : null,
-                'meta' => $data['meta'] ?? [],
-            ])->filter();
-    }
-
-    private function fetchDataIfNotEmpty(?string $id, string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
-    {
-        return empty($id) ? collect([]) : $this->fetchData($endpoint, $cacheKey, $includePostalCode);
+        return [];
     }
 
     public function getProvinces(): Collection
@@ -62,13 +45,24 @@ class AddressService extends Service
         return implode(', ', array_filter($address));
     }
 
-    public function getAddressOptions(array $location): array
+    private function fetchData(string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
     {
-        return collect([
-            'provinces' => $this->getProvinces(),
-            'regencies' => $this->getRegencies($location['province_id'] ?? ''),
-            'districts' => $this->getDistricts($location['regency_id'] ?? ''),
-            'subdistricts' => $this->getSubdistricts($location['district_id'] ?? ''),
-        ])->map(fn ($data) => Formatter::formatOptions($data->toArray()))->all();
+        $cacheKey ??= $endpoint;
+
+        $data = Async::fetch($cacheKey, "https://wilayah.id/api/{$endpoint}.json", $this->cacheTTL);
+
+        return isset($data['errors'])
+            ? collect([])
+            : collect($data['data'] ?? [])->map(fn ($item) => [
+                'id' => $item['code'] ?? '',
+                'name' => $item['name'] ?? '',
+                'postal_code' => $includePostalCode ? ($item['postal_code'] ?? '') : null,
+                'meta' => $data['meta'] ?? [],
+            ])->filter();
+    }
+
+    private function fetchDataIfNotEmpty(?string $id, string $endpoint, ?string $cacheKey = null, bool $includePostalCode = false): Collection
+    {
+        return empty($id) ? collect([]) : $this->fetchData($endpoint, $cacheKey, $includePostalCode);
     }
 }

@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     protected function runDatabaseSeeder()
     {
         $this->call([
-            SystemSeeder::class,
+            SettingSeeder::class,
             RoleSeeder::class,
         ]);
     }

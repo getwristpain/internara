@@ -15,7 +15,7 @@ class Sanitizer extends Helper
      *
      * @throws InvalidArgumentException
      */
-    public static function sanitize(string|array|null $input, string|array $rules, array $conditions = []): mixed
+    public static function sanitize(string|int|array|null $input, string|array $rules, array $conditions = []): mixed
     {
         if ($input === null) {
             return null;
@@ -23,6 +23,10 @@ class Sanitizer extends Helper
 
         if (is_array($input)) {
             if (is_string($rules)) {
+                if ($rules == 'sensitive') {
+                    return static::sanitizeFromSensitive($input, $conditions);
+                }
+
                 return array_map(
                     fn ($item) => static::sanitize($item, $rules, $conditions),
                     $input
@@ -95,7 +99,7 @@ class Sanitizer extends Helper
             'html' => htmlspecialchars((string) $input, ENT_QUOTES, 'UTF-8'),
             'int' => filter_var($input, FILTER_SANITIZE_NUMBER_INT),
             'message' => static::sanitizeMessage($input, $conditions),
-            'sensitive' => static::sanitizeFromSensitive($input, $conditions),
+            'sensitive' => static::sanitizeFromSensitive((array) $input, $conditions),
             'string' => trim(strip_tags((string) $input)),
             'url' => filter_var(trim((string) $input), FILTER_SANITIZE_URL),
             'query' => static::sanitizeQuery($input, $conditions),
@@ -112,6 +116,10 @@ class Sanitizer extends Helper
     protected static function sanitizeMessage(string $message, array $removedWords = []): string
     {
         $sensitiveWords = array_merge(config('filter.sensitiveKeywords', []), $removedWords);
+
+        if (empty($sensitiveWords)) {
+            return trim(strip_tags($message));
+        }
 
         foreach ($sensitiveWords as $word) {
 
@@ -167,14 +175,14 @@ class Sanitizer extends Helper
         return $query;
     }
 
-    protected static function sanitizeFromSensitive(string|array $input, array $keywords): string|array|null
+    protected static function sanitizeFromSensitive(array $input, array $keywords): string|array|null
     {
         $conditions = [
-            'keywords' => array_merge(config('filter.sensitiveKeywords'), $keywords),
+            'keywords' => array_merge(config('filter.sensitiveKeywords', []), $keywords),
             'exclude' => true,
         ];
 
-        return static::filterWithConditions($input, $conditions);
+        return static::filterWithConditions((array) $input, $conditions);
     }
 
     /**
@@ -187,7 +195,7 @@ class Sanitizer extends Helper
     protected static function filterWithConditions(string|array $input, array $conditions): string|array|null
     {
         if (is_array($input)) {
-            return array_values(\App\Helpers\Helper::filter($input, $conditions));
+            return Helper::filter($input, $conditions);
         }
 
         return in_array($input, $conditions, true) ? $input : null;

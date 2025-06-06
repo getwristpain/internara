@@ -1,3 +1,5 @@
 <?php
 
-// API Routes
+foreach (glob(__DIR__ . '/api/*.php') as $routeFile) {
+    require $routeFile;
+}

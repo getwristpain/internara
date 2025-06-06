@@ -1,6 +1,5 @@
 @php
-    $systemService = new \App\Services\SystemService();
-    $system = $systemService->first();
+    $system = app(\App\Services\SystemService::class)->getAttributes();
 @endphp
 
 <!DOCTYPE html>
@@ -18,7 +17,7 @@
         <title>{{ $title ?? $system->name }}</title>
 
         <!-- Favicon -->
-        <link rel="shortcut icon" href="{{ $favicon ?? asset($system->logo) }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ $favicon ?? asset($system->logo_path) }}" type="image/x-icon">
 
         <!-- Vite Configs -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

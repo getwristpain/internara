@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\School;
-use App\Models\System;
+use App\Models\Setting;
 
 class SchoolObserver
 {
@@ -12,9 +12,9 @@ class SchoolObserver
      *
      * @return void
      */
-    public function created(School $school)
+    public function created(School $school): void
     {
-        $this->updateSystem($school);
+        $this->updateSetting($school);
     }
 
     /**
@@ -22,9 +22,9 @@ class SchoolObserver
      *
      * @return void
      */
-    public function updated(School $school)
+    public function updated(School $school): void
     {
-        $this->updateSystem($school);
+        $this->updateSetting($school);
     }
 
     /**
@@ -32,22 +32,22 @@ class SchoolObserver
      *
      * @return void
      */
-    protected function updateSystem(School $school)
+    protected function updateSetting(School $school): void
     {
-        $system = System::first();
+        $setting = Setting::first();
 
-        if (! $system) {
-            $system->create([
-                'name' => $school->name,
-                'logo' => $school->logo,
+        if (! $setting) {
+            $setting->create([
+                'app_name' => $school->name ?? '',
+                'logo_path' => $school->logo_path ?? '',
             ]);
 
             return;
         }
 
-        $system->update([
-            'name' => $school->name,
-            'logo' => $school->logo,
+        $setting->update([
+            'app_name' => $school->name ?? '',
+            'logo_path' => $school->logo_path ?? '',
         ]);
     }
 }

@@ -10,7 +10,7 @@
 /.vscode
 /.zed
 /auth.json
-/docs/todos
+/database/backups
 /node_modules
 /public/build
 /public/hot

@@ -7,6 +7,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 use App\Helpers\Debugger;
+use App\Helpers\LogicResponse;
 
 abstract class Helper
 {
@@ -34,12 +35,12 @@ abstract class Helper
         $reflection = new ReflectionClass($object);
         $array = [];
 
-        foreach ($reflection->getProperties(\ReflectionProperty::IS_PUBLIC) as $property) {
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             $array[$property->getName()] = $property->getValue($object);
         }
 
         $methods = [];
-        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             if (
                 $method->class === $reflection->getName() &&
                 ! $method->isConstructor() &&
@@ -137,12 +138,5 @@ abstract class Helper
         }
 
         return $items;
-    }
-
-    protected function handleError(Throwable $exception, string $message = '', array $context = [], array $properties = [], mixed $default = null): mixed
-    {
-        Debugger::debug($exception, $message, $context, $properties)->storeLog();
-
-        return $default;
     }
 }

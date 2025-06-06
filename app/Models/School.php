@@ -13,7 +13,7 @@ class School extends Model
 {
     protected $fillable = [
         'name',
-        'logo',
+        'logo_path',
         'address',
         'email',
         'phone',
@@ -25,6 +25,27 @@ class School extends Model
     protected $casts = [
         'address' => 'array',
     ];
+
+    protected function defaultAddress(array $value = []): array
+    {
+        return [
+            'province' => $value['province'] ?? '',
+            'regency' => $value['regency'] ?? '',
+            'district' => $value['district'] ?? '',
+            'subdistrict' => $value['subdistrict'] ?? '',
+            'postal_code' => $value['postal_code'] ?? ''
+        ];
+    }
+
+    public function setAttribute($key, $value)
+    {
+        match ($key) {
+            'address' => $value = $this->defaultAddress($value),
+            default => $value,
+        };
+
+        return parent::setAttribute($key, $value);
+    }
 
     /**
      * Get all of the departments for the School
