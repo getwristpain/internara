@@ -22,10 +22,6 @@ class School extends Model
         'principal_name',
     ];
 
-    protected $casts = [
-        'address' => 'array',
-    ];
-
     protected function defaultAddress(array $value = []): array
     {
         return [

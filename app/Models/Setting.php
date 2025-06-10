@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Sanitizer;
 use App\Traits\HasStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,58 +16,44 @@ class Setting extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'app_name',
-        'logo_path',
-        'is_installed',
+        'key',
+        'value',
+        'value_type',
+        'type',
+        'label',
+        'description',
+        'flag'
     ];
 
     protected $casts = [
-        'is_installed' => 'boolean',
+        'flag' => 'boolean',
     ];
 
-    public array $initialStatuses = [
-        'installation' => [
-            [
-                'name' => 'welcome',
-                'label' => 'Mulai Instalasi',
-                'description' => 'Menyiapkan proses instalasi.',
-                'priority' => 1,
-            ],
-            [
-                'name' => 'school_config',
-                'label' => 'Konfigurasi Sekolah',
-                'description' => 'Mengonfigurasi sekolah.',
-                'priority' => 2,
-            ],
-            [
-                'name' => 'department_setup',
-                'label' => 'Pengaturan Jurusan',
-                'description' => 'Mengatur jurusan dan kelas.',
-                'priority' => 3,
-            ],
-            [
-                'name' => 'owner_setup',
-                'label' => 'Buat Akun Owner',
-                'description' => 'Membuat akun pemilik.',
-                'priority' => 4,
-            ],
-            [
-                'name' => 'complete',
-                'label' => 'Instalasi Selesai',
-                'description' => 'Menyelesaikan instalasi.',
-                'priority' => 5,
-            ],
-        ],
-    ];
-
-    public function setAttribute($key, $value): void
+    public function getValueAttribute($value): mixed
     {
-        match ($key) {
-            'app_name' => $value ??= config('app.name'),
-            'logo_path' => $value ??= config('app.logo', 'images/logo.png'),
-            default => $value
+        return match ($this->value_type) {
+            'boolean'      => Sanitizer::sanitize($value, 'bool'),
+            'integer'      => Sanitizer::sanitize($value, 'int'),
+            'float'        => Sanitizer::sanitize($value, 'float'),
+            'array'        => Sanitizer::sanitize($value, 'array'),
+            'array_bool'   => Sanitizer::sanitize($value, 'array_bool'),
+            'array_float'  => Sanitizer::sanitize($value, 'array_float'),
+            'array_int'    => Sanitizer::sanitize($value, 'array_int'),
+            'array_string' => Sanitizer::sanitize($value, 'array_string'),
+            'json'         => Sanitizer::sanitize($value, 'json'),
+            'email'        => Sanitizer::sanitize($value, 'email'),
+            'html'         => Sanitizer::sanitize($value, 'html'),
+            'string'       => Sanitizer::sanitize($value, 'string'),
+            'url'          => Sanitizer::sanitize($value, 'url'),
+            'message'      => Sanitizer::sanitize($value, 'message'),
+            default        => $value,
         };
+    }
 
-        parent::setAttribute($key, $value);
+    public function setValueAttribute($value): void
+    {
+        $this->attributes['value'] = is_array($value) || is_object($value)
+            ? json_encode($value)
+            : (string) $value;
     }
 }

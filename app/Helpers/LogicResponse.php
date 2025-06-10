@@ -13,25 +13,17 @@ use Spatie\Activitylog\Facades\Activity;
 class LogicResponse extends Helper implements LogicResponseContract
 {
     protected bool $initial = false;
-
     protected bool $success = true;
-
     protected string $message = '';
-
     protected string $status = '';
-
     protected int $code = 0;
-
     protected string $type = '';
-
     protected ?Collection $payload = null;
-
     protected ?object $operator = null;
-
     protected MessageBag|Collection|null $errors = null;
-
     protected array $allowedLevel = ['info', 'debug', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
 
+    // --- Static Factory ---
     public static function response(bool $success, string $message = '', string $status = '', int $code = 0, string $type = '', array $payload = []): static
     {
         $instance = new static();
@@ -44,6 +36,19 @@ class LogicResponse extends Helper implements LogicResponseContract
             ->withPayload($payload ?? []);
     }
 
+    // --- Initialization ---
+    protected function initialized(): static
+    {
+        $this->initial = true;
+        return $this;
+    }
+
+    public function isInitialized(): bool
+    {
+        return $this->initial;
+    }
+
+    // --- Success & Failure ---
     public function success(string $message = ''): static
     {
         return $this->initialized()
@@ -63,38 +68,13 @@ class LogicResponse extends Helper implements LogicResponseContract
             ->withErrors(['messages' => [$message]]);
     }
 
-    public function isInitialized(): bool
-    {
-        return $this->initial;
-    }
-
-    public function passes(): bool
-    {
-        return $this->isInitialized() && !$this->hasErrors() && $this->success;
-    }
-
-    public function fails(): bool
-    {
-        return $this->isInitialized() && !$this->success;
-    }
-
     public function setSuccess(bool $success): static
     {
         $this->success = $success;
         return $this;
     }
 
-    public function getMessage(): string
-    {
-        return $this->message;
-    }
-
-    public function withMessage(string $message): static
-    {
-        $this->message = Sanitizer::sanitize($message, 'message');
-        return $this;
-    }
-
+    // --- Status & Code & Type ---
     public function getStatus(): string
     {
         return $this->status;
@@ -128,18 +108,30 @@ class LogicResponse extends Helper implements LogicResponseContract
         return $this;
     }
 
+    // --- Message ---
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
+
+    public function withMessage(string $message): static
+    {
+        $this->message = Sanitizer::sanitize($message, 'message');
+        return $this;
+    }
+
+    // --- Payload ---
     public function payload(): ?Collection
     {
+        if ($this->fails()) {
+            $this->payload = null;
+        }
+
         return $this->payload;
     }
 
     public function withPayload(Collection|array|null $payload): static
     {
-        if ($this->fails()) {
-            $this->payload = null;
-            return $this;
-        }
-
         if (is_a($payload, Collection::class)) {
             $payload = $payload?->toArray() ?? null;
         }
@@ -148,6 +140,7 @@ class LogicResponse extends Helper implements LogicResponseContract
         return $this;
     }
 
+    // --- Errors ---
     public function getErrors(string $key = ''): MessageBag|Collection|null
     {
         if (!empty($key)) {
@@ -205,6 +198,7 @@ class LogicResponse extends Helper implements LogicResponseContract
         return !empty($this->errors);
     }
 
+    // --- Operator & Then ---
     public function operator(?object $operator): static
     {
         if (is_a($operator, LogicResponse::class)) {
@@ -217,7 +211,22 @@ class LogicResponse extends Helper implements LogicResponseContract
 
     public function then(): mixed
     {
+        if ($this->fails()) {
+            return $this;
+        }
+
         return $this->operator ?? $this;
+    }
+
+    // --- Pass/Fail/Empty ---
+    public function passes(): bool
+    {
+        return $this->isInitialized() && !$this->hasErrors() && $this->success;
+    }
+
+    public function fails(): bool
+    {
+        return $this->isInitialized() && !$this->success;
     }
 
     public function isEmpty(): bool
@@ -225,6 +234,7 @@ class LogicResponse extends Helper implements LogicResponseContract
         return empty($this->payload?->toArray() ?? null);
     }
 
+    // --- Array & Debug & Log ---
     public function toArray(): array
     {
         $array = Helper::filter(array_merge([
@@ -235,8 +245,13 @@ class LogicResponse extends Helper implements LogicResponseContract
         return $this->isInitialized() ? $array : [];
     }
 
-    public function debug(): static
+    public function debug(array $property = [], bool $throw = false): static
     {
+        if ($this->fails()) {
+            $exception = new \LogicException($this->message ?: 'LogicResponse failed.');
+            Debugger::debug($exception, 'LogicResponse failed.', $this->toArray(), $property, $throw);
+        }
+
         $this->storeLog('debug');
         return $this;
     }
@@ -270,6 +285,7 @@ class LogicResponse extends Helper implements LogicResponseContract
         return $this;
     }
 
+    // --- Helpers ---
     protected function formatResponProps(): array
     {
         return Helper::filter([
@@ -289,11 +305,5 @@ class LogicResponse extends Helper implements LogicResponseContract
             'operator' => is_object($this->operator) ? get_class($this->operator) : null,
             'timestamp' => now()->toDateTimeString()
         ]);
-    }
-
-    protected function initialized(): static
-    {
-        $this->initial = true;
-        return $this;
     }
 }

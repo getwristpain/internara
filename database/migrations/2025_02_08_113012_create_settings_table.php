@@ -12,10 +12,16 @@ return new class () extends Migration {
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('app_name');
-            $table->string('logo_path')->nullable();
-            $table->boolean('is_installed')->default(false);
+            $table->string('key');
+            $table->text('value')->nullable();
+            $table->string('value_type')->default('string');
+            $table->string('type')->nullable();
+            $table->string('label')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('flag')->default(false);
             $table->timestamps();
+
+            $table->unique(['type', 'key']);
         });
     }
 

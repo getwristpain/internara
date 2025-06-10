@@ -2,15 +2,37 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasUuids;
+    use HasRoles;
+    use Notifiable;
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'uuid';
+
+    /**
+     * The "type" of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
+
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +44,7 @@ class User extends Authenticatable
         'email',
         'username',
         'password',
-        'first_login',
+        'type',
     ];
 
     /**
@@ -45,34 +67,6 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-        ];
-    }
-
-    public function roleOptions(): array
-    {
-        return [
-            'owner',
-            'admin',
-            'staff',
-            'student',
-            'teacher',
-            'supervisor',
-        ];
-    }
-
-    public function statusOptions(): array
-    {
-        return [
-            'registered',
-            'active',
-            'inactive',
-            'suspended',
-            'blocked',
-            'pending',
-            'verified',
-            'unverified',
-            'banned',
-            'deleted',
         ];
     }
 }

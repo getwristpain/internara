@@ -31,7 +31,7 @@ class Debugger extends Helper
     {
         $instance = new static();
         $instance->exception = $exception;
-        $instance->message = Sanitizer::sanitize($message ?? $exception->getMessage(), 'message');
+        $instance->message = Sanitizer::sanitize(!empty($message) ? $message : $exception->getMessage(), 'message');
         $instance->context = Sanitizer::sanitize($context, 'sensitive');
         $instance->properties = $instance->normalizeDebugProps($properties);
 

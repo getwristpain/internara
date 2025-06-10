@@ -14,9 +14,10 @@ return new class () extends Migration {
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('locations')->onDelete('cascade');
             $table->string('name');
-            $table->enum('type', ['province', 'regency', 'district', 'village'])
-                ->comment('Type of location: province, regency, district, or village');
-            $table->string('postal_code')->nullable();
+            $table->enum('type', ['province', 'regency', 'district', 'village']);
+            $table->string('postal_code')->nullable()->unique();
+            $table->string('slug')->nullable()->unique();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

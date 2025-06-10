@@ -7,12 +7,12 @@ use Illuminate\Support\Str;
 
 class Generator extends Helper
 {
-    public static function key(string $identifier, bool $timestamp = false)
+    public static function key(string $identifier = '', bool $timestamp = false): string
     {
-        $identiifer = empty($identifier) ? md5(uniqid()) : $identifier;
-        $time = now()->toDateTimeString();
+        $identifier = empty($identifier) ? md5(uniqid()) : Str::slug($identifier);
+        $datetime = now()->format('Ymd-Hi');
+        $key = implode('-', Helper::filter([$datetime, $identifier, Str::random(8)]));
 
-        $key = implode('-', Helper::filter([$time, $identifier, Str::random(8)]));
-        return $timestamp ? implode('-', [$time, md5($key)]) : md5($key);
+        return $timestamp ? implode('-', [$datetime, md5($key)]) : md5($key);
     }
 }
