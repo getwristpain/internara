@@ -14,15 +14,13 @@ abstract class Service
 {
     protected ?Model $model = null;
 
-    protected array $permissions = [];
-
     protected string $type = 'Service';
 
-    public function __construct(?Model $model = null, array $permissions = [], ?string $type = null)
+
+    public function __construct(?Model $model = null, ?string $type = null)
     {
-        $this->model = $model;
-        $this->permissions = $permissions;
-        $this->type ??= $type ?? static::class;
+        $this->setModel($model);
+        $this->setType($type);
     }
 
     public function __toString(): string
@@ -34,17 +32,6 @@ abstract class Service
     {
         $response = new LogicResponse();
         return $response->withType($this->type ?? '');
-    }
-
-    public function model(): ?ModelWrapper
-    {
-        if (empty($this->model)) {
-            Debugger::debug(new \LogicException("There is no model declared in this service class."))->throw();
-
-            return null;
-        }
-
-        return new ModelWrapper($this->model, $this->permissions);
     }
 
     public function validate(array $data, ?array $rules = [], array $messages = [], array $attributes = []): LogicResponse
@@ -73,5 +60,28 @@ abstract class Service
         return $this->response()->success("Data is validated successfully.")
             ->withPayload($validator->validate())
             ->operator($this);
+    }
+
+    public function model(): ?ModelWrapper
+    {
+        if (empty($this->model)) {
+            Debugger::debug(new \LogicException("There is no model declared in this service class."));
+
+            return ModelWrapper::make();
+        }
+
+        return ModelWrapper::make($this->model);
+    }
+
+    protected function setModel(?Model $model = null): static
+    {
+        $this->model = $model;
+        return $this;
+    }
+
+    protected function setType(?string $type = ''): static
+    {
+        $this->type = empty($type) ? (empty($this->model) ? class_basename($this) : class_basename($this->model)) : $type;
+        return $this;
     }
 }

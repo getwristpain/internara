@@ -2,8 +2,9 @@
 
 namespace App\Services\Console;
 
-use App\Services\LocationService;
+use App\Helpers\Connection;
 use App\Services\Http\WilayahHttpService;
+use App\Services\LocationService;
 use App\Services\Service;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
@@ -11,19 +12,24 @@ use Symfony\Component\Process\Process;
 class LocationSyncService extends Service
 {
     protected ?Command $command = null;
+
+    protected bool $isNew = false;
+
     protected LocationService $locationService;
 
-    public function __construct(?Command $command = null, ?LocationService $locationService = null)
+    public function __construct(?Command $command = null, bool $isNew = false)
     {
         parent::__construct();
 
         $this->command = $command;
+        $this->isNew = $isNew;
         $this->locationService = $locationService ?? app(LocationService::class);
     }
 
     public function syncAll(): void
     {
-        if ($this->restoreFromBackupIfExists()) {
+        if ($this->isNew || !Connection::checkInternetConnectivity()) {
+            $this->restoreFromBackupIfExists();
             return;
         }
 

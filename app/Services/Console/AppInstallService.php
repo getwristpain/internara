@@ -57,7 +57,7 @@ class AppInstallService extends Service
         $this->cleanStorage();
 
         $this->command->newLine();
-        $this->installThirdPartyPackages();
+        $this->syncDataset();
 
         $this->command->newLine();
         $this->buildAssets();
@@ -68,12 +68,12 @@ class AppInstallService extends Service
 
     private function clearCache(): void
     {
-        $this->callArtisan('optimize:clear', [], 'Clearing application cache...');
+        $this->runArtisan('optimize:clear', [], 'Clearing application cache...');
     }
 
     private function clearLogs(): void
     {
-        $this->callArtisan('activitylog:clean', [], 'Removing application logs...');
+        $this->runArtisan('activitylog:clean', [], 'Removing application logs...');
     }
 
     private function checkEnvFile(): void
@@ -98,7 +98,7 @@ class AppInstallService extends Service
 
     private function generateAppKey(): void
     {
-        $this->executeCommand('key:generate', [], 'Generating application key...', 'Application key generated.');
+        $this->runArtisan('key:generate', [], 'Generating application key...', 'Application key generated.');
     }
 
     private function configureEnv(): void
@@ -160,17 +160,17 @@ class AppInstallService extends Service
 
     private function runMigrations(): void
     {
-        $this->executeCommand('migrate', ['--force' => true], 'Running database migrations...', 'Database migrations completed.', 'Database migration failed.');
+        $this->runArtisan('migrate', ['--force' => true], 'Running database migrations...', 'Database migrations completed.', 'Database migration failed.');
     }
 
     private function runFreshMigrations(): void
     {
-        $this->executeCommand('migrate:fresh', ['--force' => true]);
+        $this->runArtisan('migrate:fresh', ['--force' => true]);
     }
 
     private function seedDatabase(): void
     {
-        $this->executeCommand('db:seed', [], 'Seeding database...', 'Database seeding completed.', 'Database seeding failed.');
+        $this->runArtisan('db:seed', [], 'Seeding database...', 'Database seeding completed.', 'Database seeding failed.');
     }
 
     private function createStorageLink(): void
@@ -182,7 +182,7 @@ class AppInstallService extends Service
             return;
         }
 
-        $this->executeCommand('storage:link', [], 'Creating storage symbolic link...', 'Storage symbolic link created.', 'Failed to create storage symbolic link.');
+        $this->runArtisan('storage:link', [], 'Creating storage symbolic link...', 'Storage symbolic link created.', 'Failed to create storage symbolic link.');
     }
 
     private function cleanStorage(): void
@@ -226,52 +226,15 @@ class AppInstallService extends Service
 
     private function optimize(): void
     {
-        $this->executeCommand('optimize', [], 'Optimizing application...', 'Application optimized.', 'Application optimization failed.', false);
+        $this->runArtisan('optimize', [], 'Optimizing application...', 'Application optimized.', 'Application optimization failed.', false);
     }
 
-    private function installThirdPartyPackages(): void
+    private function syncDataset(): void
     {
-        if (!$this->checkInternetConnection()) {
-            $this->command->warn('No internet connection detected. Skipping third-party package installation.');
-            return;
-        }
-
-        if (!confirm('Would you like to install third-party packages now?')) {
-            $this->command->info('Third-party package installation skipped.');
-            return;
-        }
-
-        $this->command->info('Installing third-party packages...');
-        $this->command->newLine();
-
-        $this->callArtisan('location:sync');
-
-        $this->command->newLine();
-        $this->command->info('Third-party packages have been installed succesfully.');
+        $this->runArtisan('location:sync', ['--new' => true]);
     }
 
-    private function checkInternetConnection(): bool
-    {
-        $this->command->info('Checking for internet connectivity...');
-
-        try {
-            $process = Process::fromShellCommandline('ping -c 1 -W 2 google.com');
-            $process->run();
-
-            if ($process->isSuccessful()) {
-                $this->command->info('Internet connection detected.');
-                return true;
-            } else {
-                $this->command->warn('Internet connection not detected.');
-                return false;
-            }
-        } catch (\Throwable $th) {
-            $this->skipWithWarn('Error occurred while checking internet connection.', $th);
-            return false;
-        }
-    }
-
-    private function executeCommand(
+    private function runArtisan(
         string $command,
         array $arguments = [],
         string $startMessage = '',
@@ -281,6 +244,7 @@ class AppInstallService extends Service
     ): void {
         if ($startMessage) {
             $this->command->info($startMessage);
+            $this->command->newLine();
         }
 
         try {
@@ -295,14 +259,6 @@ class AppInstallService extends Service
             }
             $this->abort($errorMessage ?: "Error executing command: $command", $th);
         }
-    }
-
-    private function callArtisan(string $command, array $args = [], string $msg = ''): void
-    {
-        if ($msg) {
-            $this->command->info($msg);
-        }
-        $this->command->call($command, $args);
     }
 
     private function runShellCommand(string $command): void

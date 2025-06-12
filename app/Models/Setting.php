@@ -17,16 +17,46 @@ class Setting extends Model
      */
     protected $fillable = [
         'key',
+        'type',
         'value',
         'value_type',
-        'type',
-        'label',
         'description',
+        'label',
         'flag'
     ];
 
     protected $casts = [
         'flag' => 'boolean',
+    ];
+
+    protected $statuses = [
+        'installation' => [
+            [
+                'name' => 'welcome',
+                'label' => 'Selamat datang',
+                'description' => 'Langkah awal instalasi aplikasi. Menampilkan pesan sambutan kepada pengguna.',
+            ],
+            [
+                'name' => 'school_config',
+                'label' => 'Konfigurasi sekolah',
+                'description' => 'Pengaturan data dan informasi sekolah yang diperlukan sebelum melanjutkan proses instalasi.',
+            ],
+            [
+                'name' => 'department_setup',
+                'label' => 'Pengaturan jurusan',
+                'description' => 'Menambahkan dan mengatur jurusan atau program studi yang tersedia di sekolah.',
+            ],
+            [
+                'name' => 'owner_setup',
+                'label' => 'Pengaturan pemilik',
+                'description' => 'Menentukan atau mengatur pemilik atau administrator utama aplikasi.',
+            ],
+            [
+                'name' => 'complete',
+                'label' => 'Selesai',
+                'description' => 'Seluruh proses instalasi telah selesai dan aplikasi siap digunakan.',
+            ]
+        ]
     ];
 
     public function getValueAttribute($value): mixed

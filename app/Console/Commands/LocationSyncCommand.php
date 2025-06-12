@@ -14,7 +14,7 @@ class LocationSyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'location:sync';
+    protected $signature = 'location:sync {--new : Intialize new locations}';
 
     /**
      * The console command description.
@@ -31,8 +31,10 @@ class LocationSyncCommand extends Command
         $this->info('Starting location synchronization...');
         $start = microtime(true);
 
+        $isNew = $this->option('new');
+
         try {
-            app(LocationSyncService::class, ['command' => $this])
+            app(LocationSyncService::class, ['command' => $this, 'isNew' => $isNew])
                 ->syncAll();
         } catch (\Throwable $e) {
             $this->error('Sync failed: ' . $e->getMessage());

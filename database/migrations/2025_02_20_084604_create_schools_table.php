@@ -14,10 +14,10 @@ return new class () extends Migration {
             $table->id();
             $table->string('name')->unique();
             $table->string('logo_path')->nullable();
-            $table->json('address')->nullable();
+            $table->string('address')->nullable();
+            $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->string('fax')->nullable();
-            $table->string('email')->unique()->nullable();
             $table->string('website')->nullable();
             $table->string('principal_name')->nullable();
             $table->timestamps();

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -19,16 +18,13 @@ class DatabaseSeeder extends Seeder
     protected function runDatabaseSeeder()
     {
         $this->call([
-            SettingSeeder::class,
-            RoleSeeder::class,
+            SettingSeeder::class
         ]);
     }
 
     protected function runDatabaseTestSeeder(): void
     {
-
-        $devEnv = in_array(app()->environment(), ['testing', 'local', 'development', 'dev'], true);
-        if ($devEnv) {
+        if (app()->environment(['local', 'test', 'testing', 'dev', 'development'])) {
             $this->call(DBTestSeeder::class);
         }
     }

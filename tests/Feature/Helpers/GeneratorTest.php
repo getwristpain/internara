@@ -5,7 +5,7 @@ use App\Helpers\Generator;
 it('generates a key with default parameters', function () {
     $key = Generator::key();
     expect($key)->toBeString()
-        ->and(strlen($key))->toBe(32); // md5 hash length
+        ->and(strlen($key))->toBe(32);
 });
 
 it('generates a key with identifier', function () {
@@ -17,8 +17,6 @@ it('generates a key with identifier', function () {
 it('generates a key with timestamp', function () {
     $key = Generator::key('test', true);
     $parts = explode('-', $key);
-
-    dd($key);
 
     expect(count($parts))->toBe(3)
         ->and(strlen($parts[2]))->toBe(32);

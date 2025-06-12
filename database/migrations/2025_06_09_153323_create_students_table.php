@@ -12,9 +12,15 @@ return new class () extends Migration {
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('user_uuid')->constrained('users')->cascadeOnUpdate();
-            $table->foreignId('department_id')->constrained('departments')->nullOnDelete();
-            $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
+            $table->foreignUuid('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            $table->foreignId('department_id')
+                ->constrained('departments')
+                ->nullOnDelete();
+            $table->foreignId('school_id')
+                ->constrained('schools')
+                ->cascadeOnDelete();
             $table->string('classroom')->nullable();
             $table->string('id_number')->nullable()->unique();
             $table->string('phone')->nullable();

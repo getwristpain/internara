@@ -10,33 +10,38 @@ class Attribute implements Arrayable
 {
     protected array $attributes = [];
 
-    public function __construct(array $attributes = [], array $defaults = [])
+    public function __construct(array $attributes = [])
     {
-        $this->fill($attributes, $defaults);
+        $this->fill($attributes);
     }
 
-    public static function make(array $attributes = [], array $defaults = []): static
+    public static function make(array $attributes = []): static
     {
-        return new static($attributes, $defaults);
+        return new static($attributes);
     }
 
-    public function fill(array $attributes, array $defaults = []): static
+    public function fill(array $attributes): static
     {
-        $attributes = ArrayHelper::isFlatAssoc($attributes) ? $attributes : [];
-        $defaults = ArrayHelper::isFlatAssoc($defaults) ? $defaults : [];
+        if (!empty($attributes) && !ArrayHelper::isFlatAssoc($attributes)) {
+            throw new \InvalidArgumentException('Attributes array must be a flat associative array.');
+        }
 
-        $this->attributes = array_merge($defaults, $attributes);
+        $this->attributes = $attributes;
         return $this;
     }
 
-    public function get(string $key, mixed $default = null): mixed
+    public function get(string|int|array $key = '', mixed $default = null): mixed
     {
-        return Arr::get($this->attributes, $key, $default);
+        if (empty($key)) {
+            return $this->attributes;
+        }
+
+        return ArrayHelper::get($this->attributes, $key, $default);
     }
 
-    public function set(string $key, mixed $value): static
+    public function set(string|int|array $key, mixed $value): static
     {
-        Arr::set($this->attributes, $key, $value);
+        ArrayHelper::set($this->attributes, $key, $value);
         return $this;
     }
 
@@ -47,22 +52,22 @@ class Attribute implements Arrayable
 
     public function only(array $keys): static
     {
-        return static::make(Arr::only($this->attributes, $keys));
+        return $this->fill(Arr::only($this->attributes, $keys));
     }
 
     public function except(array $keys): static
     {
-        return static::make(Arr::except($this->attributes, $keys));
+        return $this->fill(Arr::except($this->attributes, $keys));
     }
 
     public function merge(array $items): static
     {
-        return static::make(array_merge($this->attributes, $items));
+        return $this->fill(array_merge($this->attributes, $items));
     }
 
     public function map(callable $callback): static
     {
-        return static::make(array_map($callback, $this->attributes));
+        return $this->fill(array_map($callback, $this->attributes));
     }
 
     public function isEmpty(): bool

@@ -3,8 +3,8 @@
 use App\Helpers\Attribute;
 
 it('can be constructed and converted to array', function () {
-    $attr = new Attribute(['foo' => 'bar', 'baz' => 123]);
-    expect($attr->toArray())->toBe(['foo' => 'bar', 'baz' => 123]);
+    $attr = new Attribute(['foo' => 'bar', 'caz' => 123]);
+    expect($attr->toArray())->toBe(['foo' => 'bar', 'caz' => 123]);
 });
 
 it('make() creates a new instance', function () {
@@ -14,42 +14,42 @@ it('make() creates a new instance', function () {
 });
 
 it('fill() replaces attributes and respects defaults', function () {
-    $attr = new Attribute(['foo' => 'bar'], ['foo' => 'default', 'baz' => 1]);
-    expect($attr->toArray())->toBe(['foo' => 'bar', 'baz' => 1]);
-    $attr->fill(['baz' => 2]);
-    expect($attr->toArray())->toBe(['baz' => 2]);
+    $attr = new Attribute(['foo' => 'bar']);
+    expect($attr->toArray())->toBe(['foo' => 'bar']);
+    $attr->fill(['caz' => 2]);
+    expect($attr->toArray())->toBe(['caz' => 2]);
 });
 
 it('get() returns value or default', function () {
     $attr = new Attribute(['foo' => 'bar']);
     expect($attr->get('foo'))->toBe('bar')
-        ->and($attr->get('baz', 'default'))->toBe('default');
+        ->and($attr->get('caz', 'default'))->toBe('default');
 });
 
 it('set() sets a value', function () {
     $attr = new Attribute(['foo' => 'bar']);
-    $attr->set('baz', 123);
-    expect($attr->get('baz'))->toBe(123);
+    $attr->set('caz', 123);
+    expect($attr->get('caz'))->toBe(123);
 });
 
 it('has() checks for key existence', function () {
     $attr = new Attribute(['foo' => 'bar']);
     expect($attr->has('foo'))->toBeTrue()
-        ->and($attr->has('baz'))->toBeFalse();
+        ->and($attr->has('caz'))->toBeFalse();
 });
 
 it('only() returns only specified keys', function () {
-    $attr = new Attribute(['foo' => 1, 'bar' => 2, 'baz' => 3]);
-    $only = $attr->only(['foo', 'baz']);
+    $attr = new Attribute(['foo' => 1, 'bar' => 2, 'caz' => 3]);
+    $only = $attr->only(['foo', 'caz']);
     expect($only)->toBeInstanceOf(Attribute::class)
-        ->and($only->toArray())->toBe(['foo' => 1, 'baz' => 3]);
+        ->and($only->toArray())->toBe(['foo' => 1, 'caz' => 3]);
 });
 
 it('except() returns all except specified keys', function () {
-    $attr = new Attribute(['foo' => 1, 'bar' => 2, 'baz' => 3]);
+    $attr = new Attribute(['foo' => 1, 'bar' => 2, 'caz' => 3]);
     $except = $attr->except(['bar']);
     expect($except)->toBeInstanceOf(Attribute::class)
-        ->and($except->toArray())->toBe(['foo' => 1, 'baz' => 3]);
+        ->and($except->toArray())->toBe(['foo' => 1, 'caz' => 3]);
 });
 
 it('merge() merges new items', function () {
@@ -80,8 +80,8 @@ it('toCollection() returns a collection', function () {
 it('magic get/set/isset works', function () {
     $attr = new Attribute(['foo' => 'bar']);
     expect($attr->foo)->toBe('bar');
-    $attr->baz = 123;
-    expect($attr->baz)->toBe(123);
+    $attr->caz = 123;
+    expect($attr->caz)->toBe(123);
     expect(isset($attr->foo))->toBeTrue();
     expect(isset($attr->notfound))->toBeFalse();
 });

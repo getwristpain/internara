@@ -2,141 +2,87 @@
 
 namespace App\Services;
 
-use App\Helpers\Debugger;
 use App\Helpers\LogicResponse;
-use App\Services\OwnerService;
-use App\Services\SchoolService;
 use App\Services\Service;
-use App\Services\SettingService;
-use Illuminate\Support\Facades\Log;
 
 class InstallationService extends Service
 {
-    /*
-     * Class constructor
-     */
+    protected StatusService $statusService;
+
+    protected SchoolService $schoolService;
+
+    protected DepartmentService $departmentService;
+
+    protected OwnerService $ownerService;
+
     public function __construct()
     {
         parent::__construct();
     }
 
-    public function performInstall(string $step): ?LogicResponse
+    public function performInstall(string $step): LogicResponse
     {
-        $this->ensureIsNotInstalled();
-
-        try {
-            $performInstall = match ($step) {
-                'welcome' => $this->installWelcome(),
-                'school_config' => $this->installSchool(),
-                'department_setup' => $this->installDepartment(),
-                'owner_setup' => $this->installOwner(),
-                'complete' => $this->installComplete(),
-                default => $this->response()
-                    ->failure('Invalid installation step provided.')
-                    ->withType('Installation')
-                    ->storeLog()
-            };
-        } catch (\Throwable $th) {
-            Debugger::debug($th, 'An unexpected error during application installation.');
-            return null;
-        }
-
-        return $performInstall;
-    }
-
-    protected function ensureIsNotInstalled(): void
-    {
-        if (app(SettingService::class)->isInstalled()) {
-            Log::warn('Try to access the installation routes: the application has already been installed.');
-
-            redirect()->route('login')->with('message', 'The application has been installed.');
-        }
+        return match ($step) {
+            'welcome' => $this->installWelcome(),
+            'school_config' => $this->installSchool(),
+            'department_setup' => $this->installDepartment(),
+            'owner_setup' => $this->installOwner(),
+            'complete' => $this->installComplete(),
+            default => $this->response()->failure('The specified installation step is invalid.')->storeLog()
+        };
     }
 
     protected function installWelcome(): LogicResponse
     {
-        return $this->markAsCompleted('start', 'Welcome');
+        return $this->markAsCompleted('welcome');
     }
 
     protected function installSchool(): LogicResponse
     {
-        if (app(SchoolService::class)->getSchool()->isEmpty()) {
-            return $this->response()->failure('School configuration must not be empty.')
-                ->withType('Installation')
-                ->storeLog();
+        $firstSchool = $this->schoolService->model()->query()->first();
+
+        if (!$firstSchool) {
+            return $this->response()->failure('No school record found. Please create a school before proceeding.');
         }
 
-        return $this->markAsCompleted('school_config', 'School Configuration');
+        return $this->markAsCompleted('school_config');
     }
 
     protected function installDepartment(): LogicResponse
     {
-        return $this->markAsCompleted('department_setup', 'Department Setup');
+        $department = $this->departmentService->model()->query()->first();
+        if (!$department) {
+            return $this->response()->failure('No department record found. Please create at least one department before proceeding.');
+        }
+
+        return $this->markAsCompleted('department_setup');
     }
 
     protected function installOwner(): LogicResponse
     {
-        if (app(OwnerService::class)->getOwner()->isEmpty()) {
-            return $this->response()->failure('The owner account is required.')
-                ->withType('Installation')
-                ->storeLog();
+        $owner = $this->ownerService->get();
+
+        if (!$owner) {
+            return $this->response()->failure('No owner or administrator found. Please create an owner or administrator before proceeding.');
         }
 
         return $this->markAsCompleted('owner_setup');
     }
 
+
     protected function installComplete(): LogicResponse
     {
-        if (!$this->ensureStepsCompleted(['welcome', 'school_config', 'department_setup', 'owner_setup'])) {
-            return $this->response()->failure('Some installation steps are missing.')
-                ->withType('Installation')
-                ->storelog();
-        }
-
-        $markAsCompleted = $this->markAsCompleted('complete');
-        $setInstalled = app(SettingService::class)->setValues(['is_installed' => true]);
-
-        if ($markAsCompleted->fails() || $setInstalled->fails()) {
-            return $this->response()->failure('Failed to complete installation')
-                ->withType('Installation')
-                ->storeLog();
-        }
-
-        return $this->response()->success('Installation has been completed successfully.')
-            ->withType('Installation')
-            ->storeLog();
+        return $this->markAsCompleted('complete');
     }
 
-    public function isStepCompleted(string $step): bool
+    protected function markAsCompleted(string $step): LogicResponse
     {
-        return app(SettingService::class)->isCompleted($step, 'installation');
-    }
+        $markStatus = $this->statusService->mark($step, 'installation', strict: true);
 
-
-    protected function markAsCompleted(string $name, string $label = '[label]'): LogicResponse
-    {
-        $completed = app(SettingService::class)->markStatus($name, 'installation', strict: true);
-
-        if (!$completed) {
-            return $this->response()->failure("Failed to complete the installation step: {$label}.")
-                ->withType('Installation')
-                ->storeLog();
+        if (!$markStatus) {
+            return $this->response()->failure("Unable to mark the installation step as completed: {$step}.");
         }
 
-        return $this->response()->success("Installation step has been completed successfully: {$label}.")
-            ->withStatus('completed')
-            ->withType('Installation')
-            ->storeLog();
-    }
-
-    protected function ensureStepsCompleted(array $steps = []): bool
-    {
-        foreach ($steps as $step) {
-            if (!$this->isStepCompleted($step)) {
-                return false;
-            }
-        }
-
-        return true;
+        return $this->response()->success("Installation step '{$step}' has been successfully completed.");
     }
 }

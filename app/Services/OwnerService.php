@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Helpers\Attribute;
 use App\Models\User;
 use App\Services\Service;
+use Illuminate\Database\Eloquent\Model;
 
 class OwnerService extends Service
 {
@@ -13,11 +13,11 @@ class OwnerService extends Service
      */
     public function __construct()
     {
-        parent::__construct(new User(), ['single', 'read', 'create', 'update']);
+        parent::__construct(User::where(['type' => 'owner'])->first());
     }
 
-    public function getOwner(): ?Attribute
+    public function get(): ?Model
     {
-        return $this->model()->first(['type' => 'owner']);
+        return $this->model()?->instance();
     }
 }

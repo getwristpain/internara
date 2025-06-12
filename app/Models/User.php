@@ -14,13 +14,6 @@ class User extends Authenticatable
     use Notifiable;
 
     /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'uuid';
-
-    /**
      * The "type" of the auto-incrementing ID.
      *
      * @var string

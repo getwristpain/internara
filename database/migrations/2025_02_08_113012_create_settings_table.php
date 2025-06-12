@@ -13,11 +13,11 @@ return new class () extends Migration {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('key');
+            $table->string('type')->nullable();
             $table->text('value')->nullable();
             $table->string('value_type')->default('string');
-            $table->string('type')->nullable();
-            $table->string('label')->nullable();
             $table->text('description')->nullable();
+            $table->string('label')->nullable();
             $table->boolean('flag')->default(false);
             $table->timestamps();
 
