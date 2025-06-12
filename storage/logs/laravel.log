@@ -1,1 +1,1 @@
-[2025-06-12 16:28:46] local.DEBUG: Unable to locate a class or view for component [bg-decoration]. {"status":"failed","type":"Debugger","requests":{"ip":"127.0.0.1","method":"GET","route":"","url":"http://localhost","userAgent":"Symfony","userId":""},"timestamp":"2025-06-12 16:28:46"} 
+[2025-06-12 16:40:26] local.DEBUG: Unable to locate a class or view for component [bg-decoration]. {"status":"failed","type":"Debugger","requests":{"ip":"127.0.0.1","method":"GET","route":"","url":"http://localhost","userAgent":"Symfony","userId":""},"timestamp":"2025-06-12 16:40:26"} 

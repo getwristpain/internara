@@ -13,22 +13,22 @@ class LocationSyncService extends Service
 {
     protected ?Command $command = null;
 
-    protected bool $isNew = false;
+    protected bool $restore = false;
 
     protected LocationService $locationService;
 
-    public function __construct(?Command $command = null, bool $isNew = false)
+    public function __construct(?Command $command = null, bool $restore = false)
     {
         parent::__construct();
 
         $this->command = $command;
-        $this->isNew = $isNew;
+        $this->restore = $restore;
         $this->locationService = $locationService ?? app(LocationService::class);
     }
 
     public function syncAll(): void
     {
-        if ($this->isNew || !Connection::checkInternetConnectivity()) {
+        if ($this->restore || !Connection::checkInternetConnectivity()) {
             $this->restoreFromBackupIfExists();
             return;
         }

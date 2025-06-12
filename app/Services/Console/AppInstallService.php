@@ -231,7 +231,7 @@ class AppInstallService extends Service
 
     private function syncDataset(): void
     {
-        $this->runArtisan('location:sync', ['--new' => true]);
+        $this->runArtisan('location:sync', ['--restore' => true]);
     }
 
     private function runArtisan(
