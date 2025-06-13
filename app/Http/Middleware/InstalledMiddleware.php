@@ -10,14 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InstalledMiddleware
 {
+    protected SettingService $settingService;
+
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (!app(SettingService::class)->isInstalled() && !$this->isInstallRoute($request) && !$this->isLivewireRequest($request)) {
+            if (!$this->settingService->isInstalled() && !$this->isInstallRoute($request) && !$this->isLivewireRequest($request)) {
                 return redirect()->route('install');
             }
 
-            if (app(SettingService::class)->isInstalled() && $this->isInstallRoute($request)) {
+            if ($this->settingService->isInstalled() && $this->isInstallRoute($request)) {
                 return redirect()->route('login');
             }
 

@@ -2,133 +2,235 @@
 
 namespace App\Helpers;
 
+use App\Contracts\EntityContract;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
 
-/**
- * @template TModel of Model
- */
-class ModelWrapper extends Helper
+class ModelWrapper extends Helper implements EntityContract
 {
-    protected ?Model $model;
+    protected Model|Builder|null $model;
 
-    protected ?string $modelClass = null;
+    protected string $modelClass = '';
 
     protected string $type = 'Record';
 
-    protected array $data = [];
-
     protected array $meta = [];
 
-    /**
-     * @param Model|null $model
-     * @param array $permissions
-     * @param array $defaultData
-     * @param array $relations
-     */
-    public static function make(?Model $model = null, array $meta = [], array $defaultData = []): static
+    public function __construct(Model|Builder|null $model = null)
     {
-        $instance = new static();
-        $instance->setModel($model)
-            ->setData($defaultData)
-            ->setMeta($meta);
-
-        return $instance;
+        $this->setModel($model);
     }
 
-    public function query(): ?Model
+    public function withMeta(array $meta = []): static
     {
-        return app($this->modelClass);
-    }
-
-    public function instance(): ?Model
-    {
-        return $this->model;
-    }
-
-    public function data(): array
-    {
-        return $this->data;
-    }
-
-    public function meta(): array
-    {
-        return $this->meta;
-    }
-
-    public function get(string|int|array $key, mixed $default = null): mixed
-    {
-        if (empty($this->data)) {
-            return [];
-        }
-
-        return ArrayHelper::get($this->data, $key, $default);
-    }
-
-    public function set(string|int|array $key, mixed $value): static
-    {
-        if (empty($this->data)) {
-            return $this;
-        }
-
-        ArrayHelper::set($this->data, $key, $value);
-
-        if (ArrayHelper::isFlatAssoc($this->data) && !empty($this->model->toArray())) {
-            $this->model->update($this->filterFillable($this->data));
-        }
-
+        $this->meta = array_merge($this->meta, $meta);
         return $this;
+    }
+
+    public function query(): Model|null
+    {
+        return !empty($this->modelClass) ? app($this->modelClass) : null;
+    }
+
+    public function instance(): Model|Builder|null
+    {
+        return $this->model ?? null;
+    }
+
+    public function all(array|string $column = '[*]'): ?Collection
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->all($column);
+        $this->withMeta(['count' => $query->count() ?? 0]);
+
+        return $query ?? new Collection([]);
+    }
+
+    public function get(array $where = [], array $with = [], array|string $column = '[*]'): ?Collection
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->with($with)
+            ->where($where)
+            ->get($column);
+
+        $this->withMeta(['count' => $query->count() ?? 0]);
+
+        return $query ?? new Collection([]);
+    }
+
+    public function find($id, array $with = []): Collection|Model|null
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->with($with)
+            ->find($id);
+
+        $this->withMeta(['found' => $query ? 1 : 0]);
+
+        return $query;
+    }
+
+    public function first(array $where = [], array $with = []): ?Model
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->with($with)
+            ->where($where)
+            ->first();
+
+        $this->withMeta(['found' => $query ? 1 : 0]);
+
+        return $query;
+    }
+
+    public function firstOrFail(array $where = [], array $with = []): ?Model
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->with($with)
+            ->where($where)
+            ->firstOrFail();
+
+        $this->withMeta(['found' => $query ? 1 : 0]);
+
+        return $query;
+    }
+
+    public function firstOrCreate(array $where = [], array $attributes = [], array $with = []): ?Model
+    {
+        if (!$this->model) {
+            return null;
+        }
+
+        $query = $this->query()->with($with)
+            ->firstOrCreate($where, $this->filterFillable($attributes));
+        $this->withMeta(['created' => $query->wasRecentlyCreated ? 1 : 0]);
+
+        return $query;
+    }
+
+    public function create(array $attributes = []): LogicResponse
+    {
+        try {
+            $model = $this->query()->create($this->filterFillable($attributes));
+            $this->setModel($model)->withMeta(['created' => $model ? 1 : 0]);
+
+            return $this->response()->success('Data created successfully.');
+        } catch (\Throwable $e) {
+            return $this->response()->failure('Failed to create data: ' . $e->getMessage())->debug($e);
+        }
+    }
+
+    public function insert(array $rows): LogicResponse
+    {
+        try {
+            $fillableRows = array_map(fn ($row) => $this->filterFillable($row), $rows);
+            $result = $this->query()->insert($fillableRows);
+            $this->withMeta([
+                'inserted' => $result ? 1 : 0,
+                'saved_count' => $result ? count($fillableRows) : 0
+            ]);
+            return $this->response()->success('Data inserted successfully.');
+        } catch (\Throwable $e) {
+            return $this->response()->failure('Failed to insert data: ' . $e->getMessage())->debug($e);
+        }
+    }
+
+    public function update(array $attributes = [], array $where = []): LogicResponse
+    {
+        try {
+            $query = $this->query()->newQuery();
+            if ($where) {
+                $query->where($where);
+            }
+            $updated = $query->update($this->filterFillable($attributes));
+            $this->withMeta(['updated' => $updated]);
+            return $this->response()->success('Data updated successfully.');
+        } catch (\Throwable $e) {
+            return $this->response()->failure('Failed to update data: ' . $e->getMessage())->debug($e);
+        }
+    }
+
+    public function delete($id): LogicResponse
+    {
+        try {
+            $deleted = $this->query()->destroy($id);
+            $this->withMeta(['deleted' => $deleted]);
+            return $this->response()->success('Data deleted successfully.');
+        } catch (\Throwable $e) {
+            return $this->response()->failure('Failed to delete data: ' . $e->getMessage())->debug($e);
+        }
+    }
+
+    public function destroy(array $ids): LogicResponse
+    {
+        try {
+            $deleted = $this->query()->destroy($ids);
+            $this->withMeta(['deleted' => $deleted]);
+            return $this->response()->success('Data deleted successfully.');
+        } catch (\Throwable $e) {
+            return $this->response()->failure('Failed to delete data: ' . $e->getMessage())->debug($e);
+        }
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'data' => $this->model?->toArray() ?? [],
+            'meta' => $this->meta
+        ];
     }
 
     public function toAttributes(): Attribute
     {
-        return Attribute::make($this->data);
+        return Attribute::make($this->model?->toArray() ?? []);
     }
 
     public function toCollection(): Collection
     {
-        if (!ArrayHelper::isFlatAssoc($this->data)) {
-            return Collection::make([$this->data]);
+        $data = $this->model?->toArray() ?? [];
+
+        if (!ArrayHelper::isFlatAssoc($data)) {
+            return Collection::make([$data]);
         }
 
-        return Collection::make($this->data);
+        return Collection::make($data);
     }
 
     public function response(): LogicResponse
     {
         $response = new LogicResponse();
+
         return $response
             ->withType($this->type)
-            ->withPayload([
-                    'data' => $this->data,
-                    'meta' => $this->meta
-                ]);
+            ->withPayload($this->toArray())
+            ->operator($this);
     }
 
-    protected function setmodel(?Model $model): static
+    protected function filterFillable(array $attributes): array
+    {
+        return Helper::filter($attributes, $this->model->getFillable());
+    }
+
+    protected function setmodel(Model|Builder|null $model): static
     {
         $this->model = $model;
-        $this->modelClass = $model ? get_class($model) : null;
+        $this->modelClass = $model ? get_class($model) : '';
         $this->type = $model ? class_basename($model) : $this->type;
 
         return $this;
-    }
-
-    protected function setData(array $default = []): static
-    {
-        $modelData = $this->model?->toArray();
-        $this->data = empty($modelData) ? $default : $modelData;
-        return $this;
-    }
-
-    public function setMeta(array $meta = []): static
-    {
-        $this->meta = $meta;
-        return $this;
-    }
-
-    public function filterFillable(array $attributes): array
-    {
-        return Helper::filter($attributes, $this->model->getFillable());
     }
 }

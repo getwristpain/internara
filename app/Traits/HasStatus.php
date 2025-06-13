@@ -13,7 +13,6 @@ trait HasStatus
             if (property_exists($model, 'statuses')) {
                 foreach ($model->statuses as $type => $statuses) {
                     foreach ($statuses as $status) {
-                        $statuses = $model->statuses();
                         $created = Status::updateOrCreate(array_merge($status, [
                             'type' => is_string($type) ? $type : '',
                         ]));

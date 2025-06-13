@@ -11,7 +11,7 @@ it('returns null if no owner exists', function () {
     User::truncate();
     $service = new OwnerService();
 
-    expect($service->get())->toBeNull();
+    expect($service->model()->instance())->toBeNull();
 });
 
 it('returns the owner user if exists', function () {
@@ -26,7 +26,7 @@ it('returns the owner user if exists', function () {
 
     $service = new OwnerService();
 
-    expect($service->get())->not()->toBeNull()
-        ->and($service->get()->id)->toBe($owner->id)
-        ->and($service->get()->type)->toBe('owner');
+    expect($service->model()->instance())->not()->toBeNull()
+        ->and($service->model()->instance()->id)->toBe($owner->id)
+        ->and($service->model()->instance()->type)->toBe('owner');
 });

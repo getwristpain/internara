@@ -14,9 +14,9 @@ class StatusService extends Service
         parent::__construct(new Status());
     }
 
-    public function mark(string $name, string $type = '', string $column = 'flag', bool $strict = false): bool
+    public function mark(string $key, string $type = '', string $column = 'flag', bool $strict = false): bool
     {
-        $status = $this->model()->query()->where(['name' => $name, 'type' => $type])->first();
+        $status = $this->model()->query()->where(['key' => $key, 'type' => $type])->first();
         if (!$status) {
             return false;
         }

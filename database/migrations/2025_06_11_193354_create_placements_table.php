@@ -16,8 +16,6 @@ return new class () extends Migration {
                 ->constrained('programs')->cascadeOnDelete();
             $table->foreignId('company_id')
                 ->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('student_id')
-                ->constrained('students')->cascadeOnDelete();
             $table->foreignId('teacher_id')->nullable()
                 ->constrained('teachers')->nullOnDelete();
             $table->foreignId('supervisor_id')->nullable()
@@ -27,6 +25,13 @@ return new class () extends Migration {
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('placement_student', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('placement_id')->constrained('placements')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -34,6 +39,7 @@ return new class () extends Migration {
      */
     public function down(): void
     {
+        Schema::dropIfExists('placement_student');
         Schema::dropIfExists('placements');
     }
 };

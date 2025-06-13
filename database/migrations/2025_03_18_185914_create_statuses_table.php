@@ -12,7 +12,7 @@ return new class () extends Migration {
     {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('key');
             $table->string('type');
             $table->string('label')->nullable();
             $table->string('description')->nullable();
@@ -23,7 +23,7 @@ return new class () extends Migration {
             $table->boolean('is_default')->default(false);
             $table->timestamps();
 
-            $table->unique(['key', 'type']);
+            $table->unique(['type', 'key']);
         });
 
         Schema::create('statusables', function (Blueprint $table) {

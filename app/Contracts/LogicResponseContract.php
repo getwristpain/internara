@@ -59,7 +59,7 @@ interface LogicResponseContract
 
     // --- Array & Debug & Log ---
     public function toArray(): array;
-    public function debug(array $property = [], bool $throw = false): static;
+    public function debug(?\Throwable $exception = null, array $property = [], bool $throw = false): static;
     public function storeActivity(): static;
     public function storeLog(string $level = ''): static;
 }

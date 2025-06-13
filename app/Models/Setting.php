@@ -17,42 +17,37 @@ class Setting extends Model
      */
     protected $fillable = [
         'key',
-        'type',
         'value',
-        'value_type',
-        'description',
+        'type',
         'label',
-        'flag'
-    ];
-
-    protected $casts = [
-        'flag' => 'boolean',
+        'category',
+        'description',
     ];
 
     protected $statuses = [
         'installation' => [
             [
-                'name' => 'welcome',
+                'key' => 'welcome',
                 'label' => 'Selamat datang',
                 'description' => 'Langkah awal instalasi aplikasi. Menampilkan pesan sambutan kepada pengguna.',
             ],
             [
-                'name' => 'school_config',
+                'key' => 'school_config',
                 'label' => 'Konfigurasi sekolah',
                 'description' => 'Pengaturan data dan informasi sekolah yang diperlukan sebelum melanjutkan proses instalasi.',
             ],
             [
-                'name' => 'department_setup',
+                'key' => 'department_setup',
                 'label' => 'Pengaturan jurusan',
                 'description' => 'Menambahkan dan mengatur jurusan atau program studi yang tersedia di sekolah.',
             ],
             [
-                'name' => 'owner_setup',
+                'key' => 'owner_setup',
                 'label' => 'Pengaturan pemilik',
                 'description' => 'Menentukan atau mengatur pemilik atau administrator utama aplikasi.',
             ],
             [
-                'name' => 'complete',
+                'key' => 'complete',
                 'label' => 'Selesai',
                 'description' => 'Seluruh proses instalasi telah selesai dan aplikasi siap digunakan.',
             ]
@@ -61,7 +56,7 @@ class Setting extends Model
 
     public function getValueAttribute($value): mixed
     {
-        return match ($this->value_type) {
+        return match ($this->type) {
             'boolean'      => Sanitizer::sanitize($value, 'bool'),
             'integer'      => Sanitizer::sanitize($value, 'int'),
             'float'        => Sanitizer::sanitize($value, 'float'),

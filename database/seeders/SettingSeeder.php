@@ -20,27 +20,27 @@ class SettingSeeder extends Seeder
         $settings = [
             [
                 'key' => 'app_name',
-                'type' => 'Application',
                 'value' => config('app.name', 'Internara'),
-                'value_type' => 'string',
-                'description' => 'Nama aplikasi yang ditampilkan.',
+                'type' => 'string',
                 'label' => 'Nama aplikasi',
+                'category' => 'Application',
+                'description' => 'Nama aplikasi yang ditampilkan.',
             ],
             [
                 'key' => 'app_logo',
-                'type' => 'Application',
                 'value' => config('app.logo', 'images/logo.png'),
-                'value_type' => 'string',
-                'description' => 'Path atau URL logo aplikasi.',
+                'type' => 'string',
                 'label' => 'Logo aplikasi',
+                'category' => 'Application',
+                'description' => 'Path atau URL logo aplikasi.',
             ],
             [
-                'key' => 'is_install',
-                'type' => 'Application',
+                'key' => 'is_installed',
                 'value' => false,
-                'value_type' => 'boolean',
-                'description' => 'Menandakan apakah aplikasi sudah diinstal.',
+                'type' => 'boolean',
                 'label' => 'Sudah diinstal',
+                'category' => 'Application',
+                'description' => 'Menandakan apakah aplikasi sudah diinstal.',
             ]
         ];
 

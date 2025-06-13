@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Services\Service;
-use Illuminate\Database\Eloquent\Model;
 
 class OwnerService extends Service
 {
@@ -14,10 +13,5 @@ class OwnerService extends Service
     public function __construct()
     {
         parent::__construct(User::where(['type' => 'owner'])->first());
-    }
-
-    public function get(): ?Model
-    {
-        return $this->model()?->instance();
     }
 }

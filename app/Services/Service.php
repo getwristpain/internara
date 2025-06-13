@@ -16,6 +16,8 @@ abstract class Service
 
     protected string $type = 'Service';
 
+    protected string $action = '';
+
 
     public function __construct(?Model $model = null, ?string $type = null)
     {
@@ -67,10 +69,44 @@ abstract class Service
         if (empty($this->model)) {
             Debugger::debug(new \LogicException("There is no model declared in this service class."));
 
-            return ModelWrapper::make();
+            return new ModelWrapper();
         }
 
-        return ModelWrapper::make($this->model);
+        return new ModelWrapper($this->model);
+    }
+
+    public function withAction(string $action = ''): static
+    {
+        $this->action = $action;
+        return $this;
+    }
+
+    /**
+     * @template T of Service
+     * @param class-string<T> $service
+     * @return T|null
+     */
+    protected function service($service, $args = null): ?Service
+    {
+        if ($service instanceof Service) {
+            return $service;
+        }
+
+        $resolved = null;
+
+        if (is_string($service) && class_exists($service)) {
+            $resolved = app($service, is_array($args) ? $args : []);
+        }
+
+        if (is_null($resolved) && is_string($service) && app()->bound($service)) {
+            $resolved = app($service, is_array($args) ? $args : []);
+        }
+
+        if ($resolved instanceof Service) {
+            return $resolved;
+        }
+
+        return null;
     }
 
     protected function setModel(?Model $model = null): static

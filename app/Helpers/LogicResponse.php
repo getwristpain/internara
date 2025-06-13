@@ -245,14 +245,14 @@ class LogicResponse extends Helper implements LogicResponseContract
         return $this->isInitialized() ? $array : [];
     }
 
-    public function debug(array $property = [], bool $throw = false): static
+    public function debug(?\Throwable $exception = null, array $property = [], bool $throw = false): static
     {
         if ($this->fails()) {
-            $exception = new \LogicException($this->message ?: 'LogicResponse failed.');
+            $exception ??= new \LogicException($this->message ?: 'LogicResponse failed.');
+
             Debugger::debug($exception, 'LogicResponse failed.', $this->toArray(), $property, $throw);
         }
 
-        $this->storeLog('debug');
         return $this;
     }
 

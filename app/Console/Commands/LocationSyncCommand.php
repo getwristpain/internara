@@ -29,7 +29,7 @@ class LocationSyncCommand extends Command
     public function handle(): void
     {
         $this->info('Starting location synchronization...');
-        $start = microtime(true);
+        $startTime = microtime(true);
 
         $restore = $this->option('restore');
 
@@ -44,9 +44,9 @@ class LocationSyncCommand extends Command
             exit();
         }
 
-        $end = microtime(true);
-        $duration = round($end - $start, 2);
+        $endTime = microtime(true);
+        $duration = round($endTime - $startTime, 2);
 
-        $this->info("[{$duration}s] Location sync completed successfully.");
+        $this->info("[Duration: {$duration}s] Location sync completed successfully.");
     }
 }

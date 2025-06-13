@@ -2,33 +2,83 @@
 
 namespace App\Helpers;
 
-use Throwable;
+use App\Contracts\DebuggerContract;
 use App\Helpers\Helper;
 use App\Helpers\Sanitizer;
 use App\Helpers\LogicResponse;
-use Illuminate\Support\Facades\Log;
 
-class Debugger extends Helper
+/**
+ * Debugger helper for handling exceptions, logging, and debug responses.
+ */
+class Debugger extends Helper implements DebuggerContract
 {
+    /**
+     * Logic response instance.
+     *
+     * @var LogicResponse|null
+     */
     protected ?LogicResponse $response = null;
 
-    protected Throwable $exception;
+    /**
+     * Exception instance.
+     *
+     * @var \Throwable
+     */
+    protected \Throwable $exception;
 
+    /**
+     * Debug message.
+     *
+     * @var string
+     */
     protected string $message = '';
 
+    /**
+     * Debug context.
+     *
+     * @var array
+     */
     protected array $context = [];
 
+    /**
+     * Debug properties.
+     *
+     * @var array
+     */
     protected array $properties = [];
 
+    /**
+     * Debug mode flag.
+     *
+     * @var bool
+     */
     protected bool $isDebug = false;
 
+    /**
+     * Debugger constructor.
+     */
     public function __construct()
     {
         $this->isDebug = self::isDebug();
     }
 
-    public static function debug(Throwable $exception, string $message = '', array $context = [], array $properties = [], bool $throw = false): static
-    {
+    /**
+     * Create a debug instance and log the exception.
+     *
+     * @param \Throwable $exception
+     * @param string $message
+     * @param array $context
+     * @param array $properties
+     * @param bool $throw
+     * @return static
+     */
+    public static function debug(
+        \Throwable $exception,
+        string $message = '',
+        array $context = [],
+        array $properties = [],
+        bool $throw = false
+    ): static {
         $instance = new static();
         $instance->exception = $exception;
         $instance->message = Sanitizer::sanitize(!empty($message) ? $message : $exception->getMessage(), 'message');
@@ -46,36 +96,72 @@ class Debugger extends Helper
         return $instance;
     }
 
+    /**
+     * Check if the application is in debug mode.
+     *
+     * @return bool
+     */
     public static function isDebug(): bool
     {
         return app()->environment(['local', 'dev', 'development', 'test', 'testing']) && (config('app.debug', false) === true);
     }
 
+    /**
+     * Get the logic response instance.
+     *
+     * @return LogicResponse
+     */
     public function response(): LogicResponse
     {
         return $this->response ?? new LogicResponse();
     }
 
-    public function exception(): Throwable
+    /**
+     * Get the exception instance.
+     *
+     * @return \Throwable
+     */
+    public function exception(): \Throwable
     {
         return $this->exception;
     }
 
+    /**
+     * Get the debug message.
+     *
+     * @return string
+     */
     public function getMessage(): string
     {
         return $this->message;
     }
 
+    /**
+     * Get the debug context.
+     *
+     * @return array
+     */
     public function getContext(): array
     {
         return $this->context;
     }
 
+    /**
+     * Get the debug properties.
+     *
+     * @return array
+     */
     public function getProperties(): array
     {
         return $this->properties;
     }
 
+    /**
+     * Dump debug information.
+     *
+     * @param bool $die
+     * @return void
+     */
     public function dump(bool $die = false): void
     {
         $properties = $this->isDebug ? $this->properties : $this->context;
@@ -87,52 +173,101 @@ class Debugger extends Helper
         dump($this->message, $properties);
     }
 
+    /**
+     * Throw the exception.
+     *
+     * @return void
+     * @throws \Throwable
+     */
     public function throw(): void
     {
-        throw $this->exception ?? null;
+        throw $this->exception ?? new \Exception($this->message);
     }
 
+    /**
+     * Throw the exception if the condition is true.
+     *
+     * @param bool|callable $condition
+     * @return void
+     * @throws \Throwable
+     */
     public function throwIf(bool|callable $condition): void
     {
-        if (is_bool($condition) && $condition) {
-            $this->throw();
-        } elseif ($condition()) {
+        if ((is_bool($condition) && $condition) || (is_callable($condition) && $condition())) {
             $this->throw();
         }
     }
 
+    /**
+     * Throw the exception unless the condition is true.
+     *
+     * @param bool|callable $condition
+     * @return void
+     * @throws \Throwable
+     */
     public function throwUnless(bool|callable $condition): void
     {
-        $this->throwIf(! $condition);
+        $this->throwIf(!(is_callable($condition) ? $condition() : $condition));
     }
 
+    /**
+     * Abort the request with an error code and message.
+     *
+     * @param int|null $code
+     * @param array $header
+     * @return never
+     */
     public function abort(?int $code = null, array $header = []): never
     {
         abort($code ?? $this->exception->getCode(), $this->message, $header);
     }
 
+    /**
+     * Abort if the condition is true.
+     *
+     * @param bool|callable $condition
+     * @param int|null $code
+     * @param array $header
+     * @return void
+     */
     public function abortIf(bool|callable $condition, ?int $code = null, array $header = []): void
     {
-        if (is_bool($condition) && $condition) {
-            $this->abort($code, $header);
-        } elseif ($condition()) {
+        if ((is_bool($condition) && $condition) || (is_callable($condition) && $condition())) {
             $this->abort($code, $header);
         }
     }
 
+    /**
+     * Abort unless the condition is true.
+     *
+     * @param bool|callable $condition
+     * @param int|null $code
+     * @param array $header
+     * @return void
+     */
     public function abortUnless(bool|callable $condition, ?int $code = null, array $header = []): void
     {
-        $this->abortIf(!$condition, $code, $header);
+        $this->abortIf(!(is_callable($condition) ? $condition() : $condition), $code, $header);
     }
 
+    /**
+     * Get debug data as array.
+     *
+     * @return array
+     */
     public function toArray(): array
     {
         return array_merge(['message' => $this->message], $this->properties);
     }
 
+    /**
+     * Normalize debug properties.
+     *
+     * @param array $properties
+     * @return array
+     */
     protected function normalizeDebugProps(array $properties = []): array
     {
-
         $formattedProps = $this->formatProperties($properties);
         $formattedException = empty($this->exception) ? [] : $this->formatException($this->exception);
 
@@ -142,7 +277,14 @@ class Debugger extends Helper
         ]));
     }
 
-    protected function exceptionTraceLineLimit(Throwable $exception, int $limit = 5): string
+    /**
+     * Limit the exception trace lines.
+     *
+     * @param \Throwable $exception
+     * @param int $limit
+     * @return string
+     */
+    protected function exceptionTraceLineLimit(\Throwable $exception, int $limit = 6): string
     {
         $fullTrace = $exception->getTrace();
         $limitedTrace = array_slice($fullTrace, 0, $limit);
@@ -159,7 +301,13 @@ class Debugger extends Helper
         return $traceAsString;
     }
 
-    protected function formatException(Throwable $exception): array
+    /**
+     * Format exception details as array.
+     *
+     * @param \Throwable $exception
+     * @return array
+     */
+    protected function formatException(\Throwable $exception): array
     {
         return [
             'message' => Sanitizer::sanitize($exception->getMessage(), 'message'),
@@ -171,17 +319,23 @@ class Debugger extends Helper
         ];
     }
 
+    /**
+     * Format debug properties.
+     *
+     * @param array $properties
+     * @return array
+     */
     protected function formatProperties(array $properties = []): array
     {
         $properties = array_merge([
             'requests' => [
-                    'ip' => request()->ip() ?? '',
-                    'method' => request()->method() ?? '',
-                    'route' => request()->route() ? request()->route()->getName() : '',
-                    'url' => request()->fullUrl() ?? '',
-                    'userAgent' => request()->userAgent() ?? '',
-                    'userId' => auth()->id() ?? '',
-                ],
+                'ip' => request()->ip() ?? '',
+                'method' => request()->method() ?? '',
+                'route' => request()->route() ? request()->route()->getName() : '',
+                'url' => request()->fullUrl() ?? '',
+                'userAgent' => request()->userAgent() ?? '',
+                'userId' => auth()->id() ?? '',
+            ],
             'timestamp' => now()->toDateTimeString(),
         ], Sanitizer::sanitize($properties, 'sensitive'));
 

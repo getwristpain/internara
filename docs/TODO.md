@@ -1,29 +1,29 @@
 # Internara Checklist Breakdown
 
-* [ ] Instalasi sistem oleh administrator:
-  * [ ] Tahap instalasi dimulai
-    * [ ] Tandai telah selesai
-    * [ ] Lanjut ke tahap berikutnya
-  * [ ] Tahap instalasi sekolah
-    * [ ] Cek apakah sekolah sudah dikonfigurasi
-    * [ ] Tandai selesai jika sudah
-    * [ ] Lanjut ke tahap berikutnya
-  * [ ] Tahap installasi jurusan
-    * [ ] Cek setidaknya punya satu jurusan
-    * [ ] Tandai telah selesai
-    * [ ] Lanjut ke tahap berikutnya
-  * [ ] Tahap instalasi akun admin
-    * [ ] Cek apakah akun admin telah dibuat
-    * [ ] Tandai telah selesai
-    * [ ] Lanjut ke tahap berikutnya
+* [#] Instalasi sistem oleh administrator:
+  * [#] Tahap instalasi dimulai
+    * [v] Tandai telah selesai
+    * [v] Lanjut ke tahap berikutnya
+  * [#] Tahap instalasi sekolah
+    * [v] Cek apakah sekolah sudah dikonfigurasi
+    * [v] Tandai selesai jika sudah
+    * [v] Lanjut ke tahap berikutnya
+  * [#] Tahap installasi jurusan
+    * [v] Cek setidaknya punya satu jurusan
+    * [v] Tandai telah selesai
+    * [v] Lanjut ke tahap berikutnya
+  * [#] Tahap instalasi akun admin
+    * [v] Cek apakah akun admin telah dibuat
+    * [v] Tandai telah selesai
+    * [v] Lanjut ke tahap berikutnya
   * [ ] Tahap instalasi selesai
     * [ ] Cek apakah semua tahap sebelumnya telah selesai
     * [ ] Tandai telah selesai
     * [ ] Tandai sistem telah terinstal
     * [ ] Lanjut ke halaman login
-* [ ] Konfigurasi sekolah
-* [ ] Pengaturan jurusan
-* [ ] Pembuatan akun administrator
+* [ ] Buat form sekolah
+* [ ] Buat form jurusan jurusan
+* [ ] Buat form register
 * [ ] Penambahan mitra industri
 * [ ] Penambahan akun supervisor
 * [ ] Penambahan akun guru
