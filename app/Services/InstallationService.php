@@ -15,6 +15,12 @@ class InstallationService extends Service
     public function __construct()
     {
         parent::__construct();
+        $this->useServices([
+            OwnerService::class,
+            SchoolService::class,
+            SettingService::class,
+            StatusService::class,
+        ]);
     }
 
     /**
@@ -54,11 +60,11 @@ class InstallationService extends Service
      */
     protected function installSchool(): LogicResponse
     {
-        $firstSchool = $this->service(SchoolService::class)->model()->first();
+        $firstSchool = $this->schoolService->model()->first();
 
         if (!$firstSchool) {
             return $this->response()
-                ->failure('No school record found. Please add a school before continuing.');
+                ->failure("No school found. Please ensure 'School' record exists before continuing.");
         }
 
         return $this->markAsCompleted('school_config');
@@ -71,14 +77,14 @@ class InstallationService extends Service
      */
     protected function installDepartment(): LogicResponse
     {
-        $department = $this->service(SchoolService::class)
+        $department = $this->schoolService
             ->model()->instance()
             ->departments()
             ->first();
 
         if (!$department) {
             return $this->response()
-                ->failure('No department found. Please add at least one department to proceed.');
+                ->failure("No department found. Please ensure 'Department' record exists before continuing.");
         }
 
         return $this->markAsCompleted('department_setup');
@@ -91,11 +97,11 @@ class InstallationService extends Service
      */
     protected function installOwner(): LogicResponse
     {
-        $owner = $this->service(OwnerService::class)->model()->instance();
+        $owner = $this->ownerService->model()->instance();
 
         if (!$owner) {
             return $this->response()
-                ->failure('No owner found. Please create an owner account before continuing.');
+                ->failure("No owner found. Please ensure 'Owner' record exists before continuing.");
         }
 
         return $this->markAsCompleted('owner_setup');
@@ -113,7 +119,12 @@ class InstallationService extends Service
             return $markAsCompleted;
         }
 
-        return $this->service(SettingService::class)->set('is_installed', true);
+        return $this->settingService->set('is_installed', true);
+    }
+
+    public function isStepCompleted(string $step): bool
+    {
+        return $this->statusService->isMarked($step, 'installation');
     }
 
     /**
@@ -124,7 +135,12 @@ class InstallationService extends Service
      */
     protected function markAsCompleted(string $step): LogicResponse
     {
-        $markStatus = $this->service(StatusService::class)->mark($step, 'installation', strict: true);
+        if ($this->isStepCompleted($step)) {
+            return $this->response()
+                ->success("The installation step '{$step}' has already been completed.");
+        }
+
+        $markStatus = $this->statusService->mark($step, 'installation', strict: true);
 
         if (!$markStatus) {
             return $this->response()

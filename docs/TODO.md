@@ -2,21 +2,21 @@
 
 * [#] Instalasi sistem oleh administrator:
   * [#] Tahap instalasi dimulai
-    * [v] Tandai telah selesai
-    * [v] Lanjut ke tahap berikutnya
+    * [ ] Tandai telah selesai
+    * [ ] Lanjut ke tahap berikutnya
   * [#] Tahap instalasi sekolah
-    * [v] Cek apakah sekolah sudah dikonfigurasi
-    * [v] Tandai selesai jika sudah
-    * [v] Lanjut ke tahap berikutnya
+    * [ ] Cek apakah sekolah sudah dikonfigurasi
+    * [ ] Tandai selesai jika sudah
+    * [ ] Lanjut ke tahap berikutnya
   * [#] Tahap installasi jurusan
-    * [v] Cek setidaknya punya satu jurusan
-    * [v] Tandai telah selesai
-    * [v] Lanjut ke tahap berikutnya
+    * [ ] Cek setidaknya punya satu jurusan
+    * [ ] Tandai telah selesai
+    * [ ] Lanjut ke tahap berikutnya
   * [#] Tahap instalasi akun admin
-    * [v] Cek apakah akun admin telah dibuat
-    * [v] Tandai telah selesai
-    * [v] Lanjut ke tahap berikutnya
-  * [ ] Tahap instalasi selesai
+    * [ ] Cek apakah akun admin telah dibuat
+    * [ ] Tandai telah selesai
+    * [ ] Lanjut ke tahap berikutnya
+  * [#] Tahap instalasi selesai
     * [ ] Cek apakah semua tahap sebelumnya telah selesai
     * [ ] Tandai telah selesai
     * [ ] Tandai sistem telah terinstal

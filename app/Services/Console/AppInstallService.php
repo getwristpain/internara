@@ -44,47 +44,47 @@ class AppInstallService extends Service
      */
     public function install(): void
     {
+        $this->command->newLine();
         $this->clearCache();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->clearLogs();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->checkEnvFile();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->generateAppKey();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->configureEnv();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->configureDatabase();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->runMigrations();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->runFreshMigrations();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->seedDatabase();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->createStorageLink();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->cleanStorage();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->syncDataset();
-        $this->command->newLine();
 
+        $this->command->newLine();
         $this->buildAssets();
-        $this->command->newLine();
 
-        $this->optimize();
         $this->command->newLine();
+        $this->optimize();
     }
 
     /**

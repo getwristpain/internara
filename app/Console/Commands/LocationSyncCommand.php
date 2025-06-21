@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Helpers\Debugger;
 use App\Services\Console\LocationSyncService;
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
 
 class LocationSyncCommand extends Command
 {
@@ -26,7 +25,7 @@ class LocationSyncCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): bool
     {
         $this->info('Starting location synchronization...');
         $startTime = microtime(true);
@@ -41,12 +40,14 @@ class LocationSyncCommand extends Command
 
             Debugger::debug($e, 'LocationSync command error: ' . $e->getMessage(), throw: true);
 
-            exit();
+            return static::FAILURE;
         }
 
         $endTime = microtime(true);
         $duration = round($endTime - $startTime, 2);
 
         $this->info("[Duration: {$duration}s] Location sync completed successfully.");
+
+        return static::SUCCESS;
     }
 }

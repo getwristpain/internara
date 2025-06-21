@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Language file for system messages.
+ *
+ * This file contains various messages used throughout the application,
+ * categorized by their type (success, info, warning, error).
+ */
+return [
+    'success' => [
+        'activated' => 'The :resource has been activated successfully.',
+        'approved'  => 'The :resource has been approved successfully.',
+        'cancelled'  => 'The :resource has been cancelled successfully.',
+        'completed' => 'The :resource has been completed successfully.',
+        'confirmed'  => 'The :resource has been confirmed successfully.',
+        'created_at' => 'The :resource was created at :time.',
+        'created'   => 'The :resource has been created successfully.',
+        'deactivated' => 'The :resource has been deactivated successfully.',
+        'deleted_at' => 'The :resource was deleted at :time.',
+        'deleted'   => 'The :resource has been deleted successfully.',
+        'disabled'  => 'The :resource has been disabled successfully.',
+        'enabled'   => 'The :resource has been enabled successfully.',
+        'exported'  => 'The :resource has been exported successfully.',
+        'imported'  => 'The :resource has been imported successfully.',
+        'installed' => 'The :resource has been installed successfully.',
+        'rejected'  => 'The :resource has been rejected successfully.',
+        'reset'     => 'The :resource has been reset successfully.',
+        'saved'  => 'The :resource has been saved successfully.',
+        'sent'  => 'The :resource has been sent successfully.',
+        'stored'  => 'The :resource has been stored successfully.',
+        'synced'    => 'The :resource has been synchronized successfully.',
+        'unverified'  => 'The :resource has been unverified successfully.',
+        'updated_at' => 'The :resource was updated at :time.',
+        'updated'   => 'The :resource has been updated successfully.',
+        'verified'  => 'The :resource has been verified successfully.',
+    ],
+    'info' => [
+        'processing'    => 'Processing your request, please wait...',
+        'no_changes'    => 'No changes were made.',
+        'already_exists' => 'The data already exists.',
+        'maintenance'   => 'The system is under maintenance.',
+        'session_expired' => 'Your session has expired. Please log in again.',
+    ],
+    'warning' => [
+        'unsaved_changes'   => 'You have unsaved changes.',
+        'deprecated'        => 'This feature is deprecated and may be removed in the future.',
+        'limited_access'    => 'You have limited access to this resource.',
+        'incomplete_data'   => 'Some required data is missing or incomplete.',
+        'rate_limit'        => 'You are performing actions too quickly. Please slow down.',
+    ],
+    'error' => [
+        'api_error'     => 'An error occurred while communicating with the API.',
+        'create_failed' => 'Failed to create the :resource. Please try again.',
+        'database'      => 'A database error occurred. Please try again later.',
+        'delete_failed' => 'Failed to delete the :resource. Please try again.',
+        'email_send'    => 'Failed to send the email. Please check the email configuration.',
+        'file_download' => 'Failed to download the file. Please try again later.',
+        'file_not_found' => 'The requested file was not found.',
+        'file_upload'   => 'Failed to upload the file. Please check the file size and format.',
+        'forbidden'     => 'You do not have permission to access this resource.',
+        'not_found'     => 'The :resource was not found.',
+        'require_not_exist' => 'No :resource data found. Please ensure :resource data exists before continuing.',
+        'server_error'  => 'An internal server error occurred. Please try again later.',
+        'unauthorized'  => 'You are not authorized to perform this action.',
+        'unknown'       => 'An unknown error occurred. Please try again later.',
+        'update_failed' => 'Failed to update the :resource. Please try again.',
+        'validation'    => 'Validation failed for the provided data.',
+        'store_failed' => 'Failed to store the :resource. Please try again.',
+    ],
+];

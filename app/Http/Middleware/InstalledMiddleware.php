@@ -16,7 +16,7 @@ class InstalledMiddleware
     {
         try {
             if (!$this->settingService->isInstalled() && !$this->isInstallRoute($request) && !$this->isLivewireRequest($request)) {
-                return redirect()->route('install');
+                return redirect()->route('install.welcome');
             }
 
             if ($this->settingService->isInstalled() && $this->isInstallRoute($request)) {

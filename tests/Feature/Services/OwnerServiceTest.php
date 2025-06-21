@@ -16,11 +16,7 @@ it('returns null if no owner exists', function () {
 
 it('returns the owner user if exists', function () {
     User::truncate();
-    $owner = User::create([
-        'name' => 'Owner Test',
-        'email' => 'owner@example.com',
-        'username' => 'ownertest',
-        'password' => bcrypt('password'),
+    $owner = User::factory()->create([
         'type' => 'owner',
     ]);
 

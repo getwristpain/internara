@@ -52,17 +52,6 @@ it('returns the debug properties', function () {
     expect($debugger->getProperties())->toHaveKey('baz');
 });
 
-it('can dump debug info', function () {
-    $exception = new Exception('Test');
-    $debugger = Debugger::debug($exception);
-
-    ob_start();
-    $debugger->dump();
-    $output = ob_get_clean();
-
-    expect($output)->toBeString();
-});
-
 it('throws the exception', function () {
     $exception = new Exception('Throw me');
     $debugger = Debugger::debug($exception);

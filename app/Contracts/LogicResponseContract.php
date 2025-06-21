@@ -7,7 +7,6 @@ use Illuminate\Support\MessageBag;
 
 interface LogicResponseContract
 {
-    // --- Static Factory ---
     public static function response(
         bool $success,
         string $message = '',
@@ -17,49 +16,57 @@ interface LogicResponseContract
         array $payload = []
     ): static;
 
-    // --- Initialization ---
-    public function isInitialized(): bool;
+    public function success(string $message = '', array $replace = [], string $locale = ''): static;
 
-    // --- Success & Failure ---
-    public function success(string $message = ''): static;
-    public function failure(string $message = ''): static;
+    public function failure(string $message = '', array $replace = [], string $locale = ''): static;
+
     public function setSuccess(bool $success): static;
 
-    // --- Status & Code & Type ---
     public function getStatus(): string;
+
     public function withStatus(string $status): static;
+
     public function getCode(): int;
+
     public function withCode(int $code): static;
+
     public function getType(): string;
+
     public function withType(string $type): static;
 
-    // --- Message ---
-    public function getMessage(): string;
-    public function withMessage(string $message): static;
+    public function getMessage(string $locale = ''): string;
 
-    // --- Payload ---
+    public function withMessage(string $message, array $replace = [], string $locale = 'en'): static;
+
     public function payload(): ?Collection;
+
     public function withPayload(Collection|array|null $payload): static;
 
-    // --- Errors ---
-    public function getErrors(string $key = ''): MessageBag|Collection|null;
-    public function withErrors(MessageBag|Collection|array $errors): static;
-    public function addErrors(array $errors): static;
+    public function getErrors(string $key = ''): MessageBag|array|null;
+
+    public function withErrors(array|MessageBag|null $errors): static;
+
+    public function addErrors(string $key, string $message): static;
+
     public function clearErrors(): static;
+
     public function hasErrors(): bool;
 
-    // --- Operator & Then ---
     public function operator(?object $operator): static;
+
     public function then(): mixed;
 
-    // --- Pass/Fail/Empty ---
     public function passes(): bool;
+
     public function fails(): bool;
+
     public function isEmpty(): bool;
 
-    // --- Array & Debug & Log ---
     public function toArray(): array;
+
     public function debug(?\Throwable $exception = null, array $property = [], bool $throw = false): static;
+
     public function storeActivity(): static;
+
     public function storeLog(string $level = ''): static;
 }

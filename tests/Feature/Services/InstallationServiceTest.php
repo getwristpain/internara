@@ -10,12 +10,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->service = new InstallationService();
-
     $this->setting = Setting::factory()->create([
-            'key' => 'is_installed',
-            'value' => false,
-            'type' => 'boolean'
+        'key' => 'is_installed',
+        'value' => false,
+        'type' => 'boolean'
         ]);
 
     $this->school = School::factory()->create();
@@ -23,53 +21,52 @@ beforeEach(function () {
     $this->owner = User::factory()->create(['type' => 'owner']);
 });
 
-it('fails school step if no school', function () {
-    School::query()->delete();
-    $response = $this->service->performInstall('school_config');
-    expect($response->fails())->toBeTrue();
-});
-
 it('passes school step if school exists', function () {
-    $response = $this->service->performInstall('school_config');
+    $response = app(InstallationService::class)->performInstall('school_config');
     expect($response->passes())->toBeTrue();
 });
 
-it('passes department step if department exists', function () {
-    $response = $this->service->performInstall('department_setup');
+it('fails school step if no school', function () {
+    School::query()->delete();
+    $response = app(InstallationService::class)->performInstall('school_config');
+    expect($response->fails())->toBeTrue();
+});
 
+it('passes department step if department exists', function () {
+    $response = app(InstallationService::class)->performInstall('department_setup');
     expect($response->passes())->toBeTrue();
 });
 
 it('fails department step if no department', function () {
     Department::query()->delete();
-    $response = $this->service->performInstall('department_setup');
-
-    expect($response->fails())->toBeTrue();
-});
-
-it('fails owner step if no owner', function () {
-    User::query()->delete();
-    $response = $this->service->performInstall('owner_setup');
+    $response = app(InstallationService::class)->performInstall('department_setup');
     expect($response->fails())->toBeTrue();
 });
 
 it('passes owner step if owner exists', function () {
-    $response = $this->service->performInstall('owner_setup');
+    $response = app(InstallationService::class)->performInstall('owner_setup');
     expect($response->passes())->toBeTrue();
 });
 
+it('fails owner step if no owner', function () {
+    User::query()->delete();
+    $response = app(InstallationService::class)->performInstall('owner_setup');
+    expect($response->fails())->toBeTrue();
+});
+
 it('marks welcome step as completed', function () {
-    $response = $this->service->performInstall('welcome');
+    $response = app(InstallationService::class)->performInstall('welcome');
     expect($response->passes())->toBeTrue();
 });
 
 it('marks complete step and sets is_installed', function () {
-    $this->service->performInstall('welcome');
-    $this->service->performInstall('school_config');
-    $this->service->performInstall('department_setup');
-    $this->service->performInstall('owner_setup');
+    $service = app(InstallationService::class);
+    $service->performInstall('welcome');
+    $service->performInstall('school_config');
+    $service->performInstall('department_setup');
+    $service->performInstall('owner_setup');
 
-    $response = $this->service->performInstall('complete');
+    $response = $service->performInstall('complete');
     expect($response->passes())->toBeTrue();
 
     $setting = Setting::where('key', 'is_installed')->first();
@@ -78,6 +75,6 @@ it('marks complete step and sets is_installed', function () {
 });
 
 it('fails on invalid step', function () {
-    $response = $this->service->performInstall('invalid_step');
+    $response = app(InstallationService::class)->performInstall('invalid_step');
     expect($response->fails())->toBeTrue();
 });

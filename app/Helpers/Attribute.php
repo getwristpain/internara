@@ -22,7 +22,7 @@ class Attribute implements Arrayable
 
     public function fill(array $attributes): static
     {
-        if (!empty($attributes) && !ArrayHelper::isFlatAssoc($attributes)) {
+        if (!empty($attributes) && !Helper::isFlatAssocArray($attributes)) {
             throw new \InvalidArgumentException('Attributes array must be a flat associative array.');
         }
 
@@ -36,12 +36,12 @@ class Attribute implements Arrayable
             return $this->attributes;
         }
 
-        return ArrayHelper::get($this->attributes, $key, $default);
+        return Helper::getArray($this->attributes, $key, $default);
     }
 
     public function set(string|int|array $key, mixed $value): static
     {
-        ArrayHelper::set($this->attributes, $key, $value);
+        Helper::setArray($this->attributes, $key, $value);
         return $this;
     }
 

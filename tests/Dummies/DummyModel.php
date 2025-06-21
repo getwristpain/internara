@@ -10,26 +10,22 @@ class DummyModel extends Model
     protected $fillable = [
         'name',
         'type',
-        'message'
+        'message',
     ];
 
     public static function all($columns = ['*']): Collection
     {
-        return new Collection([[
-            'name' => 'Testing',
-            'type' => 'test',
-            'message' => 'testing is everything'
-        ]]);
+        return new Collection([
+            new static([
+                'name' => 'Testing',
+                'type' => 'test',
+                'message' => 'testing is everything',
+            ])
+        ]);
     }
 
     public function getAttribute($key)
     {
-        $attributes = [
-            'name' => 'Testing',
-            'type' => 'test',
-            'message' => 'testing is everything'
-        ];
-
-        return $attributes[$key] ?? null;
+        return $this->attributes[$key] ?? parent::getAttribute($key);
     }
 }

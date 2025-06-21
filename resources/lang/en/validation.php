@@ -189,6 +189,5 @@ return [
     |
     */
 
-    'attributes' => [],
-
+    'attributes' => require __DIR__ . '/attributes.php',
 ];

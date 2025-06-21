@@ -15,15 +15,17 @@ class LocationSyncService extends Service
 
     protected bool $restore = false;
 
-    protected LocationService $locationService;
-
     public function __construct(?Command $command = null, bool $restore = false)
     {
         parent::__construct();
 
         $this->command = $command;
         $this->restore = $restore;
-        $this->locationService = $locationService ?? app(LocationService::class);
+
+        $this->useServices([
+            LocationService::class,
+            WilayahHttpService::class
+        ]);
     }
 
     public function syncAll(): void
@@ -43,7 +45,6 @@ class LocationSyncService extends Service
     protected function restoreFromBackupIfExists(): bool
     {
         $this->command->info('Checking for existing backup...');
-        $this->command->newLine();
 
         $backupFiles = glob('database/backups/locations_backup_*.csv');
         if (empty($backupFiles)) {
@@ -61,14 +62,13 @@ class LocationSyncService extends Service
         \DB::table('locations')->truncate();
         $this->runShellCommand('sqlite3 database/database.sqlite -cmd ".mode csv" -cmd ".import ' . escapeshellarg($latestBackup) . ' locations"');
 
-        $this->command->newLine();
         $this->command->info('✔ Locations restored from backup successfully.');
         return true;
     }
 
     protected function storeLocations(): void
     {
-        $wilayah = app(WilayahHttpService::class);
+        $wilayah = $this->useServices(WilayahHttpService::class);
 
         $this->locationService->transaction(function () use ($wilayah) {
             $provinces = $wilayah->getProvinces();

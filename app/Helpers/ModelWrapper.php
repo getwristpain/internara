@@ -3,229 +3,320 @@
 namespace App\Helpers;
 
 use App\Contracts\EntityContract;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Wrapper for Eloquent model operations with response helpers.
+ */
 class ModelWrapper extends Helper implements EntityContract
 {
-    protected Model|Builder|null $model;
+    /**
+     * The Eloquent model instance.
+     *
+     * @var Model|null
+     */
+    protected ?Model $model = null;
 
+    /**
+     * The model class name.
+     *
+     * @var string
+     */
     protected string $modelClass = '';
 
+    /**
+     * The type name for response.
+     *
+     * @var string
+     */
     protected string $type = 'Record';
 
-    protected array $meta = [];
-
-    public function __construct(Model|Builder|null $model = null)
+    /**
+     * ModelWrapper constructor.
+     *
+     * @param Model|null $model
+     */
+    public function __construct(?Model $model = null)
     {
         $this->setModel($model);
     }
 
-    public function withMeta(array $meta = []): static
+    /**
+     * Get a new model query instance.
+     *
+     * @return Model|null
+     */
+    public function query(): ?Model
     {
-        $this->meta = array_merge($this->meta, $meta);
-        return $this;
+        return $this->modelClass ? app($this->modelClass) : null;
     }
 
-    public function query(): Model|null
+    /**
+     * Get the current model instance.
+     *
+     * @return Model|null
+     */
+    public function instance(): ?Model
     {
-        return !empty($this->modelClass) ? app($this->modelClass) : null;
+        return $this->model;
     }
 
-    public function instance(): Model|Builder|null
+    /**
+     * Get all records.
+     *
+     * @param array|string $columns
+     * @param array $with
+     * @return Collection|null
+     */
+    public function all(array|string $columns = ['*'], array $with = []): ?Collection
     {
-        return $this->model ?? null;
-    }
-
-    public function all(array|string $column = '[*]'): ?Collection
-    {
-        if (!$this->model) {
-            return null;
+        if (!empty($with)) {
+            return $this->get(with: $with);
         }
 
-        $query = $this->query()->all($column);
-        $this->withMeta(['count' => $query->count() ?? 0]);
-
-        return $query ?? new Collection([]);
+        return $this->model
+            ? $this->query()?->all($columns) ?? new Collection([])
+            : null;
     }
 
-    public function get(array $where = [], array $with = [], array|string $column = '[*]'): ?Collection
+    /**
+     * Get records by where condition.
+     *
+     * @param array $where
+     * @param array $with
+     * @param array|string $columns
+     * @return Collection|null
+     */
+    public function get(array $where = [], array $with = [], array|string $columns = ['*']): ?Collection
     {
-        if (!$this->model) {
-            return null;
-        }
-
-        $query = $this->query()->with($with)
-            ->where($where)
-            ->get($column);
-
-        $this->withMeta(['count' => $query->count() ?? 0]);
-
-        return $query ?? new Collection([]);
+        return $this->model
+            ? $this->query()?->with($with)->where($where)->get($columns) ?? new Collection([])
+            : null;
     }
 
-    public function find($id, array $with = []): Collection|Model|null
+    /**
+     * Find a record by id.
+     *
+     * @param mixed $id
+     * @param array $with
+     * @return Collection|Model|null
+     */
+    public function find(mixed $id, array $with = []): Collection|Model|null
     {
-        if (!$this->model) {
-            return null;
-        }
-
-        $query = $this->query()->with($with)
-            ->find($id);
-
-        $this->withMeta(['found' => $query ? 1 : 0]);
-
-        return $query;
+        return $this->model
+            ? $this->query()?->with($with)->find($id)
+            : null;
     }
 
+    /**
+     * Get the first record by where condition.
+     *
+     * @param array $where
+     * @param array $with
+     * @return Model|null
+     */
     public function first(array $where = [], array $with = []): ?Model
     {
-        if (!$this->model) {
-            return null;
-        }
-
-        $query = $this->query()->with($with)
-            ->where($where)
-            ->first();
-
-        $this->withMeta(['found' => $query ? 1 : 0]);
-
-        return $query;
+        return $this->model
+            ? $this->query()?->with($with)->where($where)->first()
+            : null;
     }
 
+    /**
+     * Get the first record or fail by where condition.
+     *
+     * @param array $where
+     * @param array $with
+     * @return Model|null
+     */
     public function firstOrFail(array $where = [], array $with = []): ?Model
     {
-        if (!$this->model) {
-            return null;
-        }
-
-        $query = $this->query()->with($with)
-            ->where($where)
-            ->firstOrFail();
-
-        $this->withMeta(['found' => $query ? 1 : 0]);
-
-        return $query;
+        return $this->model
+            ? $this->query()?->with($with)->where($where)->firstOrFail()
+            : null;
     }
 
+    /**
+     * Get the first record or create a new one.
+     *
+     * @param array $where
+     * @param array $attributes
+     * @param array $with
+     * @return Model|null
+     */
     public function firstOrCreate(array $where = [], array $attributes = [], array $with = []): ?Model
     {
-        if (!$this->model) {
-            return null;
-        }
-
-        $query = $this->query()->with($with)
-            ->firstOrCreate($where, $this->filterFillable($attributes));
-        $this->withMeta(['created' => $query->wasRecentlyCreated ? 1 : 0]);
-
-        return $query;
+        return $this->model
+            ? $this->query()?->with($with)->firstOrCreate($where, $this->filterFillable($attributes))
+            : null;
     }
 
+    /**
+     * Create a new record.
+     *
+     * @param array $attributes
+     * @return LogicResponse
+     */
     public function create(array $attributes = []): LogicResponse
     {
         try {
-            $model = $this->query()->create($this->filterFillable($attributes));
-            $this->setModel($model)->withMeta(['created' => $model ? 1 : 0]);
+            $model = $this->query()?->create($this->filterFillable($attributes));
+            $this->setModel($model);
 
-            return $this->response()->success('Data created successfully.');
+            return $this->response()
+                ->success('messages.success.created', ['resource' => $this->type]);
         } catch (\Throwable $e) {
-            return $this->response()->failure('Failed to create data: ' . $e->getMessage())->debug($e);
+            return $this->response()
+                ->failure('messages.error.create_failed', ['resource' => $this->type])
+                ->debug($e);
         }
     }
 
+    /**
+     * Insert multiple rows.
+     *
+     * @param array $rows
+     * @return LogicResponse
+     */
     public function insert(array $rows): LogicResponse
     {
         try {
-            $fillableRows = array_map(fn ($row) => $this->filterFillable($row), $rows);
-            $result = $this->query()->insert($fillableRows);
-            $this->withMeta([
-                'inserted' => $result ? 1 : 0,
-                'saved_count' => $result ? count($fillableRows) : 0
-            ]);
-            return $this->response()->success('Data inserted successfully.');
+            $this->query()?->insert(array_map(fn ($row) => $this->filterFillable($row), $rows));
+
+            return $this->response()
+                ->success('messages.success.stored', ['resource' => $this->type]);
         } catch (\Throwable $e) {
-            return $this->response()->failure('Failed to insert data: ' . $e->getMessage())->debug($e);
+            return $this->response()
+                ->failure('messages.error.store_failed', ['resource' => $this->type])
+                ->debug($e);
         }
     }
 
+    /**
+     * Update records by where condition.
+     *
+     * @param array $attributes
+     * @param array $where
+     * @return LogicResponse
+     */
     public function update(array $attributes = [], array $where = []): LogicResponse
     {
         try {
-            $query = $this->query()->newQuery();
+            $query = $this->query()?->newQuery();
             if ($where) {
                 $query->where($where);
             }
-            $updated = $query->update($this->filterFillable($attributes));
-            $this->withMeta(['updated' => $updated]);
-            return $this->response()->success('Data updated successfully.');
+            $query->update($this->filterFillable($attributes));
+            return $this->response()->success('messages.success.updated', ['resource' => $this->type]);
         } catch (\Throwable $e) {
-            return $this->response()->failure('Failed to update data: ' . $e->getMessage())->debug($e);
+            return $this->response()
+                ->failure('messages.error.update_failed', ['resource' => $this->type])
+                ->debug($e);
         }
     }
 
-    public function delete($id): LogicResponse
+    /**
+     * Delete a record by id.
+     *
+     * @param mixed $id
+     * @return LogicResponse
+     */
+    public function delete(mixed $id): LogicResponse
     {
         try {
-            $deleted = $this->query()->destroy($id);
-            $this->withMeta(['deleted' => $deleted]);
-            return $this->response()->success('Data deleted successfully.');
+            $this->query()?->destroy($id);
+            return $this->response()->success('messages.success.deleted', ['resource' => $this->type]);
         } catch (\Throwable $e) {
-            return $this->response()->failure('Failed to delete data: ' . $e->getMessage())->debug($e);
+            return $this->response()
+                ->failure('messages.error.delete_failed', ['resource' => $this->type])
+                ->debug($e);
         }
     }
 
+    /**
+     * Delete multiple records by ids.
+     *
+     * @param array $ids
+     * @return LogicResponse
+     */
     public function destroy(array $ids): LogicResponse
     {
         try {
-            $deleted = $this->query()->destroy($ids);
-            $this->withMeta(['deleted' => $deleted]);
-            return $this->response()->success('Data deleted successfully.');
+            $this->query()?->destroy($ids);
+            return $this->response()->success('messages.success.deleted', ['resource' => $this->type]);
         } catch (\Throwable $e) {
-            return $this->response()->failure('Failed to delete data: ' . $e->getMessage())->debug($e);
+            return $this->response()
+                ->failure('messages.error.delete_failed', ['resource' => $this->type])
+                ->debug($e);
         }
     }
 
+    /**
+     * Convert the model to array.
+     *
+     * @return array
+     */
     public function toArray(): array
     {
-        return [
-            'data' => $this->model?->toArray() ?? [],
-            'meta' => $this->meta
-        ];
+        return $this->model?->toArray() ?? [];
     }
 
+    /**
+     * Convert the model to attributes.
+     *
+     * @return Attribute
+     */
     public function toAttributes(): Attribute
     {
         return Attribute::make($this->model?->toArray() ?? []);
     }
 
+    /**
+     * Convert the model to collection.
+     *
+     * @return Collection
+     */
     public function toCollection(): Collection
     {
         $data = $this->model?->toArray() ?? [];
 
-        if (!ArrayHelper::isFlatAssoc($data)) {
-            return Collection::make([$data]);
-        }
-
-        return Collection::make($data);
+        return Helper::isFlatAssocArray($data)
+            ? Collection::make($data)
+            : Collection::make([$data]);
     }
 
+    /**
+     * Get a LogicResponse for this wrapper.
+     *
+     * @return LogicResponse
+     */
     public function response(): LogicResponse
     {
-        $response = new LogicResponse();
-
-        return $response
+        return (new LogicResponse())
             ->withType($this->type)
             ->withPayload($this->toArray())
             ->operator($this);
     }
 
+    /**
+     * Filter attributes by model fillable.
+     *
+     * @param array $attributes
+     * @return array
+     */
     protected function filterFillable(array $attributes): array
     {
-        return Helper::filter($attributes, $this->model->getFillable());
+        return Helper::filter($attributes, $this->model?->getFillable() ?? []);
     }
 
-    protected function setmodel(Model|Builder|null $model): static
+    /**
+     * Set the model and update related properties.
+     *
+     * @param Model|null $model
+     * @return static
+     */
+    protected function setModel(?Model $model): static
     {
         $this->model = $model;
         $this->modelClass = $model ? get_class($model) : '';

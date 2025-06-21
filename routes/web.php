@@ -7,5 +7,6 @@ foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
 }
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', fn () => view('Hello world!'))->name('dashboard');
+    Route::get('/', fn () => 'Hello world!')
+        ->name('home');
 });

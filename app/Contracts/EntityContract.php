@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface EntityContract
 {
-    public function withMeta(array $meta = []): static;
-
     public function query(): Model|null;
 
     public function instance(): Model|Builder|null;
