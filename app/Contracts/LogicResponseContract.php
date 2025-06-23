@@ -7,7 +7,7 @@ use Illuminate\Support\MessageBag;
 
 interface LogicResponseContract
 {
-    public static function response(
+    public static function make(
         bool $success,
         string $message = '',
         string $status = '',

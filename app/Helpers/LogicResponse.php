@@ -101,7 +101,7 @@ class LogicResponse extends Helper implements LogicResponseContract
      * @param array $payload
      * @return static
      */
-    public static function response(
+    public static function make(
         bool $success,
         string $message = '',
         string $status = '',
@@ -245,11 +245,15 @@ class LogicResponse extends Helper implements LogicResponseContract
     /**
      * Set the response type.
      *
-     * @param string $type
+     * @param string|object $type
      * @return static
      */
-    public function withType(string $type): static
+    public function withType(string|object $type): static
     {
+        if (is_object($type)) {
+            $type = class_basename($type);
+        }
+
         $this->type = $type;
         return $this;
     }

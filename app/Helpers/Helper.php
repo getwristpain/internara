@@ -209,4 +209,17 @@ abstract class Helper
 
         return $data;
     }
+
+    public function response(): LogicResponse
+    {
+        $response = new LogicResponse();
+        return $response->withType($this)
+            ->withPayload($this->toArray())
+            ->operator($this);
+    }
+
+    protected function toArray(): array
+    {
+        return [];
+    }
 }

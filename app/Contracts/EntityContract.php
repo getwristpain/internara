@@ -32,6 +32,8 @@ interface EntityContract
 
     public function update(array $attributes = [], array $where = []): LogicResponse;
 
+    public function updateOrCreate(array $where = [], array $attributes = []): LogicResponse;
+
     public function delete($id): LogicResponse;
 
     public function destroy(array $ids): LogicResponse;

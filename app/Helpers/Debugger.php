@@ -13,13 +13,6 @@ use App\Helpers\LogicResponse;
 class Debugger extends Helper implements DebuggerContract
 {
     /**
-     * Logic response instance.
-     *
-     * @var LogicResponse|null
-     */
-    protected ?LogicResponse $response = null;
-
-    /**
      * Exception instance.
      *
      * @var \Throwable
@@ -66,7 +59,7 @@ class Debugger extends Helper implements DebuggerContract
      * Create a debug instance and log the exception.
      *
      * @param \Throwable $exception
-     * @param string $message
+     * @param string|array $message
      * @param array $context
      * @param array $properties
      * @param bool $throw
@@ -74,26 +67,60 @@ class Debugger extends Helper implements DebuggerContract
      */
     public static function debug(
         \Throwable $exception,
-        string $message = '',
+        string|array $message = '',
         array $context = [],
         array $properties = [],
-        bool $throw = false
+        bool $throw = false,
     ): static {
-        $instance = new static();
-        $instance->exception = $exception;
-        $instance->message = Sanitizer::sanitize(!empty($message) ? $message : $exception->getMessage(), 'message');
-        $instance->context = Sanitizer::sanitize($context, 'sensitive');
-        $instance->properties = $instance->normalizeDebugProps($properties);
+        $replace = [];
+        $locale = 'en';
 
-        $instance->response = $instance->response()->failure($exception->getMessage())
-            ->withType('Debugger')
-            ->storeLog('debug');
+        if (is_array($message)) {
+            $msg = $message;
+            $message = $msg[0] ?? '';
+            $replace = $msg[1] ?? [];
+            $locale = $msg[2] ?? 'en';
+        }
+
+        $instance = new static();
+        $instance->withException($exception)
+            ->withMessage($message, $replace, $locale)
+            ->withContext($context)
+            ->withProperties($properties)
+            ->response()
+                ->failure($exception->getMessage())
+                ->storeLog('debug');
 
         if ($instance->isDebug() && $throw) {
             $instance->throw();
         }
 
         return $instance;
+    }
+
+    public function withException(\Throwable $exception): static
+    {
+        $this->exception = $exception;
+        return $this;
+    }
+
+    public function withMessage(string $message = '', array $replace = [], string $locale = 'en'): static
+    {
+        $message = Sanitizer::sanitize(!empty($message) ? $message : $this->exception->getMessage() ?? '', 'message');
+        $this->message = Translator::translate($message, $replace, $locale);
+        return $this;
+    }
+
+    public function withContext(array $context = []): static
+    {
+        $this->context = Sanitizer::sanitize($context, 'sensitive');
+        return $this;
+    }
+
+    public function withProperties(array $properties = []): static
+    {
+        $this->properties = $this->normalizeDebugProps($properties);
+        return $this;
     }
 
     /**
@@ -104,16 +131,6 @@ class Debugger extends Helper implements DebuggerContract
     public static function isDebug(): bool
     {
         return app()->environment(['local', 'dev', 'development', 'test', 'testing']) && (config('app.debug', false) === true);
-    }
-
-    /**
-     * Get the logic response instance.
-     *
-     * @return LogicResponse
-     */
-    public function response(): LogicResponse
-    {
-        return $this->response ?? new LogicResponse();
     }
 
     /**
@@ -131,8 +148,9 @@ class Debugger extends Helper implements DebuggerContract
      *
      * @return string
      */
-    public function getMessage(): string
+    public function getMessage(string $locale = 'en'): string
     {
+
         return $this->message;
     }
 

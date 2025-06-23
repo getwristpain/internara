@@ -35,7 +35,7 @@ describe('LogicResponse', function () {
         });
 
         it('can use static response factory', function () {
-            $res = LogicResponse::response(true, 'ok', 'done', 201, 'Type', ['foo' => 'bar']);
+            $res = LogicResponse::make(true, 'ok', 'done', 201, 'Type', ['foo' => 'bar']);
             expect($res->passes())->toBeTrue();
             expect($res->getMessage())->toBe('ok');
             expect($res->getStatus())->toBe('done');

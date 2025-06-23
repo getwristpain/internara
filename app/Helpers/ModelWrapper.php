@@ -217,6 +217,31 @@ class ModelWrapper extends Helper implements EntityContract
     }
 
     /**
+     * Update a record if exists, otherwise create it.
+     *
+     * @param array $where
+     * @param array $attributes
+     * @return LogicResponse
+     */
+    public function updateOrCreate(array $where = [], array $attributes = []): LogicResponse
+    {
+        try {
+            $model = $this->query()?->updateOrCreate(
+                $where,
+                $this->filterFillable($attributes)
+            );
+            $this->setModel($model);
+
+            return $this->response()
+                ->success('messages.success.saved', ['resource' => $this->type]);
+        } catch (\Throwable $e) {
+            return $this->response()
+                ->failure('messages.error.save_failed', ['resource' => $this->type])
+                ->debug($e);
+        }
+    }
+
+    /**
      * Delete a record by id.
      *
      * @param mixed $id
