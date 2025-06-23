@@ -3,7 +3,6 @@
 use App\Helpers\LogicResponse;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 
 uses(RefreshDatabase::class);
@@ -11,11 +10,10 @@ uses(RefreshDatabase::class);
 describe('LogicResponse', function () {
     beforeEach(function () {
         $this->response = new LogicResponse();
-        Log::spy();
     });
 
     describe('success & failure', function () {
-        it('can create a success response', function () {
+        test('can create a success response', function () {
             $res = $this->response->success('Success message');
             expect($res->passes())->toBeTrue();
             expect($res->getMessage())->toBe('Success message');
@@ -24,7 +22,7 @@ describe('LogicResponse', function () {
             expect($res->hasErrors())->toBeFalse();
         });
 
-        it('can create a failure response', function () {
+        test('can create a failure response', function () {
             $res = $this->response->failure('Failure message');
             expect($res->fails())->toBeTrue();
             expect($res->getMessage())->toBe('Failure message');
@@ -34,7 +32,7 @@ describe('LogicResponse', function () {
             expect($res->getErrors())->toBeInstanceOf(MessageBag::class);
         });
 
-        it('can use static response factory', function () {
+        test('can use static response factory', function () {
             $res = LogicResponse::make(true, 'ok', 'done', 201, 'Type', ['foo' => 'bar']);
             expect($res->passes())->toBeTrue();
             expect($res->getMessage())->toBe('ok');
@@ -46,7 +44,7 @@ describe('LogicResponse', function () {
     });
 
     describe('status, code, type, and message', function () {
-        it('can set and get status, code, type, and message', function () {
+        test('can set and get status, code, type, and message', function () {
             $res = $this->response
                 ->withStatus('custom')
                 ->withCode(123)
@@ -58,7 +56,7 @@ describe('LogicResponse', function () {
             expect($res->getMessage())->toBe('Test message');
         });
 
-        it('can get translated message for specific locale', function () {
+        test('can get translated message for specific locale', function () {
             $en = __('tests.message', [], 'en');
             $id = __('tests.message', [], 'id');
 
@@ -69,14 +67,14 @@ describe('LogicResponse', function () {
     });
 
     describe('payload', function () {
-        it('can set and get payload', function () {
+        test('can set and get payload', function () {
             $payload = ['foo' => 'bar'];
             $res = $this->response->withPayload($payload);
             expect($res->payload())->toBeInstanceOf(Collection::class);
             expect($res->payload()->toArray())->toBe($payload);
         });
 
-        it('can check isEmpty', function () {
+        test('can check isEmpty', function () {
             $res = $this->response->withPayload([]);
             expect($res->isEmpty())->toBeTrue();
             $res = $this->response->withPayload(['foo' => 'bar']);
@@ -85,7 +83,7 @@ describe('LogicResponse', function () {
     });
 
     describe('errors', function () {
-        it('can set and get errors as MessageBag', function () {
+        test('can set and get errors as MessageBag', function () {
             $errors = ['field' => ['Error message']];
             $res = $this->response->failure('fail')->withErrors($errors);
             expect($res->getErrors())->toBeInstanceOf(MessageBag::class);
@@ -93,7 +91,7 @@ describe('LogicResponse', function () {
             expect($res->hasErrors())->toBeTrue();
         });
 
-        it('can add and clear errors', function () {
+        test('can add and clear errors', function () {
             $res = $this->response->failure('fail')->withErrors(['foo' => ['bar']]);
             $res->addErrors('baz', 'qux');
             expect($res->getErrors()->has('baz'))->toBeTrue();
@@ -104,20 +102,20 @@ describe('LogicResponse', function () {
     });
 
     describe('operator and then', function () {
-        it('can set and get operator', function () {
+        test('can set and get operator', function () {
             $obj = new stdClass();
             $res = $this->response->success('ok')->operator($obj);
             expect($res->then())->toBe($obj);
         });
 
-        it('returns self on then if fails', function () {
+        test('returns self on then if fails', function () {
             $res = $this->response->failure('fail');
             expect($res->then())->toBe($res);
         });
     });
 
     describe('array and logging', function () {
-        it('can convert to array', function () {
+        test('can convert to array', function () {
             $res = $this->response->success('ok')->withPayload(['foo' => 'bar']);
             $arr = $res->toArray();
             expect($arr)->toBeArray();
@@ -125,13 +123,13 @@ describe('LogicResponse', function () {
             expect($arr['message'])->toBe('ok');
         });
 
-        it('can store log and activity', function () {
+        test('can store log and activity', function () {
             $res = $this->response->success('ok');
             expect($res->storeLog())->toBeInstanceOf(LogicResponse::class);
             expect($res->storeActivity())->toBeInstanceOf(LogicResponse::class);
         });
 
-        it('can debug on failure', function () {
+        test('can debug on failure', function () {
             $res = $this->response->failure('fail');
             expect($res->debug())->toBeInstanceOf(LogicResponse::class);
         });

@@ -35,6 +35,11 @@ class InstallOwner extends Component
     protected function checkIfOwnerSetupCompleted(): void
     {
         if ($this->installationService->isStepCompleted('owner_setup')) {
+            $this->dispatch('install:step-error', [
+                'step' => 'department_setup',
+                'message' => 'Please complete the department setup step before proceeding.',
+            ]);
+
             redirect()->route('install.complete');
         }
     }
@@ -61,6 +66,7 @@ class InstallOwner extends Component
 
         $this->dispatch('install:step-success', [
             'step' => 'owner_setup',
+            'message' => $performInstall->getMessage(),
         ]);
 
         redirect()->route('install.complete');

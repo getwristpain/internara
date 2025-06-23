@@ -30,8 +30,9 @@ class InstallWelcome extends Component
         }
 
         $this->dispatch('install:step-success', [
-                'step' => 'welcome',
-            ]);
+            'step' => 'welcome',
+            'message' => $performInstall->getMessage(),
+        ]);
 
         redirect()->route('install.school');
     }

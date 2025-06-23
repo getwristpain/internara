@@ -51,7 +51,12 @@ class InstallComplete extends Component
             return;
         }
 
-        redirect()->route('login');
+        $this->dispatch('install:step-success', [
+            'step' => 'complete',
+            'message' => $performInstall->getMessage(),
+        ]);
+
+        redirect()->route('auth.login');
     }
 
     public function render()

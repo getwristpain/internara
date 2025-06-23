@@ -204,9 +204,9 @@ abstract class Service
      * Register and resolve one or more services.
      *
      * @param Service|string|array<Service|string> $services
-     * @return static|Service
+     * @return Service
      */
-    protected function useServices(Service|string|array $services): static|Service
+    protected function useServices(Service|string|array $services): Service
     {
         $isSingle = !is_array($services);
         $services = $isSingle ? [$services] : $services;

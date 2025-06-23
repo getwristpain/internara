@@ -53,6 +53,7 @@ class InstallDepartment extends Component
 
         $this->dispatch('install:step-success', [
             'step' => 'department_setup',
+            'message' => $performInstall->getMessage(),
         ]);
 
         redirect()->route('install.owner');

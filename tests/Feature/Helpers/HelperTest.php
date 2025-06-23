@@ -6,7 +6,7 @@ use Tests\Dummies\Dummy;
 describe('Helper', function () {
 
     describe('stringify', function () {
-        it('converts scalar values to string', function () {
+        test('converts scalar values to string', function () {
             expect(Helper::stringify('hello'))->toBe('hello');
             expect(Helper::stringify(true))->toBe('true');
             expect(Helper::stringify(false))->toBe('false');
@@ -20,50 +20,50 @@ describe('Helper', function () {
     });
 
     describe('hasNestedArray', function () {
-        it('returns true when the array has nested arrays', function () {
+        test('returns true when the array has nested arrays', function () {
             expect(Helper::hasNestedArray([1, [2], 3]))->toBeTrue();
         });
 
-        it('returns false when the array is flat', function () {
+        test('returns false when the array is flat', function () {
             expect(Helper::hasNestedArray([1, 2, 3]))->toBeFalse();
         });
     });
 
     describe('isFlatAssocArray', function () {
-        it('returns true for flat associative arrays', function () {
+        test('returns true for flat associative arrays', function () {
             expect(Helper::isFlatAssocArray(['a' => 1]))->toBeTrue();
             expect(Helper::isFlatAssocArray(['name' => 'John']))->toBeTrue();
         });
 
-        it('returns false for numeric arrays', function () {
+        test('returns false for numeric arrays', function () {
             expect(Helper::isFlatAssocArray([1, 2, 3]))->toBeFalse();
         });
 
-        it('returns false for numeric-string keys', function () {
+        test('returns false for numeric-string keys', function () {
             expect(Helper::isFlatAssocArray(['1' => 'one', '2' => 'two']))->toBeFalse();
         });
 
-        it('returns false and logs error for integer keys', function () {
+        test('returns false and logs error for integer keys', function () {
             expect(Helper::isFlatAssocArray([0 => 'a']))->toBeFalse();
         });
     });
 
     describe('getArray', function () {
-        it('returns value by simple key', function () {
+        test('returns value by simple key', function () {
             $arr = ['a' => 1];
 
             expect(Helper::getArray($arr, 'a'))->toBe(1);
             expect(Helper::getArray($arr, 'b', 'default'))->toBe('default');
         });
 
-        it('returns nested value using path array', function () {
+        test('returns nested value using path array', function () {
             $arr = ['a' => ['b' => ['c' => 5]]];
 
             expect(Helper::getArray($arr, ['a', 'b', 'c']))->toBe(5);
             expect(Helper::getArray($arr, ['a', 'x'], 'not found'))->toBe('not found');
         });
 
-        it('returns default when key is empty', function () {
+        test('returns default when key is empty', function () {
             $arr = [];
 
             expect(Helper::getArray($arr))->toBe(null);
@@ -72,7 +72,7 @@ describe('Helper', function () {
     });
 
     describe('setArray', function () {
-        it('sets value by simple key', function () {
+        test('sets value by simple key', function () {
             $arr = [];
 
             Helper::setArray($arr, 'name', 'testing');
@@ -80,7 +80,7 @@ describe('Helper', function () {
             expect($arr)->toBe(['name' => 'testing']);
         });
 
-        it('sets value by nested path', function () {
+        test('sets value by nested path', function () {
             $arr = [];
 
             Helper::setArray($arr, ['a', 'b', 'c'], 123);
@@ -90,7 +90,7 @@ describe('Helper', function () {
     });
 
     describe('getKeysWithKeywords', function () {
-        it('returns keys containing the given keywords', function () {
+        test('returns keys containing the given keywords', function () {
             $arr = ['username' => 'a', 'email' => 'b', 'phone' => 'c'];
             $expected = ['username', 'email'];
 
@@ -99,25 +99,25 @@ describe('Helper', function () {
     });
 
     describe('filter', function () {
-        it('filters using a callback condition', function () {
+        test('filters using a callback condition', function () {
             $arr = ['a' => 1, 'b' => 2, 'c' => 0];
 
             expect(Helper::filter($arr, fn ($v) => $v > 0))->toBe(['a' => 1, 'b' => 2]);
         });
 
-        it('filters by keywords (include mode)', function () {
+        test('filters by keywords (include mode)', function () {
             $arr = ['email_address' => 'a', 'name' => 'b'];
 
             expect(Helper::filter($arr, ['keywords' => ['email']]))->toBe(['email_address' => 'a']);
         });
 
-        it('filters by keywords (exclude mode)', function () {
+        test('filters by keywords (exclude mode)', function () {
             $arr = ['email_address' => 'a', 'name' => 'b'];
 
             expect(Helper::filter($arr, ['keywords' => ['email'], 'exclude' => true]))->toBe(['name' => 'b']);
         });
 
-        it('filters by matching key-value pairs', function () {
+        test('filters by matching key-value pairs', function () {
             $arr = [
                 ['type' => 'book', 'active' => true],
                 ['type' => 'magazine', 'active' => false],
@@ -128,14 +128,14 @@ describe('Helper', function () {
             expect(Helper::filter($arr, ['type' => 'book']))->toBe($expected);
         });
 
-        it('filters by selected keys from an indexed array', function () {
+        test('filters by selected keys from an indexed array', function () {
             $arr = ['name' => 'a', 'role' => 'b', 'email' => 'c'];
             $expected = ['name' => 'a', 'email' => 'c'];
 
             expect(Helper::filter($arr, ['name', 'email']))->toBe($expected);
         });
 
-        it('removes falsy values by default', function () {
+        test('removes falsy values by default', function () {
             $arr = ['a', '', null, 0, false, 'ok'];
 
             expect(Helper::filter($arr))->toBe([0 => 'a', 5 => 'ok']);
@@ -143,7 +143,7 @@ describe('Helper', function () {
     });
 
     describe('objectToArray', function () {
-        it('converts public properties and method names to array', function () {
+        test('converts public properties and method names to array', function () {
             $model = new Dummy(['name' => 'Testing']);
             $result = Helper::objectToArray($model);
 

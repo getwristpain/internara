@@ -102,7 +102,7 @@ class LogicResponse extends Helper implements LogicResponseContract
      * @return static
      */
     public static function make(
-        bool $success,
+        bool $success = true,
         string $message = '',
         string $status = '',
         int $code = 0,

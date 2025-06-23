@@ -53,6 +53,7 @@ class InstallSchool extends Component
 
         $this->dispatch('install:step-success', [
                 'step' => 'school_config',
+                'message' => $performInstall->getMessage(),
             ]);
 
         redirect()->route('install.department');
