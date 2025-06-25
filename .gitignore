@@ -1,28 +1,51 @@
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/database/backups
+# Laravel & Composer
+!/.env.example
+/vendor
 /node_modules
+/.phpunit.result.cache
+/.phpunit.cache
+/.phpactor.json
+/.env*
+
+# Laravel storage (keep only necessary folders)
+!/storage/app/public
+!/storage/app/private
+!/storage/framework/cache/data
+!/storage/framework/sessions
+!/storage/framework/testing
+!/storage/framework/views
+!/storage/logs
+!/storage/pail
+!/storage/temp
+/storage/*
+
+# Laravel public storage symlink
+/public/storage
+
+# Laravel build & hot reload
 /public/build
 /public/hot
-/public/storage
-/storage/*.key
-/storage/debugbar
-/storage/framework
-/storage/pail
-/storage/logs
-/storage/temp
-/vendor
-Homestead.json
-Homestead.yaml
-npm-debug.log
-yarn-error.log
+
+# IDE & Editor
+/.idea
+/.vscode
+/.fleet
+/.zed
+
+# Nova, Jetstream, etc
+/.nova
+
+# Misc
+/auth.json
+/database/backups
+/npm-debug.log*
+/yarn-error.log*
+/Homestead.json
+/Homestead.yaml
+
+# OS generated
+/*/.DS_Store
+/*/Thumbs.db
+
+# Keep .gitignore in all folders
+!/*/.gitignore
