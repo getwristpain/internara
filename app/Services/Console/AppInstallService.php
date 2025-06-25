@@ -252,6 +252,7 @@ class AppInstallService extends Service
     protected function cleanStorage(): void
     {
         $this->command->info('Cleaning storage directories...');
+
         $foldersToClean = [
             'app/private/cache',
             'app/private/livewire-tmp',
@@ -264,6 +265,7 @@ class AppInstallService extends Service
             'framework/views',
             'logs',
         ];
+
         try {
             foreach ($foldersToClean as $folder) {
                 $directory = storage_path($folder);
