@@ -11,26 +11,51 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('placements', function (Blueprint $table) {
+            // placement id
             $table->id();
+
+            // program id
             $table->foreignId('program_id')
-                ->constrained('programs')->cascadeOnDelete();
+                ->constrained('programs')
+                ->onDelete('cascade');
+
+            // department id
+            $table->foreignId('department_id')
+                ->constrained('departments')
+                ->onDelete('cascade');
+
+            // company id
             $table->foreignId('company_id')
-                ->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('teacher_id')->nullable()
-                ->constrained('teachers')->nullOnDelete();
-            $table->foreignId('supervisor_id')->nullable()
-                ->constrained()->nullOnDelete();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+                ->constrained('companies')
+                ->onDelete('cascade');
+
+            // student id
+            $table->foreignId('student_id')
+                ->constrained('students')
+                ->onDelete('cascade');
+
+            // teacher id
+            $table->foreignId('teacher_id')
+                ->nullable()
+                ->constrained('teachers')
+                ->onDelete('cascade');
+
+            // supervisor id
+            $table->foreignId('supervisor_id')
+                ->nullable()
+                ->constrained('supervisors')
+                ->onDelete('cascade');
+
+            // placement dates
+            $table->date('start_date');
+            $table->date('end_date');
+
+            // additional fields
             $table->text('notes')->nullable();
             $table->timestamps();
-        });
 
-        Schema::create('placement_student', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('placement_id')->constrained('placements')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
+            // indexes
+            $table->index(['student_id', 'program_id', 'department_id', 'company_id', 'supervisor_id', 'teacher_id'], 'placements_index');
         });
     }
 
@@ -39,7 +64,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('placement_student');
         Schema::dropIfExists('placements');
     }
 };

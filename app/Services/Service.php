@@ -60,7 +60,13 @@ abstract class Service
     public function __get(string $key): Service|null
     {
         if (!isset($this->services[$key])) {
-            throw new \LogicException("Service '$key' is not registered. Make sure to call useServices() first.");
+            Debugger::debug(
+                exception: new \LogicException("Service '$key' is not registered. Make sure to call useServices() first."),
+                message: 'Service not found',
+                throw: true
+            );
+
+            return null;
         }
 
         return $this->services[$key] ?? null;

@@ -12,16 +12,19 @@ return new class () extends Migration {
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained('school')->cascadeOnDelete();
             $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->string('slug')->nullable();
+            $table->string('slug')->nullable()->unique();
             $table->string('semester');
             $table->string('year');
             $table->date('start_date');
             $table->date('end_date');
             $table->text('notes')->nullable();
-            $table->foreignId('school_id')->constrained('school')->cascadeOnDelete();
             $table->timestamps();
+
+            // indexes
+            $table->index(['school_id', 'semester', 'year'], 'programs_school_semester_year_index');
         });
     }
 
