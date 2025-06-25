@@ -256,9 +256,7 @@ class AppInstallService extends Service
             'app/private/cache',
             'app/private/livewire-tmp',
             'app/public/uploads',
-            'framework/cache/data',
-            'framework/livewire-temp',
-            'framework/views',
+            'framework',
             'logs',
         ];
         try {

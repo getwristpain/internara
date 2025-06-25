@@ -24,7 +24,7 @@ class Setting extends Model
         'description',
     ];
 
-    protected $statuses = [
+    protected $initialStatuses = [
         'installation' => [
             [
                 'key' => 'welcome',

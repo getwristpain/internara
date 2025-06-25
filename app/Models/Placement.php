@@ -21,10 +21,10 @@ class Placement extends Model
                 'is_default' => 'true',
             ],
             [
-                'name' => 'active',
-                'label' => 'Aktif',
+                'name' => 'approved',
+                'label' => 'Disetujui',
                 'priority' => 2,
-                'color' => 'yellow',
+                'color' => 'green',
                 'is_default' => 'false',
             ],
             [
@@ -33,12 +33,41 @@ class Placement extends Model
                 'priority' => 3,
                 'color' => 'red',
                 'is_default' => 'false',
-            ]
+            ],
+            [
+                'name' => 'in_progress',
+                'label' => 'Sedang Berlangsung',
+                'priority' => 4,
+                'color' => 'blue',
+                'is_default' => 'false',
+            ],
+            [
+                'name' => 'completed',
+                'label' => 'Selesai',
+                'priority' => 5,
+                'color' => 'green',
+                'is_default' => 'false',
+            ],
+            [
+                'name' => 'stopped',
+                'label' => 'Dihentikan',
+                'priority' => 6,
+                'color' => 'orange',
+                'is_default' => 'false',
+            ],
+            [
+                'name' => 'archived',
+                'label' => 'Diarsipkan',
+                'priority' => 7,
+                'color' => 'gray',
+                'is_default' => 'false',
+            ],
         ]
     ];
 
     protected $fillable = [
         'program_id',
+        'department_id',
         'company_id',
         'student_id',
         'teacher_id',
@@ -47,29 +76,4 @@ class Placement extends Model
         'end_date',
         'notes',
     ];
-
-    public function program(): BelongsTo
-    {
-        return $this->belongsTo(Program::class);
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function student(): BelongsTo
-    {
-        return $this->belongsTo(Student::class);
-    }
-
-    public function teacher(): BelongsTo
-    {
-        return $this->belongsTo(Teacher::class);
-    }
-
-    public function supervisor(): BelongsTo
-    {
-        return $this->belongsTo(Supervisor::class);
-    }
 }

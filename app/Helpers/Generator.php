@@ -2,17 +2,43 @@
 
 namespace App\Helpers;
 
-use App\Helpers\Helper;
 use Illuminate\Support\Str;
 
+/**
+ * Generator helper for creating unique keys.
+ */
 class Generator extends Helper
 {
-    public static function key(string $identifier = '', bool $timestamp = false): string
+    /**
+     * Generate a unique key.
+     *
+     * @param string|int $unique If integer, sets the key length (default 32).
+     * @param bool $timestamp If true, prepends the timestamp to the key.
+     * @return string
+     */
+    public static function key(string|int $unique = '', bool $timestamp = false): string
     {
-        $identifier = empty($identifier) ? md5(uniqid()) : Str::slug($identifier);
-        $datetime = now()->format('Ymd-Hi');
-        $key = implode('-', Helper::filter([$datetime, $identifier, Str::random(8)]));
+        $length = 32;
+        $identifier = '';
 
-        return $timestamp ? implode('-', [$datetime, md5($key)]) : md5($key);
+        if (is_int($unique) && $unique > 0) {
+            $length = $unique;
+            $identifier = Str::random($length);
+        } else {
+            $identifier = empty($unique) ? Str::random(8) : $unique;
+        }
+
+        $datetime = now()->format('Ymd-Hi');
+        $rawKey = implode('-', Helper::filter([$datetime, $identifier, Str::random(8)]));
+
+        $hash = $length > 32
+            ? hash('sha256', $rawKey)
+            : md5($rawKey);
+
+        $finalKey = substr($hash, 0, $length);
+
+        return $timestamp
+            ? implode('-', [$datetime, $finalKey])
+            : $finalKey;
     }
 }
