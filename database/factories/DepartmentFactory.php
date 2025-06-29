@@ -18,10 +18,10 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'code'        => strtoupper($this->faker->unique()->bothify('DEP###')),
-            'name'        => $this->faker->word() . ' Department',
-            'description' => $this->faker->sentence(),
-            'school_id'   => School::factory(),
+            'school_id'     => School::factory(),
+            'name'          => $this->faker->unique()->word() . ' Department',
+            'code'          => $this->faker->unique()->bothify('??-###'),
+            'description'   => $this->faker->optional()->paragraph(2),
         ];
     }
 }

@@ -12,15 +12,16 @@ return new class () extends Migration {
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('key');
+            $table->string('key')->unique();
             $table->text('value')->nullable();
-            $table->string('type')->default('string');
+            $table->string('type')->default('string'); // e.g., boolean, integer
             $table->string('label')->nullable();
-            $table->string('category')->nullable();
-            $table->text('description')->nullable();
+            $table->string('category')->nullable(); // e.g., general, security
+            $table->text('description')->nullable(); // e.g., description of the setting
             $table->timestamps();
 
-            $table->unique(['type', 'key']);
+            // unique constraint for key and category
+            $table->unique(['key', 'category'], 'settings_key_category_unique');
         });
     }
 

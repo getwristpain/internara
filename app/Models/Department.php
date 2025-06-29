@@ -17,10 +17,10 @@ class Department extends Model
      * @var array
      */
     protected $fillable = [
-        'code',
-        'name',
-        'description',
         'school_id',
+        'name',
+        'code',
+        'description',
     ];
 
     public function school(): BelongsTo

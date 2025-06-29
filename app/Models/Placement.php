@@ -2,14 +2,24 @@
 
 namespace App\Models;
 
-use App\Models\Program;
 use App\Traits\HasStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Placement extends Model
 {
     use HasStatus;
+
+    protected $fillable = [
+        'program_id',
+        'department_id',
+        'company_id',
+        'student_id',
+        'teacher_id',
+        'supervisor_id',
+        'start_date',
+        'end_date',
+        'notes',
+    ];
 
     protected array $initialStatuses = [
         'placement' => [
@@ -63,17 +73,5 @@ class Placement extends Model
                 'is_default' => 'false',
             ],
         ]
-    ];
-
-    protected $fillable = [
-        'program_id',
-        'department_id',
-        'company_id',
-        'student_id',
-        'teacher_id',
-        'supervisor_id',
-        'start_date',
-        'end_date',
-        'notes',
     ];
 }

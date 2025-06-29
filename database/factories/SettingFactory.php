@@ -16,7 +16,7 @@ class SettingFactory extends Factory
      */
     public function definition(): array
     {
-        $types = ['string', 'boolean', 'integer', 'float', 'array', 'json', 'email', 'url'];
+        $types = ['array', 'boolean', 'email', 'float', 'integer', 'json', 'string', 'url'];
         $type = $this->faker->randomElement($types);
 
         $value = match ($type) {
@@ -31,11 +31,11 @@ class SettingFactory extends Factory
         };
 
         return [
-            'key'         => $this->faker->unique()->word(),
-            'value'       => $value,
-            'type'        => $type,
-            'label'       => $this->faker->words(2, true),
-            'category'    => $this->faker->word(),
+            'key' => $this->faker->unique()->word(),
+            'value' => $value,
+            'type' => $type,
+            'label' => $this->faker->word(),
+            'category' => $this->faker->word(),
             'description' => $this->faker->sentence(),
         ];
     }

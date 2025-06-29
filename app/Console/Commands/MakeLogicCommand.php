@@ -25,7 +25,7 @@ class MakeLogicCommand extends Command
             $this->info("Class created successfully at $filePath");
         } catch (\Throwable $e) {
             $this->error($e->getMessage());
-            Debugger::debug($e, 'Failed to create logic class.', [
+            Debugger::handle($e, 'Failed to create logic class.', [
                 'name' => $name,
                 'extends' => $extends,
             ]);

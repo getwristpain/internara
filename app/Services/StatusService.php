@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
-use App\Helpers\Helper;
 use App\Models\Status;
+use App\Helpers\Support;
+use App\Services\Service;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class StatusService extends Service
 {
@@ -16,9 +19,14 @@ class StatusService extends Service
         parent::__construct(new Status());
     }
 
+    public function statusables(Model $model): ?MorphToMany
+    {
+        return $model->statuses();
+    }
+
     public function get(string $key = '', string $type = ''): Status|Collection|null
     {
-        $conditions = Helper::filter(['key' => $key, 'type' => $type]);
+        $conditions = Support::filter(['key' => $key, 'type' => $type]);
 
         if (empty($conditions['key'])) {
             return $this->model()->query()->where($conditions)->get();

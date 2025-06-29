@@ -2,30 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class School extends Model
 {
+    use HasUuids;
     use HasFactory;
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
 
     protected $fillable = [
         'name',
-        'logo_path',
-        'address',
         'email',
-        'phone',
+        'telp',
         'fax',
-        'website',
+        'address',
         'principal_name',
+        'website',
+        'logo_path',
     ];
-
-    /**
-     * Get all of the departments for the School
-     */
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
-    }
 }

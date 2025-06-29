@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Str;
-use App\Helpers\Helper;
 
 class Translator extends Helper
 {

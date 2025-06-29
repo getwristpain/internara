@@ -11,15 +11,15 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('schools', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->unique();
-            $table->string('logo_path')->nullable();
-            $table->string('address')->nullable();
             $table->string('email')->unique()->nullable();
-            $table->string('phone')->nullable();
+            $table->string('telp')->nullable();
             $table->string('fax')->nullable();
-            $table->string('website')->nullable();
+            $table->text('address')->nullable();
             $table->string('principal_name')->nullable();
+            $table->string('website')->nullable();
+            $table->string('logo_path')->nullable();
             $table->timestamps();
         });
     }

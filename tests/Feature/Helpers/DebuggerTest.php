@@ -1,94 +1,86 @@
 <?php
 
 use App\Helpers\Debugger;
-use App\Helpers\LogicResponse;
-use App\Contracts\DebuggerContract;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 describe('Debugger', function () {
-    test('implements DebuggerContract', function () {
-        $debugger = new Debugger();
-        expect($debugger)->toBeInstanceOf(DebuggerContract::class);
+    beforeEach(function () {
+        Request::swap(app('request'));
+        Auth::shouldReceive('id')->andReturn(42);
     });
 
-    test('can create a debug instance', function () {
-        $exception = new Exception('Test exception');
-        $debugger = Debugger::debug($exception, 'Custom message', ['foo' => 'bar'], ['baz' => 'qux']);
-        expect($debugger)->toBeInstanceOf(Debugger::class)
-            ->and($debugger->getMessage())->toBe('Custom message')
-            ->and($debugger->exception())->toBe($exception)
-            ->and($debugger->getContext())->toBe(['foo' => 'bar'])
-            ->and($debugger->getProperties())->toHaveKey('baz');
+    test('can be instantiated from string', function () {
+        $debugger = Debugger::from('Something went wrong');
+
+        expect($debugger->exception())->toBeInstanceOf(Exception::class);
+        expect($debugger->exception()->getMessage())->toBe('Something went wrong');
     });
 
-    test('can check debug mode', function () {
-        expect(Debugger::isDebug())->toBeBool();
-    });
+    test('can be instantiated from exception object', function () {
+        $exception = new Exception('Boom');
+        $debugger = Debugger::from($exception);
 
-    test('returns a LogicResponse instance', function () {
-        $debugger = Debugger::debug(new Exception('Test'));
-        expect($debugger->response())->toBeInstanceOf(LogicResponse::class);
-    });
-
-    test('returns the exception instance', function () {
-        $exception = new Exception('Test');
-        $debugger = Debugger::debug($exception);
         expect($debugger->exception())->toBe($exception);
     });
 
-    test('returns the debug message', function () {
-        $exception = new Exception('Test');
-        $debugger = Debugger::debug($exception, 'My message');
-        expect($debugger->getMessage())->toBe('My message');
+    test('adds properties correctly', function () {
+        $debugger = Debugger::from('error')->withProperties(['foo' => 'bar']);
+
+        $props = $debugger->getProperties();
+
+        expect($props)
+            ->toHaveKey('foo', 'bar')
+            ->toHaveKey('clientIp')
+            ->toHaveKey('userAgent');
     });
 
-    test('returns the debug context', function () {
-        $exception = new Exception('Test');
-        $debugger = Debugger::debug($exception, '', ['foo' => 'bar']);
-        expect($debugger->getContext())->toBe(['foo' => 'bar']);
+    test('handle() returns instance without throwing', function () {
+        $debugger = Debugger::handle('error', [], throw: false, log: false);
+
+        expect($debugger)->toBeInstanceOf(Debugger::class);
+        expect($debugger->exception()->getMessage())->toBe('error');
     });
 
-    test('returns the debug properties', function () {
-        $exception = new Exception('Test');
-        $debugger = Debugger::debug($exception, '', [], ['baz' => 'qux']);
-        expect($debugger->getProperties())->toHaveKey('baz');
+    test('throwIf() throws when condition is true', function () {
+        $debugger = Debugger::from('error');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('error');
+
+        $debugger->throwIf(true);
     });
 
-    test('throws the exception', function () {
-        $exception = new Exception('Throw me');
-        $debugger = Debugger::debug($exception);
-        expect(fn () => $debugger->throw())->toThrow(Exception::class);
-    });
+    test('throwIf() does not throw when condition is false', function () {
+        $debugger = Debugger::from('error');
 
-    test('throws if condition is true', function () {
-        $exception = new Exception('Throw if');
-        $debugger = Debugger::debug($exception);
-        expect(fn () => $debugger->throwIf(true))->toThrow(Exception::class);
-    });
-
-    test('does not throw if condition is false', function () {
-        $exception = new Exception('No throw');
-        $debugger = Debugger::debug($exception);
         expect(fn () => $debugger->throwIf(false))->not->toThrow(Exception::class);
     });
 
-    test('throws unless condition is false', function () {
-        $exception = new Exception('Throw unless');
-        $debugger = Debugger::debug($exception);
-        expect(fn () => $debugger->throwUnless(false))->toThrow(Exception::class);
+    test('abortIf() aborts when condition is true', function () {
+        $debugger = Debugger::from('Aborting...');
+        $code = 418;
+
+        $this->expectException(Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectExceptionMessage('Aborting...');
+
+        $debugger->abortIf(true, $code);
     });
 
-    test('does not throw unless condition is true', function () {
-        $exception = new Exception('No throw unless');
-        $debugger = Debugger::debug($exception);
-        expect(fn () => $debugger->throwUnless(true))->not->toThrow(Exception::class);
-    });
+    test('toArray() contains correct keys', function () {
+        $debugger = Debugger::from('Array me')->withProperties(['foo' => 'bar']);
 
-    test('returns debug data as array', function () {
-        $exception = new Exception('Test');
-        $debugger = Debugger::debug($exception, 'Array message', [], ['foo' => 'bar']);
-        $array = $debugger->toArray();
-        expect($array)->toBeArray()
-            ->and($array)->toHaveKey('message')
-            ->and($array)->toHaveKey('foo');
+        $data = $debugger->toArray();
+
+        expect($data)->toHaveKeys([
+            'message',
+            'code',
+            'file',
+            'line',
+            'stack',
+            'properties',
+        ]);
+
+        expect($data['properties'])->toHaveKey('foo', 'bar');
     });
 });

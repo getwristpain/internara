@@ -15,7 +15,7 @@ class Fetch extends Helper
                 return $response->json();
             }
         } catch (\Throwable $th) {
-            Debugger::debug($th, "API request failed for url: {$url}", ['url' => $url, 'filter' => json_encode($filter)], throw: true);
+            Debugger::handle($th, "API request failed for url: {$url}", ['url' => $url, 'filter' => json_encode($filter)], throw: true);
         }
 
         return ['errors' => ['Failed to fetch data']];

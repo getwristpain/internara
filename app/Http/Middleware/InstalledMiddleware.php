@@ -55,7 +55,7 @@ class InstalledMiddleware
                 return redirect()->route('auth.login');
             }
         } catch (\Throwable $th) {
-            Debugger::debug($th, 'Unexpected error in InstalledMiddleware.', throw: true);
+            Debugger::handle($th, 'Unexpected error in InstalledMiddleware.', throw: true);
         }
 
         return $next($request);

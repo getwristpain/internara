@@ -195,7 +195,7 @@ class Sanitizer extends Helper
     protected static function filterWithConditions(string|array $input, array $conditions): string|array|null
     {
         if (is_array($input)) {
-            return Helper::filter($input, $conditions);
+            return Support::filter($input, $conditions);
         }
 
         return in_array($input, $conditions, true) ? $input : null;

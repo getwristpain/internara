@@ -306,7 +306,7 @@ class ModelWrapper extends Helper implements EntityContract
     {
         $data = $this->model?->toArray() ?? [];
 
-        return Helper::isFlatAssocArray($data)
+        return Support::isFlatAssocArray($data)
             ? Collection::make($data)
             : Collection::make([$data]);
     }
@@ -332,7 +332,7 @@ class ModelWrapper extends Helper implements EntityContract
      */
     protected function filterFillable(array $attributes): array
     {
-        return Helper::filter($attributes, $this->model?->getFillable() ?? []);
+        return Support::filter($attributes, $this->model?->getFillable() ?? []);
     }
 
     /**

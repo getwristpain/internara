@@ -1,137 +1,79 @@
 <?php
 
 use App\Helpers\LogicResponse;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 
-uses(RefreshDatabase::class);
-
 describe('LogicResponse', function () {
-    beforeEach(function () {
-        $this->response = new LogicResponse();
+
+    test('creates a successful response', function () {
+        $response = LogicResponse::make(true, 'Data saved successfully');
+
+        expect($response->passes())->toBeTrue()
+            ->and($response->getMessage())->toBe('Data saved successfully')
+            ->and($response->getStatus())->toBe('success')
+            ->and($response->getCode())->toBe(200);
     });
 
-    describe('success & failure', function () {
-        test('can create a success response', function () {
-            $res = $this->response->success('Success message');
-            expect($res->passes())->toBeTrue();
-            expect($res->getMessage())->toBe('Success message');
-            expect($res->getStatus())->toBe('success');
-            expect($res->getCode())->toBe(200);
-            expect($res->hasErrors())->toBeFalse();
-        });
+    test('creates a failure response', function () {
+        $response = LogicResponse::make(false, 'Failed to save data');
 
-        test('can create a failure response', function () {
-            $res = $this->response->failure('Failure message');
-            expect($res->fails())->toBeTrue();
-            expect($res->getMessage())->toBe('Failure message');
-            expect($res->getStatus())->toBe('failed');
-            expect($res->getCode())->toBe(0);
-            expect($res->hasErrors())->toBeTrue();
-            expect($res->getErrors())->toBeInstanceOf(MessageBag::class);
-        });
-
-        test('can use static response factory', function () {
-            $res = LogicResponse::make(true, 'ok', 'done', 201, 'Type', ['foo' => 'bar']);
-            expect($res->passes())->toBeTrue();
-            expect($res->getMessage())->toBe('ok');
-            expect($res->getStatus())->toBe('done');
-            expect($res->getCode())->toBe(201);
-            expect($res->getType())->toBe('Type');
-            expect($res->payload()->toArray())->toBe(['foo' => 'bar']);
-        });
+        expect($response->fails())->toBeTrue()
+            ->and($response->getMessage())->toBe('Failed to save data')
+            ->and($response->getStatus())->toBe('error')
+            ->and($response->getCode())->toBe(500)
+            ->and($response->hasErrors())->toBeTrue();
     });
 
-    describe('status, code, type, and message', function () {
-        test('can set and get status, code, type, and message', function () {
-            $res = $this->response
-                ->withStatus('custom')
-                ->withCode(123)
-                ->withType('TestType')
-                ->withMessage('Test message');
-            expect($res->getStatus())->toBe('custom');
-            expect($res->getCode())->toBe(123);
-            expect($res->getType())->toBe('TestType');
-            expect($res->getMessage())->toBe('Test message');
-        });
+    test('sets and retrieves the payload', function () {
+        $payload = ['name' => 'John Doe'];
+        $response = LogicResponse::make()->withPayload($payload);
 
-        test('can get translated message for specific locale', function () {
-            $en = __('tests.message', [], 'en');
-            $id = __('tests.message', [], 'id');
-
-            $res = $this->response->withMessage('tests.message');
-            expect($res->getMessage('en'))->toBe($en);
-            expect($res->getMessage('id'))->toBe($id);
-        });
+        expect($response->payload())->toBeInstanceOf(Collection::class)
+            ->and($response->payload()->get('name'))->toBe('John Doe');
     });
 
-    describe('payload', function () {
-        test('can set and get payload', function () {
-            $payload = ['foo' => 'bar'];
-            $res = $this->response->withPayload($payload);
-            expect($res->payload())->toBeInstanceOf(Collection::class);
-            expect($res->payload()->toArray())->toBe($payload);
-        });
+    test('adds and retrieves errors', function () {
+        $response = LogicResponse::make(false)->addErrors('email', 'Invalid email address');
 
-        test('can check isEmpty', function () {
-            $res = $this->response->withPayload([]);
-            expect($res->isEmpty())->toBeTrue();
-            $res = $this->response->withPayload(['foo' => 'bar']);
-            expect($res->isEmpty())->toBeFalse();
-        });
+        expect($response->fails())->toBeTrue()
+            ->and($response->getErrors())->toBeInstanceOf(MessageBag::class)
+            ->and($response->getErrors('email'))->toContain('Invalid email address');
     });
 
-    describe('errors', function () {
-        test('can set and get errors as MessageBag', function () {
-            $errors = ['field' => ['Error message']];
-            $res = $this->response->failure('fail')->withErrors($errors);
-            expect($res->getErrors())->toBeInstanceOf(MessageBag::class);
-            expect($res->getErrors()->toArray())->toBe($errors);
-            expect($res->hasErrors())->toBeTrue();
-        });
+    test('clears all errors correctly', function () {
+        $response = LogicResponse::make(false)
+            ->addErrors('username', 'Username is required')
+            ->clearErrors();
 
-        test('can add and clear errors', function () {
-            $res = $this->response->failure('fail')->withErrors(['foo' => ['bar']]);
-            $res->addErrors('baz', 'qux');
-            expect($res->getErrors()->has('baz'))->toBeTrue();
-            $res->clearErrors();
-            expect($res->hasErrors())->toBeFalse();
-            expect($res->getErrors())->toBeNull();
-        });
+        expect($response->getErrors())->toBeNull();
     });
 
-    describe('operator and then', function () {
-        test('can set and get operator', function () {
-            $obj = new stdClass();
-            $res = $this->response->success('ok')->operator($obj);
-            expect($res->then())->toBe($obj);
-        });
+    test('returns operator on success', function () {
+        $operator = new stdClass();
+        $response = LogicResponse::make()->operator($operator);
 
-        test('returns self on then if fails', function () {
-            $res = $this->response->failure('fail');
-            expect($res->then())->toBe($res);
-        });
+        expect($response->then())->toBeInstanceOf(stdClass::class);
     });
 
-    describe('array and logging', function () {
-        test('can convert to array', function () {
-            $res = $this->response->success('ok')->withPayload(['foo' => 'bar']);
-            $arr = $res->toArray();
-            expect($arr)->toBeArray();
-            expect($arr['success'])->toBeTrue();
-            expect($arr['message'])->toBe('ok');
-        });
+    test('returns self on failure', function () {
+        $response = LogicResponse::make(false);
 
-        test('can store log and activity', function () {
-            $res = $this->response->success('ok');
-            expect($res->storeLog())->toBeInstanceOf(LogicResponse::class);
-            expect($res->storeActivity())->toBeInstanceOf(LogicResponse::class);
-        });
+        expect($response->then())->toBeInstanceOf(LogicResponse::class);
+    });
 
-        test('can debug on failure', function () {
-            $res = $this->response->failure('fail');
-            expect($res->debug())->toBeInstanceOf(LogicResponse::class);
-        });
+    test('converts to array correctly', function () {
+        $response = LogicResponse::make(true, 'Operation completed')->toArray();
+
+        expect($response)->toHaveKey('success')
+            ->and($response)->toHaveKey('message')
+            ->and($response['success'])->toBeTrue()
+            ->and($response['message'])->toBe('Operation completed');
+    });
+
+    test('detects empty payload correctly', function () {
+        $response = LogicResponse::make()->withPayload([]);
+
+        expect($response->isEmpty())->toBeTrue();
     });
 });

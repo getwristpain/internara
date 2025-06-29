@@ -29,7 +29,7 @@ class Generator extends Helper
         }
 
         $datetime = now()->format('Ymd-Hi');
-        $rawKey = implode('-', Helper::filter([$datetime, $identifier, Str::random(8)]));
+        $rawKey = implode('-', Support::filter([$datetime, $identifier, Str::random(8)]));
 
         $hash = $length > 32
             ? hash('sha256', $rawKey)

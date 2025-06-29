@@ -3,171 +3,116 @@
 namespace App\Helpers;
 
 use App\Contracts\DebuggerContract;
-use App\Helpers\Helper;
-use App\Helpers\Sanitizer;
-use App\Helpers\LogicResponse;
 
-/**
- * Debugger helper for handling exceptions, logging, and debug responses.
- */
 class Debugger extends Helper implements DebuggerContract
 {
     /**
-     * Exception instance.
-     *
-     * @var \Throwable
+     * ------------------------------------------------------------------------
+     * Exception and State Storage
+     * ------------------------------------------------------------------------
+     * Holds the main exception instance and additional contextual properties.
      */
-    protected \Throwable $exception;
 
-    /**
-     * Debug message.
-     *
-     * @var string
-     */
-    protected string $message = '';
+    /** @var \Exception */
+    protected \Exception $exception;
 
-    /**
-     * Debug context.
-     *
-     * @var array
-     */
-    protected array $context = [];
-
-    /**
-     * Debug properties.
-     *
-     * @var array
-     */
+    /** @var array<string, mixed> */
     protected array $properties = [];
 
     /**
-     * Debug mode flag.
-     *
-     * @var bool
+     * ------------------------------------------------------------------------
+     * Static Factory and Utility Methods
+     * ------------------------------------------------------------------------
+     * Responsible for instance creation and environment-related utilities.
      */
-    protected bool $isDebug = false;
 
     /**
-     * Debugger constructor.
+     * Handle an exception with optional logging and throwing.
      */
-    public function __construct()
-    {
-        $this->isDebug = self::isDebug();
-    }
-
-    /**
-     * Create a debug instance and log the exception.
-     *
-     * @param \Throwable $exception
-     * @param string|array $message
-     * @param array $context
-     * @param array $properties
-     * @param bool $throw
-     * @return static
-     */
-    public static function debug(
-        \Throwable $exception,
-        string|array $message = '',
-        array $context = [],
+    public static function handle(
+        \Exception|string $exception = '',
         array $properties = [],
         bool $throw = false,
+        bool $log = true,
     ): static {
-        $replace = [];
-        $locale = 'en';
+        $instance = static::from($exception)
+            ->withProperties($properties);
 
-        if (is_array($message)) {
-            $msg = $message;
-            $message = $msg[0] ?? '';
-            $replace = $msg[1] ?? [];
-            $locale = $msg[2] ?? 'en';
+        if ($log) {
+            $instance->storeLog();
         }
 
-        $instance = new static();
-        $instance->withException($exception)
-            ->withMessage($message, $replace, $locale)
-            ->withContext($context)
-            ->withProperties($properties)
-            ->response()
-                ->failure($exception->getMessage())
-                ->storeLog('debug');
-
-        if ($instance->isDebug() && $throw) {
+        if (static::isDebug() && $throw) {
             $instance->throw();
         }
 
         return $instance;
     }
 
-    public function withException(\Throwable $exception): static
+    /**
+     * Create a debugger instance from an exception or a message string.
+     */
+    public static function from(\Exception|string $exception = ''): static
     {
-        $this->exception = $exception;
-        return $this;
-    }
+        $instance = new static();
 
-    public function withMessage(string $message = '', array $replace = [], string $locale = 'en'): static
-    {
-        $message = Sanitizer::sanitize(!empty($message) ? $message : $this->exception->getMessage() ?? '', 'message');
-        $this->message = Translator::translate($message, $replace, $locale);
-        return $this;
-    }
+        $instance->exception = empty($exception)
+            ? new \Exception('An unknown error has occurred.')
+            : (is_string($exception) ? new \Exception($exception) : $exception);
 
-    public function withContext(array $context = []): static
-    {
-        $this->context = Sanitizer::sanitize($context, 'sensitive');
-        return $this;
-    }
-
-    public function withProperties(array $properties = []): static
-    {
-        $this->properties = $this->normalizeDebugProps($properties);
-        return $this;
+        return $instance;
     }
 
     /**
-     * Check if the application is in debug mode.
-     *
-     * @return bool
+     * Determine if the current environment is in debug mode.
      */
     public static function isDebug(): bool
     {
-        return app()->environment(['local', 'dev', 'development', 'test', 'testing']) && (config('app.debug', false) === true);
+        return app()->environment(['local', 'dev', 'development', 'test', 'testing'])
+            && config('app.debug', false) === true;
     }
 
     /**
-     * Get the exception instance.
-     *
-     * @return \Throwable
+     * ------------------------------------------------------------------------
+     * Instance Mutators
+     * ------------------------------------------------------------------------
+     * Modify the internal state of the instance with contextual data.
      */
-    public function exception(): \Throwable
+
+    /**
+     * Attach request-related properties to the debugger instance.
+     */
+    public function withProperties(array $properties = []): static
+    {
+        $this->properties = array_merge($properties, [
+            'clientIp'   => request()->getClientIp(),
+            'ip'         => request()->ip(),
+            'method'     => request()->method(),
+            'url'        => request()->url(),
+            'userAgent'  => request()->userAgent(),
+            'userId'     => auth()->id(),
+        ]);
+
+        return $this;
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * Instance Accessors
+     * ------------------------------------------------------------------------
+     * Retrieve internal data such as the exception or contextual properties.
+     */
+
+    /**
+     * Get the stored exception object.
+     */
+    public function exception(): \Exception
     {
         return $this->exception;
     }
 
     /**
-     * Get the debug message.
-     *
-     * @return string
-     */
-    public function getMessage(string $locale = 'en'): string
-    {
-
-        return $this->message;
-    }
-
-    /**
-     * Get the debug context.
-     *
-     * @return array
-     */
-    public function getContext(): array
-    {
-        return $this->context;
-    }
-
-    /**
-     * Get the debug properties.
-     *
-     * @return array
+     * Get all contextual properties attached to this instance.
      */
     public function getProperties(): array
     {
@@ -175,188 +120,155 @@ class Debugger extends Helper implements DebuggerContract
     }
 
     /**
-     * Dump debug information.
+     * Create a LogicResponse instance with this exception.
      *
-     * @param bool $die
-     * @return void
+     * @return LogicResponse
+     */
+    public function response(): LogicResponse
+    {
+        return parent::response()
+            ->failure($this->exception()->getMessage())
+            ->withType($this->exception())
+            ->withCode($this->exception()->getCode());
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * Core Actions (Main API)
+     * ------------------------------------------------------------------------
+     * Main behaviors such as logging, throwing, aborting, and dumping state.
+     */
+
+    /**
+     * Store the exception into the application log.
+     */
+    public function storeLog(): static
+    {
+        $this->response()
+            ->storeLog();
+
+        return $this;
+    }
+
+    /**
+     * Immediately throw the stored exception.
+     *
+     * @throws \Exception
+     */
+    public function throw(): never
+    {
+        throw $this->exception();
+    }
+
+    /**
+     * Abort the request with the exception’s message and code.
+     */
+    public function abort(?int $code = null, array $headers = []): never
+    {
+        abort(
+            $code ?? ($this->exception()->getCode() ?: 500),
+            $this->exception()->getMessage(),
+            $headers
+        );
+    }
+
+    /**
+     * Dump the debugger data as array, optionally halting execution.
      */
     public function dump(bool $die = false): void
     {
-        $properties = $this->isDebug ? $this->properties : $this->context;
-
-        if ($die) {
-            dd($this->message, $properties);
-        }
-
-        dump($this->message, $properties);
+        $die ? dd($this->toArray()) : dump($this->toArray());
     }
 
     /**
-     * Throw the exception.
-     *
-     * @return void
-     * @throws \Throwable
+     * ------------------------------------------------------------------------
+     * Helper Methods (Internal Use Only)
+     * ------------------------------------------------------------------------
+     * Conditional logic methods for expressive error handling.
      */
-    public function throw(): void
-    {
-        throw $this->exception ?? new \Exception($this->message);
-    }
 
     /**
-     * Throw the exception if the condition is true.
-     *
-     * @param bool|callable $condition
-     * @return void
-     * @throws \Throwable
+     * Throw the exception if the given condition is true.
      */
-    public function throwIf(bool|callable $condition): void
+    public function throwIf(bool $condition): static
     {
-        if ((is_bool($condition) && $condition) || (is_callable($condition) && $condition())) {
+        if ($condition) {
             $this->throw();
         }
+
+        return $this;
     }
 
     /**
-     * Throw the exception unless the condition is true.
-     *
-     * @param bool|callable $condition
-     * @return void
-     * @throws \Throwable
+     * Throw the exception unless the given condition is true.
      */
-    public function throwUnless(bool|callable $condition): void
+    public function throwUnless(bool $condition): static
     {
-        $this->throwIf(!(is_callable($condition) ? $condition() : $condition));
+        return $this->throwIf(!$condition);
     }
 
     /**
-     * Abort the request with an error code and message.
-     *
-     * @param int|null $code
-     * @param array $header
-     * @return never
+     * Abort the request if the condition is true.
      */
-    public function abort(?int $code = null, array $header = []): never
+    public function abortIf(bool $condition, ?int $code = null, array $headers = []): static
     {
-        abort($code ?? $this->exception->getCode(), $this->message, $header);
-    }
-
-    /**
-     * Abort if the condition is true.
-     *
-     * @param bool|callable $condition
-     * @param int|null $code
-     * @param array $header
-     * @return void
-     */
-    public function abortIf(bool|callable $condition, ?int $code = null, array $header = []): void
-    {
-        if ((is_bool($condition) && $condition) || (is_callable($condition) && $condition())) {
-            $this->abort($code, $header);
+        if ($condition) {
+            $this->abort($code, $headers);
         }
+
+        return $this;
     }
 
     /**
-     * Abort unless the condition is true.
-     *
-     * @param bool|callable $condition
-     * @param int|null $code
-     * @param array $header
-     * @return void
+     * Abort the request unless the condition is true.
      */
-    public function abortUnless(bool|callable $condition, ?int $code = null, array $header = []): void
+    public function abortUnless(bool $condition, ?int $code = null, array $headers = []): static
     {
-        $this->abortIf(!(is_callable($condition) ? $condition() : $condition), $code, $header);
+        return $this->abortIf(!$condition, $code, $headers);
     }
 
     /**
-     * Get debug data as array.
-     *
-     * @return array
+     * Format a limited portion of the exception's stack trace.
+     */
+    protected function formattedTrace(int $limit = 5): array
+    {
+        $trace = array_slice($this->exception()->getTrace(), 0, $limit);
+
+        return array_map(
+            fn ($item, $index) =>
+                sprintf(
+                    '#%d %s(%s): %s%s%s',
+                    $index,
+                    $item['file'] ?? '[internal function]',
+                    $item['line'] ?? '-',
+                    $item['class'] ?? '',
+                    $item['type'] ?? '',
+                    $item['function'] ?? ''
+                ),
+            $trace,
+            array_keys($trace)
+        );
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * Serialization Methods
+     * ------------------------------------------------------------------------
+     * Converts internal debugger state into array format for logging/debugging.
+     */
+
+    /**
+     * Convert the exception and its context into an array.
      */
     public function toArray(): array
     {
-        return array_merge(['message' => $this->message], $this->properties);
-    }
-
-    /**
-     * Normalize debug properties.
-     *
-     * @param array $properties
-     * @return array
-     */
-    protected function normalizeDebugProps(array $properties = []): array
-    {
-        $formattedProps = $this->formatProperties($properties);
-        $formattedException = empty($this->exception) ? [] : $this->formatException($this->exception);
-
-        return Helper::filter(array_merge($formattedProps, [
-            'context' => $this->context,
-            'exception' => $formattedException,
-        ]));
-    }
-
-    /**
-     * Limit the exception trace lines.
-     *
-     * @param \Throwable $exception
-     * @param int $limit
-     * @return string
-     */
-    protected function exceptionTraceLineLimit(\Throwable $exception, int $limit = 6): string
-    {
-        $fullTrace = $exception->getTrace();
-        $limitedTrace = array_slice($fullTrace, 0, $limit);
-
-        $traceAsString = '';
-        foreach ($limitedTrace as $index => $frame) {
-            $file = $frame['file'] ?? 'internal function';
-            $line = $frame['line'] ?? '?';
-            $function = $frame['function'] ?? 'unknown';
-
-            $traceAsString .= "\n#{$index} [{$file}]({$line}): {$function}\n";
-        }
-
-        return $traceAsString;
-    }
-
-    /**
-     * Format exception details as array.
-     *
-     * @param \Throwable $exception
-     * @return array
-     */
-    protected function formatException(\Throwable $exception): array
-    {
         return [
-            'message' => Sanitizer::sanitize($exception->getMessage(), 'message'),
-            'type' => get_class($exception),
-            'code' => $exception->getCode(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'stack' => $this->exceptionTraceLineLimit($exception),
+            'message'    => $this->exception()->getMessage(),
+            'code'       => $this->exception()->getCode(),
+            'file'       => $this->exception()->getFile(),
+            'line'       => $this->exception()->getLine(),
+            'stack'      => $this->formattedTrace(),
+            'properties' => $this->getProperties(),
         ];
-    }
-
-    /**
-     * Format debug properties.
-     *
-     * @param array $properties
-     * @return array
-     */
-    protected function formatProperties(array $properties = []): array
-    {
-        $properties = array_merge([
-            'requests' => [
-                'ip' => request()->ip() ?? '',
-                'method' => request()->method() ?? '',
-                'route' => request()->route() ? request()->route()->getName() : '',
-                'url' => request()->fullUrl() ?? '',
-                'userAgent' => request()->userAgent() ?? '',
-                'userId' => auth()->id() ?? '',
-            ],
-            'timestamp' => now()->toDateTimeString(),
-        ], Sanitizer::sanitize($properties, 'sensitive'));
-
-        return Helper::filter($properties);
     }
 }

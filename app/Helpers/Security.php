@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-use App\Helpers\Helper;
 use App\Helpers\RateLimiterWrapper;
 use Illuminate\Support\Facades\RateLimiter;
 

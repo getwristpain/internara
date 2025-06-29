@@ -1,22 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
-    |
-    */
-
-    'failed' => 'Kredensial ini tidak cocok dengan catatan kami.',
-    'password' => 'Kata sandi yang diberikan tidak benar.',
-    'throttle' => 'Terlalu banyak upaya masuk. Silakan coba lagi dalam :seconds detik.',
-    'login' => 'Masuk',
+    'failed'   => 'Identitas tersebut tidak cocok dengan data kami.',
+    'login'    => 'Masuk',
+    'logout'   => 'Keluar',
+    'password' => 'Kata sandi salah.',
     'register' => 'Daftar',
-    'logout' => 'Keluar',
+    'throttle' => 'Terlalu banyak upaya masuk. Silahkan coba lagi dalam :seconds detik.',
 ];

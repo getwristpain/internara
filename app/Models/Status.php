@@ -18,13 +18,13 @@ class Status extends Model
         'label',
         'description',
         'priority',
-        'color',
-        'icon',
         'flag',
         'is_default',
+        'color',
+        'icon',
     ];
 
-    /**
+    /**type
      * The attributes that should be cast to native types.
      *
      * @var array

@@ -2,103 +2,80 @@
 
 namespace App\Helpers;
 
-use Illuminate\Support\MessageBag;
-use Illuminate\Support\Facades\Log;
 use App\Contracts\LogicResponseContract;
-use Spatie\Activitylog\Facades\Activity;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\MessageBag;
+use Spatie\Activitylog\Facades\Activity;
 
 /**
- * LogicResponse is a helper for standardized service responses, error handling, and logging.
+ * LogicResponse is a helper class that standardizes service outcomes,
+ * supports method chaining, and offers logging or debugging capabilities.
  */
 class LogicResponse extends Helper implements LogicResponseContract
 {
     /**
-     * Indicates if the response has been initialized.
-     *
-     * @var bool
+     * ------------------------------------------------------------------------
+     * Core State
+     * ------------------------------------------------------------------------
+     * Fundamental response state: success flag, code, message, and status.
      */
+
+    /** @var bool Indicates whether the response has been initialized. */
     protected bool $initial = false;
 
-    /**
-     * Indicates if the response is successful.
-     *
-     * @var bool
-     */
+    /** @var bool Indicates whether the response is successful. */
     protected bool $success = true;
 
-    /**
-     * The response message structure.
-     *
-     * @var array
-     */
-    protected array $message = [
-        'message' => '',
-        'replace' => [],
-        'locale' => 'en',
-        'translated' => '',
-    ];
-
-    /**
-     * The response status.
-     *
-     * @var string
-     */
+    /** @var string Response status string such as 'success', 'error'. */
     protected string $status = '';
 
-    /**
-     * The response code.
-     *
-     * @var int
-     */
-    protected int $code = 0;
+    /** @var int HTTP-compatible response code. */
+    protected int $code = 200;
 
-    /**
-     * The response type.
-     *
-     * @var string
-     */
+    /** @var string The message describing the response. */
+    protected string $message = '';
+
+    /** @var string The type or context of the response (usually class name). */
     protected string $type = '';
 
     /**
-     * The response payload.
-     *
-     * @var Collection|null
+     * ------------------------------------------------------------------------
+     * Payload & Metadata
+     * ------------------------------------------------------------------------
+     * Holds the data payload, error messages, and source operator.
      */
+
+    /** @var Collection|null Response payload as collection of data. */
     protected ?Collection $payload = null;
 
-    /**
-     * The operator object (usually the service or model).
-     *
-     * @var object|null
-     */
-    protected ?object $operator = null;
-
-    /**
-     * The response errors.
-     *
-     * @var MessageBag|null
-     */
+    /** @var MessageBag|null Validation or system errors. */
     protected ?MessageBag $errors = null;
 
-    /**
-     * Allowed log levels.
-     *
-     * @var array
-     */
+    /** @var object|null Optional operator instance related to this response. */
+    protected ?object $operator = null;
+
+    /** @var array Allowed log levels for storeLog(). */
     protected array $allowedLevel = [
         'info', 'debug', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'
     ];
 
     /**
-     * Static factory for creating a LogicResponse instance.
+     * ------------------------------------------------------------------------
+     * Static Factory
+     * ------------------------------------------------------------------------
+     * Create a new LogicResponse instance with default or given values.
+     */
+
+    /**
+     * Create a new response instance.
      *
-     * @param bool $success
-     * @param string $message
-     * @param string $status
-     * @param int $code
-     * @param string $type
-     * @param array $payload
+     * @param bool $success Whether the response is successful.
+     * @param string $message Message describing the result.
+     * @param string $status Response status string.
+     * @param int $code HTTP-compatible response code.
+     * @param string $type Type or context of the response.
+     * @param array $payload Data payload to attach.
      * @return static
      */
     public static function make(
@@ -110,51 +87,36 @@ class LogicResponse extends Helper implements LogicResponseContract
         array $payload = []
     ): static {
         $instance = new static();
-        $response = $success ? $instance->success($message) : $instance->failure($message);
 
-        return $response
-            ->withStatus($status)
-            ->withCode($code)
-            ->withType($type)
+        return ($success ? $instance->success($message) : $instance->failure($message))
+            ->withStatus($status ?: ($success ? 'success' : 'error'))
+            ->withCode($code !== 0 ? $code : ($success ? 200 : 500))
+            ->withType($type ?: $instance)
             ->withPayload($payload);
     }
 
     /**
-     * Mark the response as initialized.
-     *
-     * @return static
+     * ------------------------------------------------------------------------
+     * Instance Mutators
+     * ------------------------------------------------------------------------
+     * Configure response state and properties.
      */
-    protected function initialized(): static
-    {
-        $this->initial = true;
-        return $this;
-    }
-
-    /**
-     * Check if the response is initialized.
-     *
-     * @return bool
-     */
-    protected function isInitialized(): bool
-    {
-        return $this->initial;
-    }
 
     /**
      * Mark the response as successful.
      *
      * @param string $message
-     * @param array $replace
-     * @param string $locale
+     * @param string $status
+     * @param int $code
      * @return static
      */
-    public function success(string $message = '', array $replace = [], string $locale = 'en'): static
+    public function success(string $message = '', string $status = 'success', int $code = 200): static
     {
         return $this->initialized()
             ->setSuccess(true)
-            ->withMessage($message, $replace, $locale)
-            ->withStatus('success')
-            ->withCode(200)
+            ->withMessage($message)
+            ->withStatus($status)
+            ->withCode($code)
             ->clearErrors();
     }
 
@@ -162,22 +124,22 @@ class LogicResponse extends Helper implements LogicResponseContract
      * Mark the response as failed.
      *
      * @param string $message
-     * @param array $replace
-     * @param string $locale
+     * @param string $status
+     * @param int $code
      * @return static
      */
-    public function failure(string $message = '', array $replace = [], string $locale = 'en'): static
+    public function failure(string $message = '', string $status = 'error', int $code = 500): static
     {
         return $this->initialized()
             ->setSuccess(false)
-            ->withMessage($message, $replace, $locale)
-            ->withCode(0)
-            ->withStatus('failed')
+            ->withMessage($message)
+            ->withStatus($status)
+            ->withCode($code)
             ->withErrors(['messages' => [$this->getMessage()]]);
     }
 
     /**
-     * Set the success flag.
+     * Set whether the response is successful.
      *
      * @param bool $success
      * @return static
@@ -189,17 +151,19 @@ class LogicResponse extends Helper implements LogicResponseContract
     }
 
     /**
-     * Get the response status.
+     * Set the response message.
      *
-     * @return string
+     * @param string $message
+     * @return static
      */
-    public function getStatus(): string
+    public function withMessage(string $message): static
     {
-        return $this->status;
+        $this->message = Sanitizer::sanitize($message, 'message');
+        return $this;
     }
 
     /**
-     * Set the response status.
+     * Set the response status string.
      *
      * @param string $status
      * @return static
@@ -211,17 +175,7 @@ class LogicResponse extends Helper implements LogicResponseContract
     }
 
     /**
-     * Get the response code.
-     *
-     * @return int
-     */
-    public function getCode(): int
-    {
-        return $this->code;
-    }
-
-    /**
-     * Set the response code.
+     * Set the response HTTP code.
      *
      * @param int $code
      * @return static
@@ -233,93 +187,15 @@ class LogicResponse extends Helper implements LogicResponseContract
     }
 
     /**
-     * Get the response type.
-     *
-     * @return string
-     */
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    /**
-     * Set the response type.
+     * Set the type or context for the response.
      *
      * @param string|object $type
      * @return static
      */
     public function withType(string|object $type): static
     {
-        if (is_object($type)) {
-            $type = class_basename($type);
-        }
-
-        $this->type = $type;
+        $this->type = is_object($type) ? get_class($type) : $type;
         return $this;
-    }
-
-    /**
-     * Get the translated response message.
-     *
-     * @return string
-     */
-    public function getMessage(string $locale = ''): string
-    {
-        if (empty($locale)) {
-            return $this->message['translated'] ?? '';
-        }
-
-        return $this->transMessage(
-            $this->message['message'] ?? '',
-            $this->message['replace'] ?? [],
-            $locale
-        );
-    }
-
-    /**
-     * Set the response message.
-     *
-     * @param string $message
-     * @param array $replace
-     * @param string $locale
-     * @return static
-     */
-    public function withMessage(string $message, array $replace = [], string $locale = 'en'): static
-    {
-        $message = Sanitizer::sanitize($message, 'message');
-        $this->message = [
-            'message' => $message,
-            'replace' => $replace,
-            'locale' => $locale,
-            'translated' => $this->transMessage($message, $replace, $locale)
-        ];
-        return $this;
-    }
-
-    /**
-     * Translate a message with replacements and locale.
-     *
-     * @param string $message
-     * @param array $replace
-     * @param string $locale
-     * @return string
-     */
-    protected function transMessage(string $message, array $replace = [], string $locale = 'en'): string
-    {
-        return Translator::translate($message, $replace, $locale);
-    }
-
-    /**
-     * Get the response payload.
-     *
-     * @return Collection|null
-     */
-    public function payload(): ?Collection
-    {
-        if ($this->fails()) {
-            $this->payload = null;
-        }
-        return $this->payload;
     }
 
     /**
@@ -330,28 +206,8 @@ class LogicResponse extends Helper implements LogicResponseContract
      */
     public function withPayload(Collection|array|null $payload): static
     {
-        if ($payload instanceof Collection) {
-            $payload = $payload->toArray();
-        }
-        $this->payload = new Collection($payload ?? []);
+        $this->payload = new Collection($payload instanceof Collection ? $payload->toArray() : $payload ?? []);
         return $this;
-    }
-
-    /**
-     * Get the response errors.
-     *
-     * @param string $key
-     * @return MessageBag|array|null
-     */
-    public function getErrors(string $key = ''): MessageBag|array|null
-    {
-        if ($this->errors === null) {
-            return null;
-        }
-        if ($key) {
-            return $this->errors->get($key);
-        }
-        return $this->errors;
     }
 
     /**
@@ -365,18 +221,18 @@ class LogicResponse extends Helper implements LogicResponseContract
         if ($this->passes()) {
             return $this;
         }
-        if ($errors instanceof MessageBag) {
-            $this->errors = $errors;
-        } elseif (is_array($errors)) {
-            $this->errors = new MessageBag($errors);
-        } else {
-            $this->errors = null;
-        }
+
+        $this->errors = match (true) {
+            $errors instanceof MessageBag => $errors,
+            is_array($errors)      => new MessageBag($errors),
+            default                       => null,
+        };
+
         return $this;
     }
 
     /**
-     * Add an error to the response.
+     * Add a new error to the response.
      *
      * @param string $key
      * @param string $message
@@ -387,15 +243,15 @@ class LogicResponse extends Helper implements LogicResponseContract
         if ($this->passes()) {
             return $this;
         }
-        if (!$this->errors) {
-            $this->errors = new MessageBag();
-        }
+
+        $this->errors ??= new MessageBag();
         $this->errors->add($key, $message);
+
         return $this;
     }
 
     /**
-     * Clear all errors from the response.
+     * Clear all response errors.
      *
      * @return static
      */
@@ -406,17 +262,7 @@ class LogicResponse extends Helper implements LogicResponseContract
     }
 
     /**
-     * Check if the response has errors.
-     *
-     * @return bool
-     */
-    public function hasErrors(): bool
-    {
-        return $this->errors instanceof MessageBag && $this->errors->isNotEmpty();
-    }
-
-    /**
-     * Set the operator object.
+     * Set the operator instance (only if response passes).
      *
      * @param object|null $operator
      * @return static
@@ -424,72 +270,100 @@ class LogicResponse extends Helper implements LogicResponseContract
     public function operator(?object $operator): static
     {
         if ($operator instanceof LogicResponse) {
-            $operator = null;
+            return $this;
         }
+
         $this->operator = $this->passes() ? $operator : null;
         return $this;
     }
 
     /**
-     * Return the operator or self if passes, otherwise return self.
+     * ------------------------------------------------------------------------
+     * Instance Accessors
+     * ------------------------------------------------------------------------
+     * Get current state of the response.
+     */
+
+    /**
+     * Get the response message.
+     *
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
+
+    /**
+     * Get the response status.
+     *
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * Get the response HTTP code.
+     *
+     * @return int
+     */
+    public function getCode(): int
+    {
+        return $this->code;
+    }
+
+    /**
+     * Get the response type.
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * Get the response errors.
+     *
+     * @param string $key
+     * @return MessageBag|array|null
+     */
+    public function getErrors(string $key = ''): MessageBag|array|null
+    {
+        return $this->errors ? ($key ? $this->errors->get($key) : $this->errors) : null;
+    }
+
+    /**
+     * Get the response payload.
+     *
+     * @return Collection|null
+     */
+    public function payload(): ?Collection
+    {
+        return $this->fails() ? null : $this->payload;
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     * Core Actions
+     * ------------------------------------------------------------------------
+     * Behaviors like debug, logging, activity, and chaining.
+     */
+
+    /**
+     * Return operator if passes, or return self.
      *
      * @return mixed
      */
     public function then(): mixed
     {
-        if ($this->fails()) {
-            return $this;
-        }
-        return $this->operator ?? $this;
+        return $this->fails() ? $this : ($this->operator ?? $this);
     }
 
     /**
-     * Check if the response passes.
-     *
-     * @return bool
-     */
-    public function passes(): bool
-    {
-        return $this->isInitialized() && !$this->hasErrors() && $this->success;
-    }
-
-    /**
-     * Check if the response fails.
-     *
-     * @return bool
-     */
-    public function fails(): bool
-    {
-        return $this->isInitialized() && !$this->success;
-    }
-
-    /**
-     * Check if the payload is empty.
-     *
-     * @return bool
-     */
-    public function isEmpty(): bool
-    {
-        return empty($this->payload?->toArray() ?? null);
-    }
-
-    /**
-     * Convert the response to array.
-     *
-     * @return array
-     */
-    public function toArray(): array
-    {
-        $array = Helper::filter(array_merge([
-            'success' => $this->passes(),
-            'message' => $this->getMessage(),
-        ], $this->formatResponProps()));
-
-        return $this->isInitialized() ? $array : [];
-    }
-
-    /**
-     * Debug the response and log exception if fails.
+     * Debug this response with optional exception and context.
      *
      * @param \Throwable|null $exception
      * @param array $property
@@ -499,9 +373,15 @@ class LogicResponse extends Helper implements LogicResponseContract
     public function debug(?\Throwable $exception = null, array $property = [], bool $throw = false): static
     {
         if ($this->fails()) {
-            $exception ??= new \LogicException($this->getMessage() ?: 'LogicResponse failed.');
-            Debugger::debug($exception, 'LogicResponse failed.', $this->toArray(), $property, $throw);
+            Debugger::handle(
+                exception: $exception ?? new \LogicException($this->getMessage()),
+                properties: array_merge($property, [
+                    'response' => $this->toArray(),
+                ]),
+                throw: $throw
+            );
         }
+
         return $this;
     }
 
@@ -512,17 +392,19 @@ class LogicResponse extends Helper implements LogicResponseContract
      */
     public function storeActivity(): static
     {
-        if (!$this->isInitialized() || $this->fails()) {
+        if (!$this->passes()) {
             return $this->failure('Failed to store activity log: Undefined response.');
         }
-        Activity::withProperties($this->formatResponProps())
-            ->event($this->status ?: $this->type ?: 'response')
+
+        Activity::withProperties($this->toArray())
+            ->event($this->getStatus() ?: $this->getType() ?: 'response')
             ->log($this->getMessage());
+
         return $this;
     }
 
     /**
-     * Store system log with the given level.
+     * Store system log using Laravel's Log facade.
      *
      * @param string $level
      * @return static
@@ -532,38 +414,102 @@ class LogicResponse extends Helper implements LogicResponseContract
         if (!$this->isInitialized()) {
             return $this->failure('Failed to store system log: Undefined response.');
         }
+
         $level = Sanitizer::sanitize($level, 'filter', $this->allowedLevel);
-        $context = $this->formatResponProps();
-        if (empty($level)) {
-            $level = $this->passes() ? 'info' : 'error';
-        }
-        Log::log($level, $this->getMessage(), $context);
+        $level = $level ?: ($this->passes() ? 'info' : 'error');
+
+        Log::log($level, $this->getMessage(), $this->toArray());
+
         return $this;
     }
 
     /**
-     * Format response properties for logging and activity.
+     * ------------------------------------------------------------------------
+     * Internal Utilities
+     * ------------------------------------------------------------------------
+     * Internal logic utilities for managing state.
+     */
+
+    /**
+     * Mark the response as initialized.
+     *
+     * @return static
+     */
+    protected function initialized(): static
+    {
+        $this->initial = true;
+        return $this;
+    }
+
+    /**
+     * Check if the response has been initialized.
+     *
+     * @return bool
+     */
+    protected function isInitialized(): bool
+    {
+        return $this->initial;
+    }
+
+    /**
+     * Check whether the response is valid and successful.
+     *
+     * @return bool
+     */
+    public function passes(): bool
+    {
+        return $this->isInitialized() && !$this->hasErrors() && $this->success;
+    }
+
+    /**
+     * Check whether the response is invalid or failed.
+     *
+     * @return bool
+     */
+    public function fails(): bool
+    {
+        return $this->isInitialized() && !$this->success;
+    }
+
+    /**
+     * Check if the response contains errors.
+     *
+     * @return bool
+     */
+    public function hasErrors(): bool
+    {
+        return $this->errors instanceof MessageBag && $this->errors->isNotEmpty();
+    }
+
+    /**
+     * Check if the payload is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->payload()?->toArray() ?? null);
+    }
+
+    /**
+     * Convert the response to an array representation.
      *
      * @return array
      */
-    protected function formatResponProps(): array
+    public function toArray(): array
     {
-        return Helper::filter([
-            'status' => $this->getStatus(),
-            'code' => $this->getCode(),
-            'type' => $this->getType(),
-            'payload' => Sanitizer::sanitize($this->payload()?->toArray(), 'sensitive'),
-            'errors' => Sanitizer::sanitize($this->getErrors() instanceof MessageBag ? $this->getErrors()->toArray() : [], 'sensitive'),
-            'requests' => [
-                'ip' => request()->ip(),
-                'method' => request()->method(),
-                'route' => request()->route() ? request()->route()->getName() : '',
-                'url' => request()->fullUrl(),
-                'userAgent' => request()->userAgent(),
-                'userId' => auth()->id() ?? '',
-            ],
-            'operator' => is_object($this->operator) ? get_class($this->operator) : null,
-            'timestamp' => now()->toDateTimeString()
+        if (!$this->isInitialized()) {
+            return [];
+        }
+
+        return Support::filter([
+            'success' => $this->passes(),
+            'message' => $this->getMessage(),
+            'status'  => $this->getStatus(),
+            'code'    => $this->getCode(),
+            'type'    => $this->getType(),
+            'payload' => $this->payload()?->toArray(),
+            'errors'  => $this->getErrors() instanceof MessageBag ? $this->getErrors()->toArray() : null,
         ]);
     }
 }

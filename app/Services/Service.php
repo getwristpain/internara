@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\Helper;
+use App\Helpers\Support;
 use App\Helpers\Debugger;
 use App\Helpers\ModelWrapper;
 use App\Helpers\LogicResponse;
@@ -60,7 +60,7 @@ abstract class Service
     public function __get(string $key): Service|null
     {
         if (!isset($this->services[$key])) {
-            Debugger::debug(
+            Debugger::handle(
                 exception: new \LogicException("Service '$key' is not registered. Make sure to call useServices() first."),
                 message: 'Service not found',
                 throw: true
@@ -77,7 +77,7 @@ abstract class Service
      */
     public function __toString(): string
     {
-        return Helper::stringify(Helper::objectToArray($this));
+        return Support::stringify(Support::objectToArray($this));
     }
 
     /**
@@ -86,7 +86,7 @@ abstract class Service
     public function model(): ModelWrapper
     {
         if (!$this->model) {
-            Debugger::debug(new \LogicException('No model declared in service.'));
+            Debugger::handle(new \LogicException('No model declared in service.'));
             return new ModelWrapper();
         }
 
@@ -128,7 +128,7 @@ abstract class Service
             $validator = Validator::make($data, $rules, $messages, $attributes);
 
             if ($validator->fails()) {
-                Debugger::debug(new ValidationException($validator), 'Validation failed');
+                Debugger::handle(new ValidationException($validator), 'Validation failed');
 
                 return $this->response()
                     ->failure('Validation failed: ' . $validator->errors()->first())
@@ -151,7 +151,7 @@ abstract class Service
      */
     public function data(string|int|array $key = '', mixed $default = null): mixed
     {
-        return Helper::getArray($this->data, $key, $default);
+        return Support::getArray($this->data, $key, $default);
     }
 
     /**
@@ -159,7 +159,7 @@ abstract class Service
      */
     public function meta(string|int|array $key = '', mixed $default = null): mixed
     {
-        return Helper::getArray($this->meta, $key, $default);
+        return Support::getArray($this->meta, $key, $default);
     }
 
     /**
@@ -167,8 +167,14 @@ abstract class Service
      */
     public function toArray(): array
     {
+        $data = $this->data;
+
+        if (empty($data) && $this->model) {
+            $data = $this->model->toArray();
+        }
+
         return [
-            'data' => $this->data,
+            'data' => $data,
             'meta' => $this->meta,
         ];
     }

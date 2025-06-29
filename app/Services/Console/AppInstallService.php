@@ -15,19 +15,19 @@ use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 /**
- * Handles the automated installation and setup process for the application.
+ * Service untuk menangani proses instalasi dan setup aplikasi secara otomatis.
  */
 class AppInstallService extends Service
 {
     /**
-     * The console command instance.
+     * Menyimpan instance perintah konsol.
      *
      * @var Command
      */
     protected Command $command;
 
     /**
-     * AppInstallService constructor.
+     * Konstruktor untuk AppInstallService.
      *
      * @param Command $command
      */
@@ -38,7 +38,7 @@ class AppInstallService extends Service
     }
 
     /**
-     * Run the full installation process.
+     * Menjalankan seluruh proses instalasi aplikasi secara otomatis.
      *
      * @return void
      */
@@ -48,7 +48,7 @@ class AppInstallService extends Service
         $this->clearCache();
 
         $this->command->newLine();
-        $this->clearLogs();
+        $this->cleanLog();
 
         $this->command->newLine();
         $this->checkEnvFile();
@@ -57,16 +57,16 @@ class AppInstallService extends Service
         $this->generateAppKey();
 
         $this->command->newLine();
-        $this->configureEnv();
+        $this->setupBasicEnv();
 
         $this->command->newLine();
-        $this->configureDatabase();
+        $this->setupDatabase();
 
         $this->command->newLine();
-        $this->runMigrations();
+        $this->runMigration();
 
         $this->command->newLine();
-        $this->runFreshMigrations();
+        $this->runMigrationFresh();
 
         $this->command->newLine();
         $this->seedDatabase();
@@ -81,208 +81,159 @@ class AppInstallService extends Service
         $this->syncDataset();
 
         $this->command->newLine();
-        $this->buildAssets();
+        $this->buildFrontendAssets();
 
         $this->command->newLine();
-        $this->optimize();
+        $this->optimizeApplication();
     }
 
     /**
-     * Clear application cache.
-     *
-     * @return void
+     * Membersihkan cache aplikasi.
      */
     protected function clearCache(): void
     {
-        $this->runArtisan('optimize:clear', [], 'Clearing application cache...');
+        $this->runArtisan('optimize:clear', [], 'Membersihkan cache aplikasi...');
     }
 
     /**
-     * Remove application logs.
-     *
-     * @return void
+     * Menghapus log aplikasi.
      */
-    protected function clearLogs(): void
+    protected function cleanLog(): void
     {
-        $this->runArtisan('activitylog:clean', [], 'Removing application logs...');
+        $this->runArtisan('activitylog:clean', [], 'Menghapus log aplikasi...');
     }
 
     /**
-     * Ensure the .env file exists.
-     *
-     * @return void
+     * Memastikan file .env tersedia.
      */
     protected function checkEnvFile(): void
     {
-        $this->command->info('Validating environment file...');
+        $this->command->info('Memvalidasi file environment...');
         $envPath = base_path('.env');
         $envExamplePath = base_path('.env.example');
         if (!File::exists($envPath)) {
-            $this->command->info('Environment file not found. Creating from example...');
+            $this->command->info('File environment tidak ditemukan. Membuat dari contoh...');
             if (File::exists($envExamplePath)) {
                 File::copy($envExamplePath, $envPath);
-                $this->command->info('Environment file created from .env.example.');
+                $this->command->info('File environment berhasil dibuat dari .env.example.');
             } else {
-                $this->abort('The .env.example file is missing. Please provide the example file.');
+                $this->fail('File .env.example tidak ditemukan. Silakan sediakan file contoh tersebut.');
             }
         } else {
-            $this->command->info('Environment file already exists. Skipping creation.');
+            $this->command->info('File environment sudah tersedia. Lewati pembuatan.');
         }
     }
 
     /**
-     * Generate the application key.
-     *
-     * @return void
+     * Membuat application key.
      */
     protected function generateAppKey(): void
     {
-        $this->runArtisan('key:generate', [], 'Generating application key...', 'Application key generated.');
+        $this->runArtisan('key:generate', [], 'Membuat application key...', 'Application key berhasil dibuat.');
     }
 
     /**
-     * Configure environment variables.
-     *
-     * @return void
+     * Mengatur variabel environment dasar.
      */
-    protected function configureEnv(): void
+    protected function setupBasicEnv(): void
     {
         try {
-            $this->command->info('Configuring environment variables...');
+            $this->command->info('Mengatur variabel environment...');
             $envConfig = [
                 'APP_NAME' => config('app.name', 'Internara'),
                 'APP_TIMEZONE' => config('app.timezone', 'Asia/Jakarta'),
                 'APP_LOCALE' => config('app.locale', 'id'),
-                'APP_FALLBACK_LOCALE' => config('app.fallback_locale', 'en'),
+                'APP_FALLBACK_LOCALE' => config('app.fallback_locale', 'id'),
                 'APP_FAKER_LOCALE' => config('app.faker_locale', 'id_ID'),
             ];
             foreach ($envConfig as $key => $value) {
                 $this->updateEnv($key, $value);
             }
-            $this->command->info('Environment variables configured successfully.');
+            $this->command->info('Variabel environment berhasil dikonfigurasi.');
         } catch (\Throwable $th) {
-            $this->abort('Failed to configure environment variables.', $th);
+            $this->fail('Gagal mengatur variabel environment.', $th);
         }
     }
 
     /**
-     * Configure the database connection.
-     *
-     * @return void
+     * Mengatur koneksi database.
      */
-    protected function configureDatabase(): void
+    protected function setupDatabase(): void
     {
-        $this->command->info('Configuring database connection...');
-        if (!confirm('Would you like to configure the database connection now?')) {
-            $this->command->info('Database configuration skipped.');
+        $this->command->info('Mengatur koneksi database...');
+        if (!confirm('Apakah Anda ingin mengatur koneksi database sekarang?')) {
+            $this->command->info('Konfigurasi database dilewati.');
             return;
         }
         $dbTypes = ['sqlite', 'mysql', 'pgsql', 'sqlsrv'];
-        $dbType = select('Select the database connection type:', $dbTypes, 0);
+        $dbType = select('Pilih tipe koneksi database:', $dbTypes, 0);
         $dbConfig = [];
         if ($dbType === 'sqlite') {
             $dbConfig['DB_CONNECTION'] = 'sqlite';
-            $this->command->info('SQLite database will be used at: ' . database_path('database.sqlite'));
+            $this->command->info('Database SQLite akan digunakan di: ' . database_path('database.sqlite'));
         } else {
             $dbConfig = [
                 'DB_CONNECTION' => $dbType,
-                'DB_HOST' => text('Database host', '127.0.0.1'),
-                'DB_PORT' => text('Database port', $dbType === 'pgsql' ? '5432' : '3306'),
-                'DB_DATABASE' => text('Database name', 'laravel'),
-                'DB_USERNAME' => text('Database username', 'root'),
-                'DB_PASSWORD' => password('Database password'),
+                'DB_HOST' => text('Host database', '127.0.0.1'),
+                'DB_PORT' => text('Port database', $dbType === 'pgsql' ? '5432' : '3306'),
+                'DB_DATABASE' => text('Nama database', 'laravel'),
+                'DB_USERNAME' => text('Username database', 'root'),
+                'DB_PASSWORD' => password('Password database'),
             ];
         }
         foreach ($dbConfig as $key => $value) {
             $this->updateEnv($key, $value);
         }
-        $this->command->info('Database connection configured successfully.');
+        $this->command->info('Koneksi database berhasil dikonfigurasi.');
     }
 
     /**
-     * Run database migrations.
-     *
-     * @return void
+     * Menjalankan migrasi database.
      */
-    protected function runMigrations(): void
+    protected function runMigration(): void
     {
-        $this->runArtisan('migrate', ['--force' => true], 'Running database migrations...', 'Database migrations completed.', 'Database migration failed.');
+        $this->runArtisan('migrate', ['--force' => true], 'Menjalankan migrasi database...', 'Migrasi database selesai.', 'Migrasi database gagal.');
     }
 
     /**
-     * Run fresh database migrations.
-     *
-     * @return void
+     * Menjalankan migrasi fresh database.
      */
-    protected function runFreshMigrations(): void
+    protected function runMigrationFresh(): void
     {
         $this->runArtisan('migrate:fresh', ['--force' => true]);
     }
 
     /**
-     * Seed the database.
-     *
-     * @return void
+     * Menanam data awal ke database.
      */
     protected function seedDatabase(): void
     {
-        $this->runArtisan('db:seed', [], 'Seeding database...', 'Database seeding completed.', 'Database seeding failed.');
+        $this->runArtisan('db:seed', [], 'Menanam data awal ke database...', 'Seed database selesai.', 'Seed database gagal.');
     }
 
     /**
-     * Create the storage symbolic link.
-     *
-     * @return void
+     * Membuat symbolic link storage.
      */
     protected function createStorageLink(): void
     {
-        $this->command->info('Creating storage symbolic link...');
+        $this->command->info('Membuat symbolic link storage...');
         if (File::exists(public_path('storage'))) {
-            $this->command->info('Storage symbolic link already exists. Skipping.');
+            $this->command->info('Symbolic link storage sudah ada. Lewati.');
             return;
         }
-        $this->runArtisan('storage:link', [], 'Creating storage symbolic link...', 'Storage symbolic link created.', 'Failed to create storage symbolic link.');
+        $this->runArtisan('storage:link', [], 'Membuat symbolic link storage...', 'Symbolic link storage berhasil dibuat.', 'Gagal membuat symbolic link storage.');
     }
 
     /**
-     * Clean storage directories.
-     *
-     * @return void
+     * Membersihkan direktori storage.
      */
     protected function cleanStorage(): void
     {
-        $this->command->info('Cleaning storage directories...');
-
-        $foldersToClean = [
-            'app/private/cache',
-            'app/private/livewire-tmp',
-            'app/public/uploads',
-            'debugbar',
-            'framework/cache/data',
-            'framework/livewire-temp',
-            'framework/sessions',
-            'framework/testing',
-            'framework/views',
-            'logs',
-        ];
-
-        try {
-            foreach ($foldersToClean as $folder) {
-                $directory = storage_path($folder);
-                if (File::exists($directory)) {
-                    File::cleanDirectory($directory);
-                }
-            }
-            $this->command->info('Storage directories cleaned successfully.');
-        } catch (\Throwable $th) {
-            $this->abort('Failed to clean storage directories.', $th);
-        }
+        $this->runArtisan('storage:clean', [], abort: false);
     }
 
     /**
-     * Synchronize the dataset.
-     *
-     * @return void
+     * Sinkronisasi dataset lokasi.
      */
     protected function syncDataset(): void
     {
@@ -290,34 +241,30 @@ class AppInstallService extends Service
     }
 
     /**
-     * Build frontend assets.
-     *
-     * @return void
+     * Membangun aset frontend.
      */
-    protected function buildAssets(): void
+    protected function buildFrontendAssets(): void
     {
-        $this->command->info('Building frontend assets...');
+        $this->command->info('Membangun aset frontend...');
         try {
             $this->runShellCommand('npm install');
             $this->runShellCommand('npm run build');
-            $this->command->info('Frontend assets built successfully.');
+            $this->command->info('Aset frontend berhasil dibangun.');
         } catch (\Throwable $th) {
-            $this->skipWithWarn('Failed to build frontend assets.', $th);
+            $this->skipWithWarn('Gagal membangun aset frontend.', $th);
         }
     }
 
     /**
-     * Optimize the application.
-     *
-     * @return void
+     * Optimasi aplikasi.
      */
-    protected function optimize(): void
+    protected function optimizeApplication(): void
     {
-        $this->runArtisan('optimize', [], 'Optimizing application...', 'Application optimized.', 'Application optimization failed.', false);
+        $this->runArtisan('optimize', [], 'Mengoptimasi aplikasi...', 'Aplikasi berhasil dioptimasi.', 'Optimasi aplikasi gagal.', false);
     }
 
     /**
-     * Run an Artisan command with optional messaging.
+     * Menjalankan perintah Artisan dengan pesan opsional.
      *
      * @param string $command
      * @param array $arguments
@@ -345,15 +292,15 @@ class AppInstallService extends Service
             }
         } catch (\Throwable $th) {
             if (!$abort) {
-                $this->skipWithWarn($errorMessage ?: "Warning executing command: $command", $th);
+                $this->skipWithWarn($errorMessage ?: "Peringatan saat menjalankan perintah: $command", $th);
                 return;
             }
-            $this->abort($errorMessage ?: "Error executing command: $command", $th);
+            $this->fail($errorMessage ?: "Terjadi kesalahan saat menjalankan perintah: $command", $th);
         }
     }
 
     /**
-     * Run a shell command.
+     * Menjalankan perintah shell.
      *
      * @param string $command
      * @return void
@@ -374,7 +321,7 @@ class AppInstallService extends Service
     }
 
     /**
-     * Update or add a value in the .env file.
+     * Update atau tambahkan nilai pada file .env.
      *
      * @param string $key
      * @param string|int|bool $value
@@ -402,24 +349,24 @@ class AppInstallService extends Service
     }
 
     /**
-     * Abort the installation process with an error message.
+     * Batalkan proses instalasi dengan pesan error.
      *
      * @param string $message
      * @param \Throwable|null $exception
      * @return void
      */
-    protected function abort(string $message, ?\Throwable $exception = null): void
+    protected function fail(string $message, ?\Throwable $exception = null): void
     {
         if (!$exception) {
             $exception = new \Exception($message);
         }
         $this->command->error($message);
-        Debugger::debug($exception, $message);
+        Debugger::handle($exception, $message);
         exit(1);
     }
 
     /**
-     * Skip a step with a warning message.
+     * Lewati langkah dengan pesan peringatan.
      *
      * @param string $message
      * @param \Throwable|null $exception
@@ -428,6 +375,6 @@ class AppInstallService extends Service
     protected function skipWithWarn(string $message, ?\Throwable $exception = null): void
     {
         $this->command->warn($message);
-        Debugger::debug($exception, $message);
+        Debugger::handle($exception, $message);
     }
 }

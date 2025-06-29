@@ -17,14 +17,14 @@ trait HasStatus
                             'type' => is_string($type) ? $type : '',
                         ]));
 
-                        $model->statusables()->syncWithoutDetaching($created);
+                        $model->statuses()->syncWithoutDetaching($created);
                     }
                 }
             }
         });
     }
 
-    public function statusables(): MorphToMany
+    public function statuses(): MorphToMany
     {
         return $this->morphToMany(Status::class, 'statusable')->withTimestamps();
     }

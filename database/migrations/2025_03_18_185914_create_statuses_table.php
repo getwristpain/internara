@@ -12,18 +12,24 @@ return new class () extends Migration {
     {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('key');
+            $table->string('key')->unique();
             $table->string('type');
-            $table->string('label')->nullable();
+            $table->string('label');
             $table->string('description')->nullable();
-            $table->integer('priority')->nullable();
-            $table->string('color')->nullable();
-            $table->string('icon')->nullable();
+            $table->integer('priority')->default(0);
             $table->boolean('flag')->default(false);
             $table->boolean('is_default')->default(false);
+            $table->string('color')->nullable();
+            $table->string('icon')->nullable();
             $table->timestamps();
 
-            $table->unique(['type', 'key']);
+            // unique constraint for type and key
+            $table->unique(['type', 'key'], 'unique_type_key');
+
+            // index for faster lookups
+            $table->index(['type', 'flag'], 'index_type_flag');
+            $table->index(['type', 'is_default'], 'index_type_is_default');
+            $table->index(['type', 'priority'], 'index_type_priority');
         });
 
         Schema::create('statusables', function (Blueprint $table) {

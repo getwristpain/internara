@@ -2,24 +2,28 @@
 
 namespace App\Helpers;
 
-use App\Helpers\Helper;
 use Symfony\Component\Process\Process;
 
+/**
+ * Helper for checking internet connectivity.
+ */
 class Connection extends Helper
 {
-    public static function checkInternetConnectivity(): bool
+    /**
+     * Check if internet connection is available.
+     *
+     * @param int $timeout
+     * @return bool
+     */
+    public static function checkInternetConnectivity(int $timeout = 3): bool
     {
         try {
-            $process = Process::fromShellCommandline('ping -c 1 -W 2 google.com');
+            $process = Process::fromShellCommandline("ping -c 1 -W {$timeout} google.com");
             $process->run();
 
-            if ($process->isSuccessful()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (\Throwable $th) {
-            Debugger::debug($th, 'Error occurred while checking internet connection.');
+            return $process->isSuccessful();
+        } catch (\Throwable $exception) {
+            Debugger::handle($exception, 'Terjadi error saat memeriksa koneksi internet.');
             return false;
         }
     }

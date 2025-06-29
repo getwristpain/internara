@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Helpers\LogicResponse;
 
 /**
- * Service to handle application installation steps.
+ * Service untuk menangani langkah instalasi aplikasi.
  */
 class InstallationService extends Service
 {
     /**
-     * InstallationService constructor.
+     * Konstruktor InstallationService.
      */
     public function __construct()
     {
@@ -24,7 +24,7 @@ class InstallationService extends Service
     }
 
     /**
-     * Perform the specified installation step.
+     * Menjalankan langkah instalasi yang dipilih.
      *
      * @param string $step
      * @return LogicResponse
@@ -38,13 +38,13 @@ class InstallationService extends Service
             'owner_setup'       => $this->installOwner(),
             'complete'          => $this->installComplete(),
             default             => $this->response()
-                                        ->failure('The specified installation step is not recognized.')
+                                        ->failure('Langkah instalasi yang dipilih tidak dikenali.')
                                         ->storeLog(),
         };
     }
 
     /**
-     * Mark the welcome step as completed.
+     * Tandai langkah welcome sebagai selesai.
      *
      * @return LogicResponse
      */
@@ -54,7 +54,7 @@ class InstallationService extends Service
     }
 
     /**
-     * Validate and mark the school configuration step as completed.
+     * Validasi dan tandai langkah konfigurasi sekolah sebagai selesai.
      *
      * @return LogicResponse
      */
@@ -64,14 +64,14 @@ class InstallationService extends Service
 
         if (!$firstSchool) {
             return $this->response()
-                ->failure("No school found. Please ensure 'School' record exists before continuing.");
+                ->failure("Data sekolah belum ditemukan. Silakan pastikan data 'Sekolah' sudah dibuat sebelum melanjutkan.");
         }
 
         return $this->markAsCompleted('school_config');
     }
 
     /**
-     * Validate and mark the department setup step as completed.
+     * Validasi dan tandai langkah setup jurusan sebagai selesai.
      *
      * @return LogicResponse
      */
@@ -84,14 +84,14 @@ class InstallationService extends Service
 
         if (!$department) {
             return $this->response()
-                ->failure("No department found. Please ensure 'Department' record exists before continuing.");
+                ->failure("Data jurusan belum ditemukan. Silakan pastikan data 'Jurusan' sudah dibuat sebelum melanjutkan.");
         }
 
         return $this->markAsCompleted('department_setup');
     }
 
     /**
-     * Validate and mark the owner setup step as completed.
+     * Validasi dan tandai langkah setup pemilik sebagai selesai.
      *
      * @return LogicResponse
      */
@@ -101,14 +101,14 @@ class InstallationService extends Service
 
         if (!$owner) {
             return $this->response()
-                ->failure("No owner found. Please ensure 'Owner' record exists before continuing.");
+                ->failure("Data pemilik belum ditemukan. Silakan pastikan data 'Pemilik' sudah dibuat sebelum melanjutkan.");
         }
 
         return $this->markAsCompleted('owner_setup');
     }
 
     /**
-     * Complete the installation process.
+     * Menyelesaikan proses instalasi.
      *
      * @return LogicResponse
      */
@@ -122,13 +122,19 @@ class InstallationService extends Service
         return $this->settingService->set('is_installed', true);
     }
 
+    /**
+     * Mengecek apakah langkah instalasi tertentu sudah selesai.
+     *
+     * @param string $step
+     * @return bool
+     */
     public function isStepCompleted(string $step): bool
     {
         return $this->statusService->isMarked($step, 'installation');
     }
 
     /**
-     * Mark a specific installation step as completed.
+     * Tandai langkah instalasi tertentu sebagai selesai.
      *
      * @param string $step
      * @return LogicResponse
@@ -137,17 +143,17 @@ class InstallationService extends Service
     {
         if ($this->isStepCompleted($step)) {
             return $this->response()
-                ->success("The installation step '{$step}' has already been completed.");
+                ->success("Langkah instalasi '{$step}' sudah selesai.");
         }
 
         $markStatus = $this->statusService->mark($step, 'installation', strict: true);
 
         if (!$markStatus) {
             return $this->response()
-                ->failure("Failed to complete the installation step: '{$step}'.");
+                ->failure("Gagal menyelesaikan langkah instalasi: '{$step}'.");
         }
 
         return $this->response()
-            ->success("Installation step '{$step}' completed successfully.");
+            ->success("Langkah instalasi '{$step}' berhasil diselesaikan.");
     }
 }
