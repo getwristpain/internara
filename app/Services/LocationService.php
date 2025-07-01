@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Models\Location;
 
 /**
- * Service untuk menangani operasi data lokasi wilayah.
+ * ------------------------------------------------------------------------
+ * LocationService
+ * ------------------------------------------------------------------------
+ * Service to manage Indonesian administrative location data.
  */
 class LocationService extends Service
 {
     /**
-     * Konstruktor LocationService.
+     * LocationService constructor.
      */
     public function __construct()
     {
@@ -18,51 +21,57 @@ class LocationService extends Service
     }
 
     /**
-     * Menyisipkan data lokasi ke database.
+     * Upsert a batch of location data into the database.
      *
-     * @param array $data
+     * @param array $items
      * @param int|null $parentId
      * @param string $type
      * @return bool
      */
-    public function insert(array $data, ?int $parentId, string $type): bool
+    public function upsert(array $items, ?int $parentId, string $type): bool
     {
-        $validate = $this->validate(
-            ['data' => $data, 'parent_id' => $parentId, 'type' => $type],
+        $validation = $this->validate(
             [
-                'data.*.id' => 'required|string',
-                'data.*.name' => 'required|string|max:255',
-                'data.*.postal_code' => 'sometimes|nullable|string|max:10',
+                'items' => $items,
+                'parent_id' => $parentId,
+                'type' => $type,
+            ],
+            [
+                'items.*.id' => 'required|string',
+                'items.*.name' => 'required|string|max:255',
+                'items.*.postal_code' => 'nullable|string|max:10',
                 'parent_id' => 'nullable|integer',
                 'type' => 'required|string|in:province,regency,district,village',
             ]
         );
 
-        if ($validate->fails()) {
-            $validate->storeLog();
+        if ($validation->fails()) {
+            $validation->storeLog();
             return false;
         }
 
-        $insert = $this->model()->query()->insert(
-            array_map(fn ($item) => [
+        $payload = array_map(fn (array $item) => [
                 'parent_id' => $parentId,
                 'name' => $item['name'],
                 'type' => $type,
                 'postal_code' => $item['postal_code'] ?? null,
-            ], $data)
-        );
+            ], $items);
 
-        return $insert ? true : false;
+        return $this->model()->query()->upsert(
+            $payload,
+            ['parent_id', 'type', 'name'],
+            ['postal_code']
+        );
     }
 
     /**
-     * Mencari ID lokasi berdasarkan kriteria.
+     * Find the ID of a location by the given conditions.
      *
-     * @param array $where
+     * @param array $conditions
      * @return int|null
      */
-    public function findId(array $where): ?int
+    public function findId(array $conditions): ?int
     {
-        return $this->model()->first($where)?->id ?? null;
+        return $this->model()->first($conditions)?->id;
     }
 }

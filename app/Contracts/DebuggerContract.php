@@ -18,14 +18,14 @@ interface DebuggerContract
     /**
      * Create a debug instance and optionally log and/or throw the exception.
      *
-     * @param \Exception|string $exception
+     * @param \Throwable|string $exception
      * @param array $properties
      * @param bool $throw
      * @param bool $log
      * @return static
      */
     public static function handle(
-        \Exception|string $exception = '',
+        \Throwable|string $exception = '',
         array $properties = [],
         bool $throw = false,
         bool $log = true,
@@ -34,10 +34,10 @@ interface DebuggerContract
     /**
      * Create a debug instance from an exception or string.
      *
-     * @param \Exception|string $exception
+     * @param \Throwable|string $exception
      * @return static
      */
-    public static function from(\Exception|string $exception = ''): static;
+    public static function from(\Throwable|string $exception = ''): static;
 
     /**
      * Determine whether the application is in debug mode.
@@ -71,9 +71,9 @@ interface DebuggerContract
     /**
      * Get the exception being handled.
      *
-     * @return \Exception
+     * @return \Throwable
      */
-    public function exception(): \Exception;
+    public function exception(): \Throwable;
 
     /**
      * Get all additional debug properties.
@@ -106,7 +106,7 @@ interface DebuggerContract
     /**
      * Immediately throw the handled exception.
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function throw(): never;
 
@@ -115,7 +115,7 @@ interface DebuggerContract
      *
      * @param bool $condition
      * @return static
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function throwIf(bool $condition): static;
 
@@ -124,9 +124,9 @@ interface DebuggerContract
      *
      * @param bool $condition
      * @return static
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function throwUnless(bool $condition): static;
+    public function throwIfNot(bool $condition): static;
 
     /**
      * Abort the request using the exception's message and code.
@@ -155,7 +155,7 @@ interface DebuggerContract
      * @param array $headers
      * @return static
      */
-    public function abortUnless(bool $condition, ?int $code = null, array $headers = []): static;
+    public function abortIfNot(bool $condition, ?int $code = null, array $headers = []): static;
 
     /**
      * Dump the debug data to the screen.

@@ -23,7 +23,7 @@ class Connection extends Helper
 
             return $process->isSuccessful();
         } catch (\Throwable $exception) {
-            Debugger::handle($exception, 'Terjadi error saat memeriksa koneksi internet.');
+            Debugger::handle($exception);
             return false;
         }
     }

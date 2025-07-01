@@ -13,8 +13,8 @@ class Debugger extends Helper implements DebuggerContract
      * Holds the main exception instance and additional contextual properties.
      */
 
-    /** @var \Exception */
-    protected \Exception $exception;
+    /** @var \Throwable */
+    protected \Throwable $exception;
 
     /** @var array<string, mixed> */
     protected array $properties = [];
@@ -30,7 +30,7 @@ class Debugger extends Helper implements DebuggerContract
      * Handle an exception with optional logging and throwing.
      */
     public static function handle(
-        \Exception|string $exception = '',
+        \Throwable|string $exception = '',
         array $properties = [],
         bool $throw = false,
         bool $log = true,
@@ -52,15 +52,27 @@ class Debugger extends Helper implements DebuggerContract
     /**
      * Create a debugger instance from an exception or a message string.
      */
-    public static function from(\Exception|string $exception = ''): static
+    public static function from(\Throwable|string $exception = ''): static
     {
         $instance = new static();
-
+        $instance->ensureIsException($exception);
         $instance->exception = empty($exception)
             ? new \Exception('An unknown error has occurred.')
             : (is_string($exception) ? new \Exception($exception) : $exception);
 
         return $instance;
+    }
+
+    /**
+     * @param \Throwable|string $exception
+     *
+     * @return void
+     */
+    protected function ensureIsException(\Throwable|string $exception = ''): void
+    {
+        if (!is_string($exception) && !is_a($exception, \Exception::class)) {
+            throw $exception;
+        }
     }
 
     /**
@@ -106,7 +118,7 @@ class Debugger extends Helper implements DebuggerContract
     /**
      * Get the stored exception object.
      */
-    public function exception(): \Exception
+    public function exception(): \Throwable
     {
         return $this->exception;
     }
@@ -153,7 +165,7 @@ class Debugger extends Helper implements DebuggerContract
     /**
      * Immediately throw the stored exception.
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function throw(): never
     {
@@ -202,7 +214,7 @@ class Debugger extends Helper implements DebuggerContract
     /**
      * Throw the exception unless the given condition is true.
      */
-    public function throwUnless(bool $condition): static
+    public function throwIfNot(bool $condition): static
     {
         return $this->throwIf(!$condition);
     }
@@ -222,7 +234,7 @@ class Debugger extends Helper implements DebuggerContract
     /**
      * Abort the request unless the condition is true.
      */
-    public function abortUnless(bool $condition, ?int $code = null, array $headers = []): static
+    public function abortIfNot(bool $condition, ?int $code = null, array $headers = []): static
     {
         return $this->abortIf(!$condition, $code, $headers);
     }

@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface EntityContract
 {
+    public static function make(?Model $model = null): static;
+
     public function query(): Model|null;
 
     public function instance(): Model|Builder|null;
@@ -37,6 +39,8 @@ interface EntityContract
     public function delete($id): LogicResponse;
 
     public function destroy(array $ids): LogicResponse;
+
+    public function transaction(\Closure $callback, int $attempts = 1): mixed;
 
     public function toArray(): array;
 

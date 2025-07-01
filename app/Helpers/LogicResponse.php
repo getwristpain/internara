@@ -31,7 +31,7 @@ class LogicResponse extends Helper implements LogicResponseContract
     protected string $status = '';
 
     /** @var int HTTP-compatible response code. */
-    protected int $code = 200;
+    protected int|string $code = 200;
 
     /** @var string The message describing the response. */
     protected string $message = '';
@@ -73,7 +73,7 @@ class LogicResponse extends Helper implements LogicResponseContract
      * @param bool $success Whether the response is successful.
      * @param string $message Message describing the result.
      * @param string $status Response status string.
-     * @param int $code HTTP-compatible response code.
+     * @param int|string $code HTTP-compatible response code.
      * @param string $type Type or context of the response.
      * @param array $payload Data payload to attach.
      * @return static
@@ -82,7 +82,7 @@ class LogicResponse extends Helper implements LogicResponseContract
         bool $success = true,
         string $message = '',
         string $status = '',
-        int $code = 0,
+        int|string $code = 0,
         string $type = '',
         array $payload = []
     ): static {
@@ -107,10 +107,10 @@ class LogicResponse extends Helper implements LogicResponseContract
      *
      * @param string $message
      * @param string $status
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function success(string $message = '', string $status = 'success', int $code = 200): static
+    public function success(string $message = '', string $status = 'success', int|string $code = 200): static
     {
         return $this->initialized()
             ->setSuccess(true)
@@ -125,10 +125,10 @@ class LogicResponse extends Helper implements LogicResponseContract
      *
      * @param string $message
      * @param string $status
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function failure(string $message = '', string $status = 'error', int $code = 500): static
+    public function failure(string $message = '', string $status = 'error', int|string $code = 500): static
     {
         return $this->initialized()
             ->setSuccess(false)
@@ -177,10 +177,10 @@ class LogicResponse extends Helper implements LogicResponseContract
     /**
      * Set the response HTTP code.
      *
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function withCode(int $code): static
+    public function withCode(int|string $code): static
     {
         $this->code = $code;
         return $this;
@@ -307,9 +307,9 @@ class LogicResponse extends Helper implements LogicResponseContract
     /**
      * Get the response HTTP code.
      *
-     * @return int
+     * @return int|string
      */
-    public function getCode(): int
+    public function getCode(): int|string
     {
         return $this->code;
     }
@@ -365,16 +365,16 @@ class LogicResponse extends Helper implements LogicResponseContract
     /**
      * Debug this response with optional exception and context.
      *
-     * @param \Throwable|null $exception
+     * @param \Throwable|string $exception
      * @param array $property
      * @param bool $throw
      * @return static
      */
-    public function debug(?\Throwable $exception = null, array $property = [], bool $throw = false): static
+    public function debug(\Throwable|string|null $exception = null, array $property = [], bool $throw = false): static
     {
         if ($this->fails()) {
             Debugger::handle(
-                exception: $exception ?? new \LogicException($this->getMessage()),
+                exception: $exception ?? $this->getMessage(),
                 properties: array_merge($property, [
                     'response' => $this->toArray(),
                 ]),

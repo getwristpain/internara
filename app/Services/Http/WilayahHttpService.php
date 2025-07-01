@@ -7,14 +7,28 @@ use App\Services\Service;
 use Illuminate\Support\Collection;
 
 /**
- * Service untuk mengambil data wilayah administratif Indonesia dari API eksternal.
+ * ------------------------------------------------------------------------
+ * Wilayah HTTP Service
+ * ------------------------------------------------------------------------
+ * Provides access to Indonesian administrative data from external API.
  */
 class WilayahHttpService extends Service
 {
+    /**
+     * ------------------------------------------------------------------------
+     * Configuration
+     * ------------------------------------------------------------------------
+     * Base URL of the external wilayah API.
+     *
+     * @var string
+     */
     protected string $baseUrl = 'https://wilayah.id/api/';
 
     /**
-     * Konstruktor WilayahHttpService.
+     * ------------------------------------------------------------------------
+     * Constructor
+     * ------------------------------------------------------------------------
+     * Initializes the service instance.
      */
     public function __construct()
     {
@@ -22,9 +36,12 @@ class WilayahHttpService extends Service
     }
 
     /**
-     * Mengambil daftar provinsi.
+     * ------------------------------------------------------------------------
+     * Get Provinces
+     * ------------------------------------------------------------------------
+     * Retrieves a list of provinces.
      *
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
     public function getProvinces(): Collection
     {
@@ -32,10 +49,13 @@ class WilayahHttpService extends Service
     }
 
     /**
-     * Mengambil daftar kabupaten/kota berdasarkan ID provinsi.
+     * ------------------------------------------------------------------------
+     * Get Regencies
+     * ------------------------------------------------------------------------
+     * Retrieves a list of regencies by province ID.
      *
      * @param string $provinceId
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
     public function getRegencies(string $provinceId): Collection
     {
@@ -43,10 +63,13 @@ class WilayahHttpService extends Service
     }
 
     /**
-     * Mengambil daftar kecamatan berdasarkan ID kabupaten/kota.
+     * ------------------------------------------------------------------------
+     * Get Districts
+     * ------------------------------------------------------------------------
+     * Retrieves a list of districts by regency ID.
      *
      * @param string $regencyId
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
     public function getDistricts(string $regencyId): Collection
     {
@@ -54,10 +77,13 @@ class WilayahHttpService extends Service
     }
 
     /**
-     * Mengambil daftar desa/kelurahan berdasarkan ID kecamatan.
+     * ------------------------------------------------------------------------
+     * Get Villages
+     * ------------------------------------------------------------------------
+     * Retrieves a list of villages by district ID.
      *
      * @param string $districtId
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
     public function getVillages(string $districtId): Collection
     {
@@ -65,48 +91,68 @@ class WilayahHttpService extends Service
     }
 
     /**
-     * Mengambil kode pos berdasarkan lokasi.
+     * ------------------------------------------------------------------------
+     * Get Postal Code
+     * ------------------------------------------------------------------------
+     * Retrieves the postal code based on location information.
      *
-     * @param array $location
+     * @param array{id_district?: string, subdistrict_id?: string} $location
      * @return string|null
      */
     public function getPostalCode(array $location = []): ?string
     {
-        return $this->getVillages($location['district_id'] ?? '')
-            ->firstWhere('id', $location['subdistrict_id'] ?? '')['postal_code'] ?? null;
+        $districtId = $location['district_id'] ?? '';
+        $subdistrictId = $location['subdistrict_id'] ?? '';
+
+        return $this->getVillages($districtId)
+            ->firstWhere('id', $subdistrictId)['postal_code'] ?? null;
     }
 
     /**
-     * Mengambil data dari endpoint API wilayah.
+     * ------------------------------------------------------------------------
+     * Fetch Data
+     * ------------------------------------------------------------------------
+     * Fetches data from the external API and transforms it.
      *
      * @param string $endpoint
      * @param bool $includePostalCode
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
     private function fetchData(string $endpoint, bool $includePostalCode = false): Collection
     {
-        $data = Fetch::sync("{$this->baseUrl}{$endpoint}.json");
+        $response = Fetch::sync("{$this->baseUrl}{$endpoint}.json");
 
-        return isset($data['errors'])
-            ? collect()
-            : collect($data['data'] ?? [])->map(fn ($item) => [
+        if (isset($response['errors'])) {
+            return collect();
+        }
+
+        $meta = $response['meta'] ?? [];
+
+        return collect($response['data'] ?? [])->map(function ($item) use ($includePostalCode, $meta) {
+            return [
                 'id' => $item['code'] ?? '',
                 'name' => $item['name'] ?? '',
                 'postal_code' => $includePostalCode ? ($item['postal_code'] ?? '') : null,
-                'meta' => $data['meta'] ?? [],
-            ])->filter(fn ($item) => !empty($item['name']));
+                'meta' => $meta,
+            ];
+        })->filter(fn ($item) => !empty($item['name']));
     }
 
     /**
-     * Mengambil data dari endpoint jika ID tidak kosong.
+     * ------------------------------------------------------------------------
+     * Fetch Data If Not Empty
+     * ------------------------------------------------------------------------
+     * Fetches data only if the parent ID is not empty.
      *
-     * @param string|null $id
+     * @param string|null $parentId
      * @param string $endpoint
      * @param bool $includePostalCode
-     * @return Collection
+     * @return Collection<int, array{id: string, name: string, postal_code: string|null, meta: array}>
      */
-    private function fetchDataIfNotEmpty(?string $id, string $endpoint, bool $includePostalCode = false): Collection
+    private function fetchDataIfNotEmpty(?string $parentId, string $endpoint, bool $includePostalCode = false): Collection
     {
-        return empty($id) ? collect([]) : $this->fetchData($endpoint, $includePostalCode);
+        return empty($parentId)
+            ? collect()
+            : $this->fetchData($endpoint, $includePostalCode);
     }
 }

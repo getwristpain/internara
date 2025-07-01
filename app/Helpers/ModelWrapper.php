@@ -2,44 +2,51 @@
 
 namespace App\Helpers;
 
+use Closure;
 use App\Contracts\EntityContract;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Wrapper for Eloquent model operations with response helpers.
+ * Class ModelWrapper
+ *
+ * Wraps Eloquent model operations and standardizes the response format.
  */
 class ModelWrapper extends Helper implements EntityContract
 {
     /**
-     * The Eloquent model instance.
+     * The current model instance.
      *
      * @var Model|null
      */
     protected ?Model $model = null;
 
     /**
-     * The model class name.
+     * The class name of the model.
      *
      * @var string
      */
     protected string $modelClass = '';
 
     /**
-     * The type name for response.
+     * Type name used in response messages.
      *
      * @var string
      */
-    protected string $type = 'Record';
+    protected string $type = 'Data';
 
     /**
-     * ModelWrapper constructor.
-     *
+     * Make ModelWrapper instance.
      * @param Model|null $model
+     *
+     * @return static
      */
-    public function __construct(?Model $model = null)
+    public static function make(?Model $model = null): static
     {
-        $this->setModel($model);
+        $instance = new static();
+        $instance->setModel($model);
+        return $instance;
     }
 
     /**
@@ -63,7 +70,7 @@ class ModelWrapper extends Helper implements EntityContract
     }
 
     /**
-     * Get all records.
+     * Get all model records.
      *
      * @param array|string $columns
      * @param array $with
@@ -71,17 +78,13 @@ class ModelWrapper extends Helper implements EntityContract
      */
     public function all(array|string $columns = ['*'], array $with = []): ?Collection
     {
-        if (!empty($with)) {
-            return $this->get(with: $with);
-        }
-
-        return $this->model
-            ? $this->query()?->all($columns) ?? new Collection([])
-            : null;
+        return !empty($with)
+            ? $this->get(with: $with)
+            : $this->query()?->all($columns) ?? new Collection([]);
     }
 
     /**
-     * Get records by where condition.
+     * Get model records by criteria.
      *
      * @param array $where
      * @param array $with
@@ -90,27 +93,23 @@ class ModelWrapper extends Helper implements EntityContract
      */
     public function get(array $where = [], array $with = [], array|string $columns = ['*']): ?Collection
     {
-        return $this->model
-            ? $this->query()?->with($with)->where($where)->get($columns) ?? new Collection([])
-            : null;
+        return $this->query()?->with($with)->where($where)->get($columns) ?? new Collection([]);
     }
 
     /**
-     * Find a record by id.
+     * Find a record by primary key.
      *
      * @param mixed $id
      * @param array $with
-     * @return Collection|Model|null
+     * @return Model|Collection|null
      */
-    public function find(mixed $id, array $with = []): Collection|Model|null
+    public function find(mixed $id, array $with = []): Model|Collection|null
     {
-        return $this->model
-            ? $this->query()?->with($with)->find($id)
-            : null;
+        return $this->query()?->with($with)->find($id);
     }
 
     /**
-     * Get the first record by where condition.
+     * Get the first record matching the criteria.
      *
      * @param array $where
      * @param array $with
@@ -118,13 +117,11 @@ class ModelWrapper extends Helper implements EntityContract
      */
     public function first(array $where = [], array $with = []): ?Model
     {
-        return $this->model
-            ? $this->query()?->with($with)->where($where)->first()
-            : null;
+        return $this->query()?->with($with)->where($where)->first();
     }
 
     /**
-     * Get the first record or fail by where condition.
+     * Get the first record or fail if not found.
      *
      * @param array $where
      * @param array $with
@@ -132,13 +129,11 @@ class ModelWrapper extends Helper implements EntityContract
      */
     public function firstOrFail(array $where = [], array $with = []): ?Model
     {
-        return $this->model
-            ? $this->query()?->with($with)->where($where)->firstOrFail()
-            : null;
+        return $this->query()?->with($with)->where($where)->firstOrFail();
     }
 
     /**
-     * Get the first record or create a new one.
+     * Get the first record or create it.
      *
      * @param array $where
      * @param array $attributes
@@ -147,9 +142,7 @@ class ModelWrapper extends Helper implements EntityContract
      */
     public function firstOrCreate(array $where = [], array $attributes = [], array $with = []): ?Model
     {
-        return $this->model
-            ? $this->query()?->with($with)->firstOrCreate($where, $this->filterFillable($attributes))
-            : null;
+        return $this->query()?->with($with)->firstOrCreate($where, $this->filterFillable($attributes));
     }
 
     /**
@@ -163,18 +156,14 @@ class ModelWrapper extends Helper implements EntityContract
         try {
             $model = $this->query()?->create($this->filterFillable($attributes));
             $this->setModel($model);
-
-            return $this->response()
-                ->success('messages.success.created', ['resource' => $this->type]);
+            return $this->response()->success("{$this->type} berhasil dibuat.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.create_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal membuat {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Insert multiple rows.
+     * Insert multiple records.
      *
      * @param array $rows
      * @return LogicResponse
@@ -183,18 +172,14 @@ class ModelWrapper extends Helper implements EntityContract
     {
         try {
             $this->query()?->insert(array_map(fn ($row) => $this->filterFillable($row), $rows));
-
-            return $this->response()
-                ->success('messages.success.stored', ['resource' => $this->type]);
+            return $this->response()->success("Semua {$this->type} berhasil disimpan.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.store_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal menyimpan {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Update records by where condition.
+     * Update records matching criteria.
      *
      * @param array $attributes
      * @param array $where
@@ -208,16 +193,14 @@ class ModelWrapper extends Helper implements EntityContract
                 $query->where($where);
             }
             $query->update($this->filterFillable($attributes));
-            return $this->response()->success('messages.success.updated', ['resource' => $this->type]);
+            return $this->response()->success("{$this->type} berhasil diperbarui.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.update_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal memperbarui {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Update a record if exists, otherwise create it.
+     * Update existing record or create a new one.
      *
      * @param array $where
      * @param array $attributes
@@ -226,23 +209,16 @@ class ModelWrapper extends Helper implements EntityContract
     public function updateOrCreate(array $where = [], array $attributes = []): LogicResponse
     {
         try {
-            $model = $this->query()?->updateOrCreate(
-                $where,
-                $this->filterFillable($attributes)
-            );
+            $model = $this->query()?->updateOrCreate($where, $this->filterFillable($attributes));
             $this->setModel($model);
-
-            return $this->response()
-                ->success('messages.success.saved', ['resource' => $this->type]);
+            return $this->response()->success("{$this->type} berhasil diperbarui atau dibuat.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.save_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal memperbarui atau membuat {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Delete a record by id.
+     * Delete a record by ID.
      *
      * @param mixed $id
      * @return LogicResponse
@@ -251,16 +227,14 @@ class ModelWrapper extends Helper implements EntityContract
     {
         try {
             $this->query()?->destroy($id);
-            return $this->response()->success('messages.success.deleted', ['resource' => $this->type]);
+            return $this->response()->success("{$this->type} berhasil dihapus.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.delete_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal menghapus {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Delete multiple records by ids.
+     * Delete multiple records.
      *
      * @param array $ids
      * @return LogicResponse
@@ -269,16 +243,26 @@ class ModelWrapper extends Helper implements EntityContract
     {
         try {
             $this->query()?->destroy($ids);
-            return $this->response()->success('messages.success.deleted', ['resource' => $this->type]);
+            return $this->response()->success("Semua {$this->type} berhasil dihapus.");
         } catch (\Throwable $e) {
-            return $this->response()
-                ->failure('messages.error.delete_failed', ['resource' => $this->type])
-                ->debug($e);
+            return $this->response()->failure("Gagal menghapus beberapa {$this->type}.")->debug($e);
         }
     }
 
     /**
-     * Convert the model to array.
+     * Run the given closure within a transaction.
+     *
+     * @param Closure $callback
+     * @param int $attempts
+     * @return mixed
+     */
+    public function transaction(Closure $callback, int $attempts = 1): mixed
+    {
+        return DB::transaction($callback, $attempts);
+    }
+
+    /**
+     * Get model as array.
      *
      * @return array
      */
@@ -288,44 +272,43 @@ class ModelWrapper extends Helper implements EntityContract
     }
 
     /**
-     * Convert the model to attributes.
+     * Get model as attributes.
      *
      * @return Attribute
      */
     public function toAttributes(): Attribute
     {
-        return Attribute::make($this->model?->toArray() ?? []);
+        return Attribute::make($this->toArray());
     }
 
     /**
-     * Convert the model to collection.
+     * Get model as collection.
      *
      * @return Collection
      */
     public function toCollection(): Collection
     {
-        $data = $this->model?->toArray() ?? [];
-
+        $data = $this->toArray();
         return Support::isFlatAssocArray($data)
             ? Collection::make($data)
             : Collection::make([$data]);
     }
 
     /**
-     * Get a LogicResponse for this wrapper.
+     * Get LogicResponse instance with context.
      *
      * @return LogicResponse
      */
     public function response(): LogicResponse
     {
-        return (new LogicResponse())
+        return LogicResponse::make()
             ->withType($this->type)
             ->withPayload($this->toArray())
             ->operator($this);
     }
 
     /**
-     * Filter attributes by model fillable.
+     * Filter only fillable attributes.
      *
      * @param array $attributes
      * @return array
@@ -336,7 +319,7 @@ class ModelWrapper extends Helper implements EntityContract
     }
 
     /**
-     * Set the model and update related properties.
+     * Set model and related meta.
      *
      * @param Model|null $model
      * @return static
@@ -346,7 +329,6 @@ class ModelWrapper extends Helper implements EntityContract
         $this->model = $model;
         $this->modelClass = $model ? get_class($model) : '';
         $this->type = $model ? class_basename($model) : $this->type;
-
         return $this;
     }
 }

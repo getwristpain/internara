@@ -61,9 +61,9 @@ abstract class Service
     {
         if (!isset($this->services[$key])) {
             Debugger::handle(
-                exception: new \LogicException("Service '$key' is not registered. Make sure to call useServices() first."),
-                message: 'Service not found',
-                throw: true
+                exception: "Service '$key' is not registered. Make sure to call useServices() first.",
+                throw: true,
+                log: true,
             );
 
             return null;
@@ -87,10 +87,10 @@ abstract class Service
     {
         if (!$this->model) {
             Debugger::handle(new \LogicException('No model declared in service.'));
-            return new ModelWrapper();
+            return ModelWrapper::make();
         }
 
-        return new ModelWrapper($this->model);
+        return ModelWrapper::make($this->model);
     }
 
     /**
@@ -121,17 +121,17 @@ abstract class Service
                 return $this->withData($data)
                     ->withMeta(['validated' => true])
                     ->response()
-                    ->success('No validation rules defined.')
+                    ->success('Tidak ada aturan validasi yang didefinisikan.')
                     ->operator($this);
             }
 
             $validator = Validator::make($data, $rules, $messages, $attributes);
 
             if ($validator->fails()) {
-                Debugger::handle(new ValidationException($validator), 'Validation failed');
+                Debugger::handle(new ValidationException($validator));
 
                 return $this->response()
-                    ->failure('Validation failed: ' . $validator->errors()->first())
+                    ->failure('Validasi gagal: ' . $validator->errors()->first())
                     ->withErrors($validator->errors()?->toArray() ?? [])
                     ->storeLog();
             }
@@ -139,7 +139,7 @@ abstract class Service
             return $this->withData($validator->validated())
                 ->withMeta(['validated' => true])
                 ->response()
-                ->success('Validation successful.')
+                ->success('Validasi berhasil.')
                 ->operator($this);
         } finally {
             app()->setLocale($locale);
@@ -216,14 +216,13 @@ abstract class Service
      * Register and resolve one or more services.
      *
      * @param Service|string|array<Service|string> $services
-     * @return Service
+     * @return void
      */
-    protected function useServices(Service|string|array $services): Service
+    protected function useServices(Service|string|array $services): void
     {
-        $isSingle = !is_array($services);
-        $services = $isSingle ? [$services] : $services;
-
-        $lastInstance = null;
+        // Reset services
+        $this->services = [];
+        $services = !is_array($services) ? [$services] : $services;
 
         foreach ($services as $service) {
             $instance = $service instanceof self ? $service : app($service);
@@ -235,11 +234,7 @@ abstract class Service
                 ->toString();
 
             $this->services[$key] = $instance;
-
-            $lastInstance = $instance;
         }
-
-        return $isSingle ? $lastInstance : $this;
     }
 
     /**
@@ -257,7 +252,6 @@ abstract class Service
     protected function setType(?string $type = ''): static
     {
         $this->type = $type ?? class_basename($this);
-
         return $this;
     }
 }

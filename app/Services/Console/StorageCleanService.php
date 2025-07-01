@@ -3,35 +3,29 @@
 namespace App\Services\Console;
 
 use App\Helpers\Debugger;
-use App\Services\Service;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 /**
- * Service untuk membersihkan direktori penyimpanan dari file sementara dan cache.
+ * ------------------------------------------------------------------------
+ * StorageCleanService
+ * ------------------------------------------------------------------------
+ * Service to clean temporary and cached files from storage directories.
  */
-class CleanStorageService extends Service
+class StorageCleanService extends CommandService
 {
     /**
-     * Instance perintah konsol.
-     *
-     * @var Command
-     */
-    protected Command $command;
-
-    /**
-     * Konstruktor CleanStorageService.
+     * Constructor for StorageCleanService.
      *
      * @param Command $command
      */
     public function __construct(Command $command)
     {
-        parent::__construct();
-        $this->command = $command;
+        parent::__construct($command);
     }
 
     /**
-     * Menjalankan proses pembersihan direktori penyimpanan.
+     * Execute the storage cleanup process.
      *
      * @return void
      */
@@ -53,16 +47,20 @@ class CleanStorageService extends Service
         try {
             foreach ($folders as $folder) {
                 $directory = storage_path($folder);
-                if (File::exists($directory)) {
-                    $this->command->info('Membersihkan: ' . $folder);
-                    if (!File::cleanDirectory($directory)) {
-                        $this->command->warn('Direktori tidak dapat dibersihkan atau tidak ditemukan: ' . $folder);
-                    }
+
+                if (!File::exists($directory)) {
+                    continue;
+                }
+
+                $this->command->info("Cleaning: {$folder}");
+
+                if (!File::cleanDirectory($directory)) {
+                    $this->command->warn("Failed to clean or access: {$folder}");
                 }
             }
         } catch (\Throwable $th) {
-            $this->command->error('Terjadi kesalahan saat membersihkan penyimpanan.');
-            Debugger::handle($th, $th->getMessage());
+            $this->command->error('An error occurred while cleaning the storage.');
+            Debugger::handle($th);
         }
     }
 }

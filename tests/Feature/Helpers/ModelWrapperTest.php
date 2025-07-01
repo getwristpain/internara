@@ -11,7 +11,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->school = School::factory()->create();
-    $this->wrapper = new ModelWrapper($this->school);
+    $this->wrapper = ModelWrapper::make($this->school);
 });
 
 describe('ModelWrapper', function () {
@@ -119,7 +119,7 @@ describe('ModelWrapper', function () {
     });
 
     test('handles null model gracefully', function () {
-        $wrapper = new ModelWrapper(null);
+        $wrapper = ModelWrapper::make(null);
         expect($wrapper->all())->toBeNull()
             ->and($wrapper->get())->toBeNull()
             ->and($wrapper->find(1))->toBeNull()

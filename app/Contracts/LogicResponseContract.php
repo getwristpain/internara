@@ -20,7 +20,7 @@ interface LogicResponseContract
      * @param bool $success
      * @param string $message
      * @param string $status
-     * @param int $code
+     * @param int|string $code
      * @param string $type
      * @param array $payload
      * @return static
@@ -29,7 +29,7 @@ interface LogicResponseContract
         bool $success = true,
         string $message = '',
         string $status = '',
-        int $code = 200,
+        int|string $code = 200,
         string $type = '',
         array $payload = []
     ): static;
@@ -43,20 +43,20 @@ interface LogicResponseContract
      *
      * @param string $message
      * @param string $status
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function success(string $message = '', string $status = 'success', int $code = 200): static;
+    public function success(string $message = '', string $status = 'success', int|string $code = 200): static;
 
     /**
      * Mark the response as failed.
      *
      * @param string $message
      * @param string $status
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function failure(string $message = '', string $status = 'error', int $code = 500): static;
+    public function failure(string $message = '', string $status = 'error', int|string $code = 500): static;
 
     /**
      * Set whether the response is successful.
@@ -85,10 +85,10 @@ interface LogicResponseContract
     /**
      * Set the response code.
      *
-     * @param int $code
+     * @param int|string $code
      * @return static
      */
-    public function withCode(int $code): static;
+    public function withCode(int|string $code): static;
 
     /**
      * Set the type or class of the response.
@@ -159,9 +159,9 @@ interface LogicResponseContract
     /**
      * Get the response HTTP code.
      *
-     * @return int
+     * @return int|string
      */
-    public function getCode(): int;
+    public function getCode(): int|string;
 
     /**
      * Get the response type.

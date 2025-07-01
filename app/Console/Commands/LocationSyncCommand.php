@@ -7,48 +7,50 @@ use App\Services\Console\LocationSyncService;
 use Illuminate\Console\Command;
 
 /**
- * Perintah konsol untuk mengambil dan sinkronisasi data wilayah administratif Indonesia ke tabel locations.
+ * ------------------------------------------------------------------------
+ * LocationSyncCommand
+ * ------------------------------------------------------------------------
+ * Console command to synchronize Indonesian administrative regions into the `locations` table.
  */
 class LocationSyncCommand extends Command
 {
     /**
-     * Nama dan signature perintah konsol.
+     * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'location:sync {--restore : Mengembalikan backup lokasi sebelum sinkronisasi}';
+    protected $signature = 'location:sync {--restore : Restore previous location data before syncing}';
 
     /**
-     * Deskripsi perintah konsol.
+     * The console command description.
      *
      * @var string
      */
-    protected $description = 'Mengambil dan sinkronisasi data wilayah administratif Indonesia ke tabel locations';
+    protected $description = 'Sync Indonesian administrative regions into the locations table.';
 
     /**
-     * Menjalankan perintah sinkronisasi wilayah.
+     * Execute the console command.
      *
      * @return int
      */
     public function handle(): int
     {
-        $this->info('Memulai sinkronisasi wilayah...');
+        $this->info('Starting location synchronization...');
         $startTime = microtime(true);
-        $restore = $this->option('restore');
 
         try {
-            app(LocationSyncService::class, ['command' => $this, 'restore' => $restore])
-                ->syncAll();
+            app(LocationSyncService::class, [
+                'command' => $this,
+                'restore' => $this->option('restore')
+            ])->syncAll();
         } catch (\Throwable $e) {
-            $this->error('Sinkronisasi gagal: ' . $e->getMessage());
-            Debugger::handle($e, 'Terjadi error pada LocationSync: ' . $e->getMessage());
+            $this->error('Synchronization failed: ' . $e->getMessage());
+            Debugger::handle($e);
             return self::FAILURE;
         }
 
-        $endTime = microtime(true);
-        $duration = round($endTime - $startTime, 2);
-
-        $this->info("[Durasi: {$duration}s] Sinkronisasi wilayah berhasil diselesaikan.");
+        $duration = round(microtime(true) - $startTime, 2);
+        $this->info("[Duration: {$duration}s] Synchronization completed successfully.");
         return self::SUCCESS;
     }
 }

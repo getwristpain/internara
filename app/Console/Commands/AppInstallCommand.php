@@ -7,58 +7,64 @@ use Illuminate\Console\Command;
 use App\Services\Console\AppInstallService;
 
 /**
- * Perintah untuk mengotomatisasi instalasi dan setup aplikasi.
+ * ------------------------------------------------------------------------
+ * Application Installation Command
+ * ------------------------------------------------------------------------
+ * Automates the installation and setup process, including environment
+ * configuration, database migration, and application optimization.
  */
 class AppInstallCommand extends Command
 {
     /**
-     * Nama dan signature dari perintah konsol.
+     * The name and signature of the console command.
      *
      * @var string
      */
     protected $signature = 'app:install';
 
     /**
-     * Deskripsi perintah konsol.
+     * The description of the console command.
      *
      * @var string
      */
-    protected $description = 'Mengotomatisasi proses instalasi dan setup, termasuk konfigurasi environment, migrasi database, dan optimasi.';
+    protected $description = 'Automates the installation and setup process for the application.';
 
     /**
-     * Menjalankan proses instalasi aplikasi secara otomatis.
+     * ------------------------------------------------------------------------
+     * Handle Command Execution
+     * ------------------------------------------------------------------------
+     * Executes the installation service and handles error reporting.
      *
-     * @return int
+     * @return int Status code representing success or failure.
      */
     public function handle(): int
     {
         $appUrl = config('app.url', 'http://localhost:8000');
         $startTime = microtime(true);
 
-        $this->info('Proses instalasi aplikasi telah dimulai.');
+        $this->info('Application installation process has started.');
         $this->newLine();
 
         try {
-            app(AppInstallService::class, ['command' => $this])->install();
+            app(AppInstallService::class, ['command' => $this])->run();
         } catch (\Throwable $th) {
-            $message = 'Terjadi kesalahan kritis selama proses instalasi. Silakan cek log untuk detail lebih lanjut.';
+            $message = 'A critical error occurred during installation. Please check the logs for more details.';
 
             $this->newLine();
             $this->error($message);
-            Debugger::handle($th, $message);
+            Debugger::handle($th);
 
             return self::FAILURE;
         }
 
-        $endTime = microtime(true);
-        $duration = round($endTime - $startTime, 2);
+        $duration = round(microtime(true) - $startTime, 2);
 
         $this->newLine();
-        $this->info("[Durasi: {$duration}s] Instalasi berhasil diselesaikan.");
+        $this->info("[Duration: {$duration}s] Installation completed successfully.");
 
         $this->newLine();
-        $this->info('Untuk memulai server, jalankan: php artisan serve');
-        $this->info("Anda sekarang dapat mengakses aplikasi di: {$appUrl}");
+        $this->info('To start the server, run: php artisan serve');
+        $this->info("You can now access the application at: {$appUrl}");
 
         return self::SUCCESS;
     }

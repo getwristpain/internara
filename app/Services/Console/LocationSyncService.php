@@ -2,55 +2,47 @@
 
 namespace App\Services\Console;
 
+use App\Models\Location;
 use App\Helpers\Connection;
-use App\Services\Http\WilayahHttpService;
-use App\Services\LocationService;
-use App\Services\Service;
+use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
+use App\Services\LocationService;
+use App\Services\Console\CommandService;
+use App\Services\Http\WilayahHttpService;
 
 /**
- * Service untuk sinkronisasi dan backup data lokasi wilayah Indonesia.
+ * ------------------------------------------------------------------------
+ * LocationSyncService
+ * ------------------------------------------------------------------------
+ * Service to sync and optionally restore Indonesian location data.
+ *
+ * @property-read LocationService $locationService
+ * @property-read WilayahHttpService $wilayahHttpService
  */
-class LocationSyncService extends Service
+class LocationSyncService extends CommandService
 {
     /**
-     * Instance perintah konsol.
-     *
-     * @var Command|null
-     */
-    protected ?Command $command = null;
-
-    /**
-     * Status restore dari backup.
-     *
-     * @var bool
+     * Whether to restore from backup.
      */
     protected bool $restore = false;
 
     /**
-     * Konstruktor LocationSyncService.
-     *
-     * @param Command|null $command
-     * @param bool $restore
+     * Constructor.
      */
-    public function __construct(?Command $command = null, bool $restore = false)
+    public function __construct(Command $command, bool $restore = false)
     {
-        parent::__construct();
-
-        $this->command = $command;
-        $this->restore = $restore;
+        parent::__construct($command);
 
         $this->useServices([
             LocationService::class,
-            WilayahHttpService::class
+            WilayahHttpService::class,
         ]);
+
+        $this->restore = $restore;
     }
 
     /**
-     * Sinkronisasi seluruh data lokasi atau restore dari backup jika diperlukan.
-     *
-     * @return void
+     * Sync or restore all location data.
      */
     public function syncAll(): void
     {
@@ -59,158 +51,194 @@ class LocationSyncService extends Service
             return;
         }
 
-        $this->command?->newLine();
-        $this->saveLocations();
+        $saved = $this->saveLocations();
 
-        $this->command?->newLine();
+        if (!$saved) {
+            $this->restoreFromBackupIfExists();
+            return;
+        }
+
         $this->backupLocations();
     }
 
     /**
-     * Restore data lokasi dari backup jika tersedia.
-     *
-     * @return bool
+     * Restore from latest location backup if exists.
      */
     protected function restoreFromBackupIfExists(): bool
     {
-        $this->command?->info('Memeriksa backup yang tersedia...');
+        $this->command->newLine();
+        $this->command->info('Checking for available backup...');
 
-        $backupFiles = glob('database/backups/locations_backup_*.csv');
-        if (empty($backupFiles)) {
-            $this->command?->info('Backup tidak ditemukan, proses restore dilewati.');
+        $backups = glob('database/backups/locations_backup_*.csv');
+        if (empty($backups)) {
+            $this->command->info('No backup found. Restore skipped.');
             return false;
         }
 
-        usort($backupFiles, fn ($a, $b) => filemtime($b) <=> filemtime($a));
-        $latestBackup = $backupFiles[0] ?? null;
-        $this->command?->info("Melakukan restore dari backup: {$latestBackup}");
+        usort($backups, fn ($a, $b) => filemtime($b) <=> filemtime($a));
+        $latest = $backups[0] ?? null;
 
-        \DB::table('locations')->truncate();
-        $this->runShellCommand('sqlite3 database/database.sqlite -cmd ".mode csv" -cmd ".import ' . escapeshellarg($latestBackup) . ' locations"');
+        $this->command->info("Restoring from backup file: {$latest}");
 
-        $this->command?->info('✔ Data lokasi berhasil direstore dari backup.');
+        Location::truncate();
+        $this->runShellCommand(
+            'sqlite3 database/database.sqlite -cmd ".mode csv" -cmd ".import ' . escapeshellarg($latest) . ' locations"'
+        );
+
+        $this->command->info('✔ Locations restored from backup.');
         return true;
     }
 
     /**
-     * Simpan seluruh data lokasi dari API ke database.
-     *
-     * @return void
+     * Save location data from API to database.
      */
-    protected function saveLocations(): void
+    protected function saveLocations(): bool
     {
-        $wilayah = $this->useServices(WilayahHttpService::class);
+        $total = [
+            'provinces' => 0,
+            'regencies' => 0,
+            'districts' => 0,
+            'villages' => 0,
+        ];
 
-        $this->locationService->transaction(function () use ($wilayah) {
-            $provinces = $wilayah->getProvinces();
-            if (!$this->locationService->insert($provinces->toArray(), null, 'province')) {
-                $this->command?->error('Gagal menyimpan data provinsi.');
-                return;
+        [$saved, $total] = $this->locationService->model()->transaction(function () use ($total): array {
+            $provinces = $this->wilayahHttpService->getProvinces()->toArray();
+            $total['provinces'] = count($provinces);
+
+            if (!$this->upsertLevel($provinces, null, 'province')) {
+                return [false, $total];
             }
-            $this->command?->info('✔ Data provinsi berhasil disimpan.');
 
-            foreach ($provinces as $province) {
-                $provinceId = $this->locationService->findId([
-                    'name' => $province['name'],
-                    'type' => 'province',
-                ]);
-                if (!$provinceId) {
-                    $this->command?->error("Provinsi {$province['name']} tidak ditemukan.");
+            foreach ($provinces as $prov) {
+                $provId = $this->findLocationId($prov['name'], 'province');
+                if (!$provId) {
                     continue;
                 }
 
-                $regencies = $wilayah->getRegencies($province['id']);
-                if (!$this->locationService->insert($regencies->toArray(), $provinceId, 'regency')) {
-                    $this->command?->error("Gagal menyimpan data kabupaten/kota untuk provinsi: {$province['name']}");
-                    return;
-                }
-                $this->command?->info("✔ Data kabupaten/kota berhasil disimpan untuk provinsi: {$province['name']}");
+                $regencies = $this->wilayahHttpService->getRegencies($prov['id'])->toArray();
+                $total['regencies'] = count($regencies);
 
-                foreach ($regencies as $regency) {
-                    $regencyId = $this->locationService->findId([
-                        'parent_id' => $provinceId,
-                        'name' => $regency['name'],
-                        'type' => 'regency',
-                    ]);
-                    if (!$regencyId) {
-                        $this->command?->error("Kabupaten/Kota {$regency['name']} tidak ditemukan untuk provinsi {$province['name']}");
+                if (!$this->upsertLevel($regencies, $provId, 'regency', $prov['name'] ?? '')) {
+                    return [false, $total];
+                }
+
+                foreach ($regencies as $reg) {
+                    $regId = $this->findLocationId($reg['name'], 'regency', $provId);
+                    if (!$regId) {
                         continue;
                     }
 
-                    $districts = $wilayah->getDistricts($regency['id']);
-                    if (!$this->locationService->insert($districts->toArray(), $regencyId, 'district')) {
-                        $this->command?->error("Gagal menyimpan data kecamatan untuk kabupaten/kota: {$regency['name']}");
-                        return;
-                    }
-                    $this->command?->info("✔ Data kecamatan berhasil disimpan untuk kabupaten/kota: {$regency['name']}");
+                    $districts = $this->wilayahHttpService->getDistricts($reg['id'])->toArray();
+                    $total['districts'] = count($districts);
 
-                    foreach ($districts as $district) {
-                        $districtId = $this->locationService->findId([
-                            'parent_id' => $regencyId,
-                            'name' => $district['name'],
-                            'type' => 'district',
-                        ]);
-                        if (!$districtId) {
-                            $this->command?->error("Kecamatan {$district['name']} tidak ditemukan untuk kabupaten/kota {$regency['name']}");
+                    if (!$this->upsertLevel($districts, $regId, 'district', $reg['name'] ?? '')) {
+                        return [false, $total];
+                    }
+
+                    foreach ($districts as $dist) {
+                        $distId = $this->findLocationId($dist['name'], 'district', $regId);
+                        if (!$distId) {
                             continue;
                         }
 
-                        $villages = $wilayah->getVillages($district['id']);
-                        if (!$this->locationService->insert($villages->toArray(), $districtId, 'village')) {
-                            $this->command?->error("Gagal menyimpan data desa/kelurahan untuk kecamatan: {$district['name']}");
-                            return;
+                        $villages = $this->wilayahHttpService->getVillages($dist['id'])->toArray();
+                        $total['villages'] = count($villages);
+
+                        if (!$this->upsertLevel($villages, $distId, 'village', $dist['name'] ?? '')) {
+                            return [false, $total];
                         }
-                        $this->command?->info("✔ Data desa/kelurahan berhasil disimpan untuk kecamatan: {$district['name']}");
                     }
                 }
             }
+
+            return [true, $total];
         });
 
-        $this->command?->newLine();
-        $this->command?->info('✅ Seluruh data lokasi berhasil disimpan.');
+        if (!$saved) {
+            return false;
+        }
+
+        $this->command->newLine();
+        $this->command->info('✅ All location data saved successfully.');
+        $this->command->info("Total: {$total['provinces']} provinces, {$total['regencies']} regencies, {$total['districts']} districs, {$total['villages']} villages.");
+
+        return true;
     }
 
     /**
-     * Backup tabel locations ke file CSV.
-     *
-     * @return void
+     * Backup locations table to CSV.
      */
     protected function backupLocations(): void
     {
-        $this->command?->info('Membackup tabel locations...');
+        $this->command->info('Backing up locations table...');
 
-        if (!is_dir('database/backups')) {
-            mkdir('database/backups', 0755, true);
+        $backupDir = 'database/backups';
+        if (!is_dir($backupDir)) {
+            mkdir($backupDir, 0755, true);
         }
 
-        $backupFiles = glob('database/backups/locations_backup_*.csv');
-        if (count($backupFiles) > 1) {
-            usort($backupFiles, fn ($a, $b) => filemtime($b) <=> filemtime($a));
-            foreach (array_slice($backupFiles, 1) as $oldFile) {
-                @unlink($oldFile);
-            }
-        }
+        $this->cleanOldBackups($backupDir);
 
-        $backupFile = 'locations_backup_' . date('Ymd_His') . '.csv';
-        $this->runShellCommand('sqlite3 database/database.sqlite -header -csv "SELECT * FROM locations;" > database/backups/' . $backupFile);
+        $backupFile = "locations_backup_" . date('Ymd_His') . ".csv";
+        $this->runShellCommand(
+            'sqlite3 database/database.sqlite -header -csv "SELECT * FROM locations;" > ' . $backupDir . '/' . $backupFile
+        );
 
-        $this->command?->info("Backup berhasil dibuat: {$backupFile}");
+        $this->command->info("Backup completed: {$backupFile}");
     }
 
     /**
-     * Jalankan perintah shell.
-     *
-     * @param string $command
-     * @return void
+     * Upsert location level data to DB.
      */
-    private function runShellCommand(string $command): void
+    protected function upsertLevel(array $items, ?int $parentId, string $type, string $name = ''): bool
     {
-        $process = Process::fromShellCommandline($command);
-        $process->setTimeout(300);
-        $process->run();
+        $pluralType = Str::plural($type);
+        $recent = empty($name) ? $pluralType : "{$pluralType} of {$name}";
 
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException($process->getErrorOutput());
+        if (!$this->locationService->upsert($items, $parentId, $type)) {
+            $this->command->error("Failed to save data for {$type}.");
+            return false;
+        }
+
+        $this->command->info("✔ {$recent} data saved successfully.");
+        return true;
+    }
+
+    /**
+     * Find location ID based on criteria.
+     */
+    protected function findLocationId(string $name, string $type, ?int $parentId = null): ?int
+    {
+        $criteria = [
+            'name' => $name,
+            'type' => $type,
+        ];
+
+        if ($parentId !== null) {
+            $criteria['parent_id'] = $parentId;
+        }
+
+        $id = $this->locationService->findId($criteria);
+        if (!$id) {
+            $this->command->error("Location [{$type}] \"{$name}\" not found.");
+        }
+
+        return $id;
+    }
+
+    /**
+     * Clean old location backup files.
+     */
+    protected function cleanOldBackups(string $dir): void
+    {
+        $backups = glob("{$dir}/locations_backup_*.csv");
+        if (count($backups) <= 1) {
+            return;
+        }
+
+        usort($backups, fn ($a, $b) => filemtime($b) <=> filemtime($a));
+        foreach (array_slice($backups, 1) as $old) {
+            @unlink($old);
         }
     }
 }
