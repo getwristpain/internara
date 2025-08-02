@@ -2,7 +2,9 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
+use InvalidArgumentException;
 
 class LogicResponse
 {
@@ -25,7 +27,7 @@ class LogicResponse
     public static function make(bool $success = true, string $message = '', string $type = 'Response'): static
     {
         $instance = new static();
-        $instance->init($success)
+        $instance->setSuccess($success)
             ->with('message', $message)
             ->with('type', $type);
 
@@ -39,7 +41,7 @@ class LogicResponse
     public static function success(string $message): static
     {
         $instance = new static();
-        $instance->init(true)
+        $instance->setSuccess(true)
             ->with('message', $message)
             ->clearErrors();
 
@@ -49,7 +51,7 @@ class LogicResponse
     public static function fail(string $message): static
     {
         $instance = new static();
-        $instance->init(false)
+        $instance->setSuccess(false)
             ->with('message', $message)
             ->with('errors', ['message' => $message]);
 
@@ -72,8 +74,31 @@ class LogicResponse
 
         return match ($attributes) {
             'errors' => $this->withErrors($value),
+            'error', 'success' => $this->withMessage($value, $attributes),
+            'type' => $this->withType($value),
             default => $this->fill($attributes, $value)
         };
+    }
+
+    public function withType(string|object|null $type): static
+    {
+        if (is_object($type)) {
+            $type = class_basename($type);
+        }
+
+        $this->type = $type;
+        return $this;
+    }
+
+    public function withMessage(string $message = '', string $flag = ''): static
+    {
+        $this->message = match (true) {
+            ($flag === 'success') && $this->passes() => $message,
+            ($flag === 'error') && $this->fails() => $message,
+            default => $this->message
+        };
+
+        return $this;
     }
 
     public function withErrors(MessageBag|array|null $errors): static
@@ -88,20 +113,72 @@ class LogicResponse
 
         return $this;
     }
-
-    protected function fill(string $attribute, mixed $value): static
+    public function passes(): bool|int
     {
-        if (property_exists($this, $attribute)) {
-            $this->$attribute = $value;
+        return $this->success && empty($this->errors);
+    }
+
+    public function fails(): bool|int
+    {
+        return !$this->success && $this->errors && $this->errors->isNotEmpty();
+    }
+
+    public function storeLog(string $level = ''): static
+    {
+        if (empty($level)) {
+            $level = $this->success ? 'success' : 'error';
         }
+
+        $level = in_array($level, ['success', 'info', 'warning', 'error', 'debug'], true);
+        $context = $this->toArray();
+
+        unset($context['message']);
+        Log::log($level, $this->message, $context);
 
         return $this;
     }
 
-    protected function init(bool $success = true): static
+    public function debug(?\Throwable $th = null): static
+    {
+        if (!($th instanceof \Exception)) {
+            throw $th;
+        }
+
+        Log::debug($th->getMessage(), [
+            'code' => $th->getCode(),
+            'file' => $th->getFile(),
+            'line' => $th->getLine(),
+            'trace' => $th->getTraceAsString()
+        ]);
+
+        return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'message' => $this->message,
+            'type' => $this->type,
+            'code' => $this->code,
+            'payload' => $this->payload,
+            'errors' => $this->errors?->all()
+        ];
+    }
+
+    protected function fill(string $attribute, mixed $value): static
+    {
+        if (property_exists($this, $attribute)) {
+            throw new InvalidArgumentException("The '$attribute' attribute not found.");
+        }
+
+        $this->$attribute = $value;
+        return $this;
+    }
+
+    protected function setSuccess(bool $value = true): static
     {
         $this->init = true;
-        $this->success = $success;
+        $this->success = $value;
 
         return $this;
     }
