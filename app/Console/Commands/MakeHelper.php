@@ -26,6 +26,6 @@ class MakeHelper extends Command
     public function handle()
     {
         $name = 'Helpers/' . trim($this->argument('name'));
-        $this->call('make:logic', ['name' => $name, '--extends' => 'App\\Helpers\\Helper']);
+        $this->call('make:logic', ['name' => $name]);
     }
 }
