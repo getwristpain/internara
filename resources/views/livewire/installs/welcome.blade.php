@@ -1,11 +1,3 @@
-<?php
-
-use Livewire\Volt\Component;
-
-new class extends Component {
-    //
-}; ?>
-
-<div>
-    //
+<div class="wh-full flex items-center justify-center">
+    // Welcome
 </div>
