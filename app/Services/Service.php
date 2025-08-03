@@ -14,12 +14,16 @@ class Service
         $this->fill($model);
     }
 
-
     public function response(): LogicResponse
     {
         return LogicResponse::make()
             ->with('type', $this)
             ->with('payload', $this->toArray());
+    }
+
+    public function model(): ?Model
+    {
+        return $this->model;
     }
 
     public function toArray(): array

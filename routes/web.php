@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
+foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
+    require  $routeFile;
+}
+
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
@@ -18,5 +22,3 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
-
-require __DIR__.'/auth.php';
