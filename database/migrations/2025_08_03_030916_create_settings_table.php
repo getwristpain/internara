@@ -15,8 +15,9 @@ return new class () extends Migration {
             $table->string('key')->unique();
             $table->text('value')->nullable();
             $table->string('type')->default('string');
-            $table->string('category')->nullable();
             $table->boolean('flag')->default('false');
+            $table->string('label')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
 
             $table->index(['category', 'key']);

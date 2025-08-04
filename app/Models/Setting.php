@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Transform;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
@@ -15,7 +16,32 @@ class Setting extends Model
         'key',
         'value',
         'type',
-        'category',
-        'flag'
+        'flag',
+        'label',
+        'description'
     ];
+
+    protected $casts = [
+        'type' => 'string',
+    ];
+
+    public function getValueAttribute($value): mixed
+    {
+        return Transform::from($value)->to($this->attributes['type']);
+    }
+
+    public function setKeyAttribute($value): void
+    {
+        $this->attributes['key'] = Transform::from($value)
+                                        ->lower()
+                                        ->slug('_')
+                                        ->toString();
+    }
+
+    public function setValueAttribute($value): void
+    {
+        $this->attributes['type'] = gettype($value);
+        $this->attributes['value'] = Transform::from($value)->toString();
+    }
+
 }

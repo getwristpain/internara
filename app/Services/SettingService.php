@@ -8,22 +8,15 @@ use Illuminate\Support\Arr;
 
 class SettingService extends Service
 {
-    /**
-     * Class constructor.
-     */
-    public function __construct(?Setting $model = null)
-    {
-        parent::__construct($model ?? app(Setting::class));
-    }
-
     public function get(string|array $keys, mixed $default = null): mixed
     {
         if (is_array($keys)) {
-            $model = $this->model()->whereIn('key', $keys)->get();
-            return $model->map(fn ($i) => $i['value'] ?? null)->toArray() ?? $default;
+            $model = Setting::whereIn('key', $keys)->get();
+
+            return $model ? $model->map(fn ($i) => $i['value'] ?? null)->toArray() : $default;
         }
 
-        return $this->model()->where(['keys' => $keys])->first()?->value ?? $default;
+        return Setting::where(['keys' => $keys])->first()?->value ?? $default;
     }
 
     public function set(array|string $keys, mixed $value = null): ?Setting
@@ -38,7 +31,7 @@ class SettingService extends Service
             }
         }
 
-        return $this->model()->updateOrCreate(['key' => $keys], ['value' => $value]);
+        return Setting::updateOrCreate(['key' => $keys], ['value' => $value]);
     }
 
     public function isInstalled(): bool
