@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html data-theme="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <head>
         <meta charset="utf-8" />
@@ -19,13 +19,13 @@
         {{-- Vite Assets Build --}}
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        @stack('head')
+        @stack('styles')
     </head>
 
-    <body>
+    <body class="bg-base-100 text-neutral">
         <div class="wh-full">{{ $slot }}</div>
 
-        @stack('script')
+        @stack('scripts')
     </body>
 
 </html>

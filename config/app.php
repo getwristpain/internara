@@ -6,6 +6,8 @@ return [
 
     'logo' => 'images/logo.png',
 
+    'description' => env('APP_NAME', 'Internara') . ' - Sistem Manajemen PKL',
+
     'env' => env('APP_ENV', 'production'),
 
     'debug' => (bool) env('APP_DEBUG', false),

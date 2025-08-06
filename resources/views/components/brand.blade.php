@@ -1,17 +1,17 @@
 @props([
     'brand' => setting('app_name', default: config('app.name')),
     'logo' => asset(setting('app_logo', default: config('app.logo'))),
-    'height' => 6,
+    'class' => null,
 ])
 
 @php
-    $height -= 3;
-    $brandClass = "flex items-center gap-2 block w-auto h-full max-h-{$height}";
+    $brandClass = 'flex items-center gap-2 block w-auto h-6';
+    $class = implode(' ', array_values(array_filter([$brandClass, $class])));
 @endphp
 
-<a href="{{ url('/') }}">
-    <div {{ $attributes->merge(['class' => $brandClass]) }}>
-        <img class="w-auto h-{{ $height }} min-h-4 aspect-square" src="{{ $logo }}" alt="Logo">
-        <span class="font-bold text-neutral-700">{{ $brand }}</span>
+<a href="{{ url('/') }}" wire:navigate>
+    <div class=" {{ $class }}">
+        <img class="w-auto h-6 scale-110 aspect-square" src="{{ $logo }}" alt="Logo">
+        <span class="font-bold text-neutral-700 text-xl">{{ $brand }}</span>
     </div>
 </a>

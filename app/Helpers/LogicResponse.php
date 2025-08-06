@@ -4,11 +4,10 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
-use InvalidArgumentException;
 
 class LogicResponse
 {
-    protected bool $init = false;
+    protected bool $initialized = false;
 
     protected bool $success = true;
 
@@ -24,6 +23,8 @@ class LogicResponse
 
     protected ?MessageBag $errors = null;
 
+    protected bool $abort = false;
+
     public static function make(bool $success = true, string $message = '', string $type = 'Response'): static
     {
         $instance = new static();
@@ -38,7 +39,7 @@ class LogicResponse
         return $instance;
     }
 
-    public static function success(string $message): static
+    public static function success(string $message = ''): static
     {
         $instance = new static();
         $instance->setSuccess(true)
@@ -48,7 +49,7 @@ class LogicResponse
         return $instance;
     }
 
-    public static function fail(string $message): static
+    public static function fail(string $message = ''): static
     {
         $instance = new static();
         $instance->setSuccess(false)
@@ -56,6 +57,53 @@ class LogicResponse
             ->with('errors', ['message' => $message]);
 
         return $instance;
+    }
+
+    /**
+     * @param LogicResponse|(callable(LogicResponse):LogicResponse)|bool $condition
+     * @param string $message
+     *
+     * @return LogicResponse
+     */
+    public function failWhen(LogicResponse|callable|bool $condition, string $message = ''): static
+    {
+        if ($this->abort) {
+            return $this;
+        }
+
+        if ($condition instanceof LogicResponse && $condition->fails()) {
+            return empty($message) ? $condition : $condition->with('error', $message);
+        }
+
+        if (is_callable($condition)) {
+            $callback = $condition($this);
+
+            if ($callback instanceof LogicResponse && $callback->fails()) {
+                return $callback;
+            }
+
+            throw new \InvalidArgumentException('The $condition must return LogicResponse or boolean. ' . gettype($callback) . ' given.');
+        }
+
+        return $condition ? $this->fail($message) : $this;
+    }
+
+    /**
+     * @param (callable(LogicResponse))|mixed|null $callback
+     *
+     * @return LogicResponse|mixed
+     */
+    public function then(mixed $callback = null): mixed
+    {
+        if ($this->abort) {
+            return $this;
+        }
+
+        if (is_callable($callback)) {
+            return $callback($this);
+        }
+
+        return empty($callback) ? $this : $callback;
     }
 
     public function clearErrors(): static
@@ -113,12 +161,12 @@ class LogicResponse
 
         return $this;
     }
-    public function passes(): bool|int
+    public function passes(): bool
     {
         return $this->success && empty($this->errors);
     }
 
-    public function fails(): bool|int
+    public function fails(): bool
     {
         return !$this->success && $this->errors && $this->errors->isNotEmpty();
     }
@@ -138,17 +186,17 @@ class LogicResponse
         return $this;
     }
 
-    public function debug(?\Throwable $th = null): static
+    public function debug(?\Throwable $exception = null): static
     {
-        if (!($th instanceof \Exception)) {
-            throw $th;
+        if (!($exception instanceof \Exception)) {
+            throw $exception;
         }
 
-        Log::debug($th->getMessage(), [
-            'code' => $th->getCode(),
-            'file' => $th->getFile(),
-            'line' => $th->getLine(),
-            'trace' => $th->getTraceAsString()
+        Log::debug($exception->getMessage(), [
+            'code' => $exception->getCode(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $this->formatExceptionTrace($exception)
         ]);
 
         return $this;
@@ -165,10 +213,34 @@ class LogicResponse
         ];
     }
 
+    protected function formatExceptionTrace(?\Throwable $exception = null, int $limit = 5): ?array
+    {
+        if (empty($exception)) {
+            return null;
+        }
+
+        $trace = array_slice($exception->getTrace(), 0, $limit);
+
+        return array_map(
+            fn ($item, $index) =>
+                sprintf(
+                    '#%d %s(%s): %s%s%s',
+                    $index,
+                    $item['file'] ?? '[internal function]',
+                    $item['line'] ?? '-',
+                    $item['class'] ?? '',
+                    $item['type'] ?? '',
+                    $item['function'] ?? ''
+                ),
+            $trace,
+            array_keys($trace)
+        );
+    }
+
     protected function fill(string $attribute, mixed $value): static
     {
         if (property_exists($this, $attribute)) {
-            throw new InvalidArgumentException("The '$attribute' attribute not found.");
+            throw new \InvalidArgumentException("The '$attribute' attribute not found.");
         }
 
         $this->$attribute = $value;
@@ -177,8 +249,9 @@ class LogicResponse
 
     protected function setSuccess(bool $value = true): static
     {
-        $this->init = true;
+        $this->initialized = true;
         $this->success = $value;
+        $this->abort = !$value;
 
         return $this;
     }

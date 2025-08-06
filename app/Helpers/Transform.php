@@ -2,7 +2,10 @@
 
 namespace App\Helpers;
 
+use ReflectionMethod;
 use App\Helpers\Helper;
+use ReflectionProperty;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class Transform extends Helper
@@ -67,16 +70,20 @@ class Transform extends Helper
         return $data;
     }
 
-    public function to(string|null $type = null): mixed
+    public function to(callable|string|null $callback = null): mixed
     {
-        return match ($type) {
-            'array_array' => $this->castArray($type),
-            'array_bool', 'array_boolean' => $this->castArray($type),
-            'array_float', 'array_double' => $this->castArray($type),
-            'array_int', 'array_integer' => $this->castArray($type),
-            'array_object', 'array_obj' => $this->castArray($type),
-            'array_string', 'array_str' => $this->castArray($type),
-            'array_value', 'array_numeric' => $this->castArray($type),
+        if (is_callable($callback)) {
+            return $callback($this->value);
+        }
+
+        return match ($callback) {
+            'array_array' => $this->castArray($callback),
+            'array_bool', 'array_boolean' => $this->castArray($callback),
+            'array_float', 'array_double' => $this->castArray($callback),
+            'array_int', 'array_integer' => $this->castArray($callback),
+            'array_object', 'array_obj' => $this->castArray($callback),
+            'array_string', 'array_str' => $this->castArray($callback),
+            'array_value', 'array_numeric' => $this->castArray($callback),
             'array' => (array) $this->value,
             'bool', 'boolean' => $this->toBoolean(),
             'float', 'double' => (float) $this->value,
@@ -151,17 +158,15 @@ class Transform extends Helper
         return $this;
     }
 
-    public function replace(array $replace = []): static
+    public function replace(array|string $search = '', array|string $replace = ''): static
     {
         if (!is_string($this->value)) {
             return $this;
         }
 
-        $this->value = str_replace(
-            array_keys($replace),
-            array_values($replace),
-            $this->value
-        );
+        $this->value = Arr::isAssoc((array) $search)
+            ? str_replace(array_keys($search), array_values($search), $this->value)
+            : str_replace($search, $replace, $this->value);
 
         return $this;
     }

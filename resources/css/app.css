@@ -9,17 +9,39 @@
         "Noto Color Emoji";
 }
 
-@layer base {
+@plugin "daisyui" {
+    themes: light --default;
+}
+
+@utility no-interact {
+    @apply pointer-events-none cursor-not-allowed select-none;
+    user-drag: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+@layer component {
+    *:disabled {
+        @apply no-interact opacity-90;
+    }
+
     body {
-        @apply font-sans bg-neutral-50 text-neutral-900 antialiased wh-screen min-h-screen max-w-screen overflow-x-hidden;
+        @apply font-sans bg-neutral-50 text-neutral-900 antialiased w-screen h-screen min-h-screen max-w-screen overflow-x-hidden;
+    }
+
+    .required {
+        @apply after:content-['*'] after:text-red-500;
+    }
+
+    iconify-icon {
+        @apply scale-110 inline-block align-middle;
     }
 }
 
 @layer utilities {
-    .glass {
-        @apply bg-neutral-50/5 backdrop-blur-3xl;
-    }
-
     .wh-full {
         @apply w-full h-full;
     }
