@@ -10,7 +10,7 @@
 }
 
 @plugin "daisyui" {
-    themes: light --default;
+    themes: lofi --default;
 }
 
 @utility no-interact {
@@ -29,7 +29,7 @@
     }
 
     body {
-        @apply font-sans bg-neutral-50 text-neutral-900 antialiased w-screen h-screen min-h-screen max-w-screen overflow-x-hidden;
+        @apply font-sans bg-base-100 text-neutral antialiased min-h-screen min-w-screen max-w-screen overflow-x-hidden;
     }
 
     .required {
@@ -48,5 +48,21 @@
 
     .wh-screen {
         @apply w-screen h-screen;
+    }
+
+    .min-wh-full {
+        @apply min-w-full min-h-full;
+    }
+
+    .min-wh-screen {
+        @apply min-w-screen min-h-screen;
+    }
+
+    .max-wh-full {
+        @apply max-w-full max-h-full;
+    }
+
+    .max-wh-screen {
+        @apply max-w-screen max-h-screen;
     }
 }

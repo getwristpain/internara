@@ -16,7 +16,7 @@ class EnsureInstalledMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (!setting()->isInstalled() && !$this->isInstallRoute($request) && !$this->isLivewireRequest($request)) {
-            return redirect()->route('install');
+            return redirect()->route('setup');
         }
 
         if (setting()->isInstalled() && $this->isInstallRoute($request)) {
@@ -28,7 +28,7 @@ class EnsureInstalledMiddleware
 
     protected function isInstallRoute(Request $request): bool
     {
-        return $request->is('install*');
+        return $request->is('setup*');
     }
 
     protected function isLivewireRequest(Request $request): bool

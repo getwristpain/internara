@@ -1,9 +1,9 @@
 @props([
-    'action' => null,
+    'action' => '',
     'bordered' => false,
     'class' => null,
     'color' => 'default',
-    'form' => null,
+    'form' => '',
     'icon' => null,
     'label' => null,
     'shadowed' => false,
@@ -22,7 +22,7 @@
     };
 
     $shadowClass = $shadowed ? 'shadow-xl shadow-neutral-200' : '';
-    $btnClass = 'btn rounded-full items-center gap-4 transition duration-150 ease-in-out hover:scale-110';
+    $btnClass = 'btn rounded-full items-center gap-4 transition duration-150 ease-in-out hover:scale-110 text-nowrap';
 
     $class = implode(' ', array_values(array_filter([$btnClass, $colorClass, $shadowClass, $class])));
 @endphp

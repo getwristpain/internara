@@ -1,10 +1,7 @@
-@props([
-    'title' => null,
-    'favicon' => null,
-])
+@extends('components.layouts.app')
 
-<x-layouts.app :$title :$favicon>
+@section('main')
     <x-bg-decoration></x-bg-decoration>
     <x-navbar fixed shadowed></x-navbar>
-    <main class="wh-screen">{{ $slot }}</main>
-</x-layouts.app>
+    <main class="min-wh-screen">{{ $slot }}</main>
+@endsection
