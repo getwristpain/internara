@@ -6,6 +6,7 @@ use RateLimiter;
 use App\Services\Service;
 use App\Helpers\Transform;
 use App\Helpers\LogicResponse;
+use Illuminate\Support\Facades\Session;
 
 class SetupService extends Service
 {
@@ -34,9 +35,9 @@ class SetupService extends Service
             });
     }
 
-    protected function setupStart()
+    protected function setupStart(): LogicResponse
     {
-        //
+        return $this->markAsCompleted('setup:welcome');
     }
 
     protected function setupAccount()
@@ -64,6 +65,19 @@ class SetupService extends Service
         //
     }
 
+    protected function markAsCompleted(string $step): LogicResponse
+    {
+        $label = $this->steps[$step] ?? 'Instalasi';
+
+        try {
+            Session::put($step, true);
+            return $this->response()->success("Berhasil menyelesaikan langkah {$label}.");
+        } catch (\Throwable $th) {
+            return $this->response()->error("Gagal menyelesaikan langkah {$label}.")
+                ->debug($th);
+        }
+    }
+
     protected function ensureNotRateLimited(string $step): LogicResponse
     {
         if (!RateLimiter::tooManyAttempts($step, 5)) {
@@ -72,11 +86,11 @@ class SetupService extends Service
                 ->replace(':seconds', $seconds)
                 ->toString();
 
-            return $this->response()->fail($message);
+            return $this->response()->error($message);
         }
 
         RateLimiter::increment($step);
-        return $this->response()->success();
+        return $this->response();
     }
 
     protected function ensureNotInstalled(): LogicResponse

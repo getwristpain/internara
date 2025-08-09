@@ -4,66 +4,62 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
+use InvalidArgumentException;
+use Throwable;
 
 class LogicResponse
 {
     protected bool $initialized = false;
-
-    protected bool $success = true;
-
+    protected ?bool $success = null;
     protected string $message = '';
-
     protected string $type = 'Response';
-
-    protected string $status = 'success';
-
-    protected string|int $code = 'SUCCESS';
-
+    protected string $status = '';
+    protected string|int $code = '';
     protected array $payload = [];
-
     protected ?MessageBag $errors = null;
-
     protected bool $abort = false;
 
-    public static function make(bool $success = true, string $message = '', string $type = 'Response'): static
-    {
+    /** ===== Static Factory ===== */
+    public static function make(
+        bool $success = true,
+        string $message = '',
+        string $type = 'Response',
+        string $status = '',
+        string|int $code = '',
+        mixed $payload = []
+    ): static {
         $instance = new static();
-        $instance->setSuccess($success)
-            ->with('message', $message)
-            ->with('type', $type);
+        $instance->initialize($success)
+            ->withMessage($message)
+            ->withType($type)
+            ->withStatus($status)
+            ->withCode($code)
+            ->withPayload($payload);
 
         $success
             ? $instance->clearErrors()
-            : $instance->with('errors', ['message' => $message]);
+            : $instance->withErrors($message);
 
         return $instance;
     }
 
     public static function success(string $message = ''): static
     {
-        $instance = new static();
-        $instance->setSuccess(true)
-            ->with('message', $message)
-            ->clearErrors();
-
-        return $instance;
+        return (new static())->make(true, $message);
     }
 
-    public static function fail(string $message = ''): static
+    public static function error(string $message = ''): static
     {
-        $instance = new static();
-        $instance->setSuccess(false)
-            ->with('message', $message)
-            ->with('errors', ['message' => $message]);
-
-        return $instance;
+        return (new static())->make(false, $message);
     }
+
+    /** ===== Conditional Fail ===== */
 
     /**
-     * @param LogicResponse|(callable(LogicResponse):LogicResponse)|bool $condition
+     * @param LogicResponse|(callable(LogicResponse): LogicResponse|bool)|bool $condition
      * @param string $message
      *
-     * @return LogicResponse
+     * @return static
      */
     public function failWhen(LogicResponse|callable|bool $condition, string $message = ''): static
     {
@@ -71,27 +67,36 @@ class LogicResponse
             return $this;
         }
 
-        if ($condition instanceof LogicResponse && $condition->fails()) {
-            return empty($message) ? $condition : $condition->with('error', $message);
+        if ($condition instanceof LogicResponse) {
+            return $condition->fails()
+                ? (empty($message) ? $condition : $condition->with('message', $message))
+                : $this;
         }
 
         if (is_callable($condition)) {
-            $callback = $condition($this);
+            $result = $condition($this);
 
-            if ($callback instanceof LogicResponse && $callback->fails()) {
-                return $callback;
+            if ($result instanceof LogicResponse) {
+                return $result->fails() ? $result : $this;
             }
 
-            throw new \InvalidArgumentException('The $condition must return LogicResponse or boolean. ' . gettype($callback) . ' given.');
+            if (is_bool($result)) {
+                return $result ? static::error($message) : $this;
+            }
+
+            throw new InvalidArgumentException(
+                sprintf('The $condition must return LogicResponse or boolean. %s given.', gettype($result))
+            );
         }
 
-        return $condition ? $this->fail($message) : $this;
+        return $condition ? static::error($message) : $this;
     }
 
+    /** ===== Callback Chaining ===== */
     /**
-     * @param (callable(LogicResponse))|mixed|null $callback
+     * @param callable(LogicResponse)|mixed|null $callback
      *
-     * @return LogicResponse|mixed
+     * @return mixed
      */
     public function then(mixed $callback = null): mixed
     {
@@ -99,123 +104,156 @@ class LogicResponse
             return $this;
         }
 
-        if (is_callable($callback)) {
-            return $callback($this);
-        }
-
-        return empty($callback) ? $this : $callback;
+        return is_callable($callback) ? $callback($this) : ($callback ?: $this);
     }
 
+    /** ===== Modifiers ===== */
     public function clearErrors(): static
     {
         $this->errors = null;
         return $this;
     }
 
-    public function with(string|array $attributes, mixed $value): static
+    public function with(string|array $attributes, mixed $value = null): static
     {
         if (is_array($attributes)) {
-            foreach ($attributes as $attr => $v) {
-                $this->with($attr, $v);
+            foreach ($attributes as $attr => $val) {
+                $this->with($attr, $val);
             }
+            return $this;
         }
 
         return match ($attributes) {
-            'errors' => $this->withErrors($value),
-            'error', 'success' => $this->withMessage($value, $attributes),
-            'type' => $this->withType($value),
-            default => $this->fill($attributes, $value)
+            'message' => $this->withMessage($value),
+            'type'    => $this->withType($value),
+            'status'  => $this->withStatus($value),
+            'code'    => $this->withCode($value),
+            'payload' => $this->withPayload($value),
+            'errors'  => $this->withErrors($value),
+            default   => throw new InvalidArgumentException("Attribute '{$attributes}' not found"),
         };
+    }
+
+    public function withCode(string|int $value = ''): static
+    {
+        $this->code = $value ?: ($this->passes() ? 'SUCCESS' : 'ERROR');
+        return $this;
+    }
+
+    public function withStatus(string $value = ''): static
+    {
+        $this->status = $value ?: ($this->passes() ? 'success' : 'error');
+        return $this;
+    }
+
+    public function withPayload(array $items = []): static
+    {
+        $this->payload = $items;
+        return $this;
     }
 
     public function withType(string|object|null $type): static
     {
-        if (is_object($type)) {
-            $type = class_basename($type);
-        }
-
-        $this->type = $type;
+        $this->type = is_object($type) ? class_basename($type) : (string) $type;
         return $this;
     }
 
-    public function withMessage(string $message = '', string $flag = ''): static
+    public function withMessage(string $message = '', string|bool $flag = ''): static
     {
+        if (is_bool($flag)) {
+            $flag = $flag ? 'success' : 'error';
+        }
+
         $this->message = match (true) {
-            ($flag === 'success') && $this->passes() => $message,
-            ($flag === 'error') && $this->fails() => $message,
-            default => $this->message
+            $flag === 'success' && $this->passes() => $message,
+            $flag === 'error' && $this->fails()    => $message,
+            default => $message ?: ($this->fails() ? 'Terjadi kesalahan sistem: tidak diketahui.' : '')
         };
 
         return $this;
     }
 
-    public function withErrors(MessageBag|array|null $errors): static
+    public function withErrors(MessageBag|array|string|null $errors): static
     {
-        if (!($errors instanceof MessageBag)) {
-            $this->errors = new MessageBag($errors ?? []);
-
-            return $this;
-        }
-
-        $this->errors = $errors;
+        $this->errors = !($errors instanceof MessageBag)
+            ? new MessageBag((array) $errors)
+            : $errors;
 
         return $this;
     }
+
+    /** ===== Status Check ===== */
     public function passes(): bool
     {
-        return $this->success && empty($this->errors);
+        return $this->initialized && $this->success === true && empty($this->errors);
     }
 
     public function fails(): bool
     {
-        return !$this->success && $this->errors && $this->errors->isNotEmpty();
+        return $this->initialized && $this->success === false && $this->errors && $this->errors->isNotEmpty();
     }
 
+    /** ===== Logging ===== */
     public function storeLog(string $level = ''): static
     {
-        if (empty($level)) {
-            $level = $this->success ? 'success' : 'error';
+        $level = $level ?: ($this->success ? 'success' : 'error');
+
+        if (!in_array($level, ['success', 'info', 'warning', 'error', 'debug'], true)) {
+            $level = 'error';
         }
 
-        $level = in_array($level, ['success', 'info', 'warning', 'error', 'debug'], true);
-        $context = $this->toArray();
-
-        unset($context['message']);
-        Log::log($level, $this->message, $context);
+        Log::log($level, $this->message, array_diff_key($this->toArray(), ['message' => true]));
 
         return $this;
     }
 
-    public function debug(?\Throwable $exception = null): static
+    public function debug(?Throwable $exception = null): static
     {
-        if (!($exception instanceof \Exception)) {
-            throw $exception;
+        if (!$exception instanceof Throwable) {
+            return $this;
         }
 
         Log::debug($exception->getMessage(), [
-            'code' => $exception->getCode(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
+            'code'  => $exception->getCode(),
+            'file'  => $exception->getFile(),
+            'line'  => $exception->getLine(),
             'trace' => $this->formatExceptionTrace($exception)
         ]);
 
         return $this;
     }
 
+    /** ===== Getters ===== */
+    public function getMessage(): string
+    {
+        if (!$this->initialized) {
+            return static::error('Terjadi kesalahan sistem: tidak diketahui.')->getMessage();
+        }
+        return $this->message;
+    }
+
+    public function getStatusType(): string
+    {
+        return $this->passes() ? 'success' : 'error';
+    }
+
     public function toArray(): array
     {
         return [
+            'success' => $this->success,
             'message' => $this->message,
-            'type' => $this->type,
-            'code' => $this->code,
+            'type'    => $this->type,
+            'status'  => $this->status,
+            'code'    => $this->code,
             'payload' => $this->payload,
-            'errors' => $this->errors?->all()
+            'errors'  => $this->errors?->all()
         ];
     }
 
-    protected function formatExceptionTrace(?\Throwable $exception = null, int $limit = 5): ?array
+    /** ===== Internal Helpers ===== */
+    protected function formatExceptionTrace(?Throwable $exception = null, int $limit = 5): ?array
     {
-        if (empty($exception)) {
+        if (!$exception) {
             return null;
         }
 
@@ -237,21 +275,13 @@ class LogicResponse
         );
     }
 
-    protected function fill(string $attribute, mixed $value): static
+    protected function initialize(?bool $success = null): static
     {
-        if (property_exists($this, $attribute)) {
-            throw new \InvalidArgumentException("The '$attribute' attribute not found.");
+        if ($success !== null) {
+            $this->initialized = true;
+            $this->success = $success;
+            $this->abort = !$success;
         }
-
-        $this->$attribute = $value;
-        return $this;
-    }
-
-    protected function setSuccess(bool $value = true): static
-    {
-        $this->initialized = true;
-        $this->success = $value;
-        $this->abort = !$value;
 
         return $this;
     }

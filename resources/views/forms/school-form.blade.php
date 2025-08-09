@@ -2,9 +2,10 @@
     'shadowed' => false,
     'bordered' => false,
     'title' => 'Data Sekolah',
+    'desc' => 'Isi data berikut ini dengan benar.',
 ])
 
-<x-form :$title :$shadowed :$bordered>
+<x-form :$title :$desc :$shadowed :$bordered>
     <div class="space-y-12">
         <div class="space-y-2">
             <div>

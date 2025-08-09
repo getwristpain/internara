@@ -1,6 +1,5 @@
 @props([
     'action' => '',
-    'bordered' => false,
     'class' => null,
     'color' => 'default',
     'form' => '',
@@ -13,7 +12,7 @@
 @php
     $type = in_array($type, ['button', 'submit', 'reset']) ? $type : 'button';
     $color = $type === 'submit' ? 'primary' : $color;
-    $icon = $color === 'primary' ? 'icon-park-solid:right-c' : $icon;
+    $icon = $color === 'primary' && empty($icon) ? 'icon-park-solid:right-c' : $icon;
 
     $colorClass = match ($color) {
         'primary' => 'btn-neutral',

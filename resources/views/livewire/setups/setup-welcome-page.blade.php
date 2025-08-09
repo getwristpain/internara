@@ -10,7 +10,15 @@ Livewire\Volt\title(
 );
 
 $next = function () {
-    $this->redirectRoute('setup.account', navigate: true);
+    $res = app(App\Services\SetupService::class)->perform('setup:start');
+    $this->response = $res->toArray();
+
+    dd($res);
+
+    flash($res->getMessage(), $res->getStatusType());
+    if ($res->passes()) {
+        $this->redirectRoute('setup.account', navigate: true);
+    }
 };
 
 ?>

@@ -6,7 +6,7 @@
 ])
 
 @php
-    $labelClass = 'label pl-2 space-x-0 gap-0 text-sm';
+    $labelClass = 'label pl-2 space-x-0 gap-0 text-sm text-neutral-800';
     $class = implode(' ', array_values(array_filter([$labelClass, $class])));
 @endphp
 
@@ -15,6 +15,6 @@
     <span class="{{ $required }}"></span>
 
     @isset($hint)
-        <span class="text-gray-500 pl-1">({{ $hint }})</span>
+        <span class="text-neutral-600 pl-1">({{ $hint }})</span>
     @endisset
 </label>

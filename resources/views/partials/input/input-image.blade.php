@@ -16,7 +16,7 @@
 
     $height = 'h-' . $height;
     $aspect = 'aspect-' . $aspect;
-    $component = 'wh-full space-y-2 py-3';
+    $component = 'wh-full space-y-2';
     $class = implode(' ', array_values(array_filter([$component, $class])));
 @endphp
 
@@ -63,9 +63,9 @@
 
             <!-- Overlay label trigger -->
             <label
-                class="absolute top-0 left-0 opacity-0 group-hover:opacity-100 glass w-full h-full min-h-24 p-4 text-center flex justify-center items-center font-medium text-sm shadow-none !border-3 border-dashed border-neutral-400 rounded-lg text-neutral-500 transition duration-300 ease-in-out hover:bg-neutral-200"
+                class="absolute top-0 left-0 opacity-0 glass w-full h-full min-h-24 p-4 text-center flex justify-center items-center shadow-none !border-3 border-dashed border-neutral-400 rounded-lg transition duration-300 ease-in-out group-hover:opacity-100 group-hover:bg-neutral-200 cursor-pointer"
                 for="{{ $id }}">
-                <span>{{ $placeholder }}</span>
+                <span class="font-bold text-neutral-500">{{ $placeholder }}</span>
             </label>
 
             <!-- Hidden input -->
@@ -73,4 +73,12 @@
                 wire:model="{{ $field }}" x-on:change="updatePreview" />
         </div>
     </div>
+
+    @if ($errors->has($field))
+        <div class="flex flex-col pt-1 w-full">
+            @foreach ($errors->get($field) as $error)
+                <span class="text-error font-semibold text-sm">{{ $error }}</span>
+            @endforeach
+        </div>
+    @endif
 </div>

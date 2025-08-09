@@ -27,6 +27,7 @@
         'password' => 'tabler:lock-filled',
         'person', 'name', 'username' => 'ion:person',
         'tel', 'phone' => 'solar:phone-bold',
+        'text' => 'icon-park-outline:text',
         default => $icon ?? 'icon-park-outline:text',
     };
 
@@ -50,11 +51,12 @@
             -translate-y-1/2 z-[2]"
             icon="{{ $icon }}"></iconify-icon>
     </div>
-    <div class="flex flex-col pt-1 w-full">
-        @if ($hasErrors)
+
+    @if ($hasErrors)
+        <div class="flex flex-col pt-1 w-full">
             @foreach ($errors->get($field) as $error)
                 <span class="text-error font-semibold text-sm">{{ $error }}</span>
             @endforeach
-        @endif
-    </div>
+        </div>
+    @endif
 </div>
