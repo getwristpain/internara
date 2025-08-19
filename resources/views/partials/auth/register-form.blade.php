@@ -3,22 +3,22 @@
     'shadowed' => false,
     'bordered' => false,
     'type' => 'student',
-    'action' => 'submit',
+    'submit' => null,
 ])
 
-<x-form id="register-form" :$action :$title :$shadowed :$bordered>
-    <div class="flex flex-col gap-4">
-        <div class="flex gap-8">
+<x-form class="p-8" name="registerForm" :$submit :$title :$shadowed :$bordered>
+    <div class="flex flex-col w-full">
+        <div class="w-full flex flex-col md:flex-row gap-x-4">
             <x-input type="name" field="form.data.name" label="Nama" placeholder="Masukkan nama pengguna..." required
-                disabled="{{ $type === 'owner' }}" />
+                disabled="{{ $type === 'owner' }}"></x-input>
             <x-input type="email" field="form.data.email" label="Email" placeholder="Masukkan email pengguna..."
-                required />
+                required></x-input>
         </div>
-        <div class="flex gap-8">
+        <div class="flex flex-col md:flex-row gap-x-4">
             <x-input type="password" field="form.data.password" label="Kata Sandi" placeholder="Masukkan Kata Sandi..."
-                required />
+                required></x-input>
             <x-input type="password" field="form.data.password_confirmation" label="Konfirmasi Kata Sandi"
-                placeholder="Konfirmasi Kata Sandi..." required />
+                placeholder="Konfirmasi Kata Sandi..." required></x-input>
         </div>
     </div>
 </x-form>

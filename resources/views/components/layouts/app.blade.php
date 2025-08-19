@@ -5,11 +5,8 @@
         @include('partials.head')
     </head>
 
-    <body>
-        <div class="min-wh-screen">
-            @yield('main')
-        </div>
-
+    <body class="min-wh-screen max-w-screen overflow-x-hidden font-sans text-neutral antialiased">
+        @yield('content')
         @stack('scripts')
     </body>
 

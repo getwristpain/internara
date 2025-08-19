@@ -171,6 +171,39 @@ class Transform extends Helper
         return $this;
     }
 
+    public function initials(): static
+    {
+        if (!is_string($this->value)) {
+            return $this;
+        }
+
+        $this->value = Str::of($this->value)
+            ->explode(' ')
+            ->map(fn ($w) => trim($w))
+            ->filter(fn ($w) => $w !== '')
+            ->map(function ($w) {
+                if (Str::contains($w, '-')) {
+                    $parts = explode('-', $w);
+                    foreach ($parts as $p) {
+                        $p = trim($p);
+                        if ($p !== '' && ctype_upper(Str::substr($p, 0, 1))) {
+                            return Str::substr($p, 0, 1);
+                        }
+                    }
+
+                    return null;
+                }
+
+                return ctype_upper(Str::substr($w, 0, 1))
+                    ? Str::substr($w, 0, 1)
+                    : null;
+            })
+            ->filter()
+            ->implode('');
+
+        return $this;
+    }
+
     protected function castArray(string $type): mixed
     {
         $array = $this->to('array');

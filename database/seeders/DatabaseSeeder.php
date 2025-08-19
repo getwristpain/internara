@@ -13,11 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->runReqSeeders();
+        $this->runProdSeeders();
         $this->runDevSeeders();
     }
 
-    protected function runReqSeeders()
+    protected function runProdSeeders()
     {
         $this->call([
             SettingSeeder::class
@@ -27,7 +27,10 @@ class DatabaseSeeder extends Seeder
     protected function runDevSeeders()
     {
         if (setting()->isDev()) {
-            // Call the development seeders only
+            $this->call([
+                SchoolSeeder::class,
+                DepartmentSeeder::class,
+            ]);
         }
     }
 }

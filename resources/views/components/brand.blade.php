@@ -9,7 +9,7 @@
     $class = implode(' ', array_values(array_filter([$brandClass, $class])));
 @endphp
 
-<a href="{{ url('/') }}" wire:navigate>
+<a href="{{ url('/') }}" wire:navigate tabindex="0">
     <div class=" {{ $class }}">
         <img class="w-auto h-6 scale-110 aspect-square" src="{{ $logo }}" alt="Logo">
         <span class="font-bold text-neutral-700 text-xl">{{ $brand }}</span>

@@ -23,6 +23,7 @@ class Setting extends Model
 
     protected $casts = [
         'type' => 'string',
+        'flag' => 'boolean',
     ];
 
     public function getValueAttribute($value): mixed

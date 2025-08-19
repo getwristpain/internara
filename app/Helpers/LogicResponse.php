@@ -43,6 +43,18 @@ class LogicResponse
         return $instance;
     }
 
+    /**
+     * @param bool|callable:bool $condition
+     *
+     * @return static
+     */
+    public function decide(bool|callable $condition, string $successMessage = '', string $errorMessage = ''): static
+    {
+        return (bool) $condition ?? false
+            ? $this->success($successMessage)
+            : $this->error($errorMessage);
+    }
+
     public static function success(string $message = ''): static
     {
         return (new static())->make(true, $message);
@@ -94,7 +106,7 @@ class LogicResponse
 
     /** ===== Callback Chaining ===== */
     /**
-     * @param callable(LogicResponse)|mixed|null $callback
+     * @param (callable(LogicResponse))|mixed|null $callback
      *
      * @return mixed
      */

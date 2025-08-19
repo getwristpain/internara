@@ -5,13 +5,13 @@
 
 @php
     $fixedClass = $fixed ? 'fixed z-10 top-0 left-0' : 'block';
-    $navbarClass = 'navbar justify-between gap-4 glass px-12 shadow-none';
+    $navbarClass = 'navbar glass shadow-none';
 
     $class = implode(' ', array_values(array_filter([$navbarClass, $fixedClass, $class])));
 @endphp
 
 <nav class="{{ $class }}">
-    <div class="flex gap-4 items-center">
+    <div class="container mx-auto px-4 md:px-8 lg:px-12 w-full h-full">
         <x-brand></x-brand>
     </div>
 </nav>

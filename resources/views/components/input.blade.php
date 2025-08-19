@@ -5,16 +5,20 @@
     'disabled' => false,
     'field' => '',
     'hint' => null,
-    'icon' => 'lucide:form-input',
+    'icon' => null,
     'label' => null,
     'placeholder' => '',
+    'preview' => null,
     'required' => false,
-    'type' => 'text',
+    'size' => null,
+    'type' => null,
 ])
 
 <div class="w-full">
     @if ($type === 'image')
         @include('partials.input.input-image')
+    @elseif ($type === 'select')
+        @include('components.select')
     @else
         @include('partials.input.input-text')
     @endif

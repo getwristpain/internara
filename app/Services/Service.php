@@ -6,8 +6,15 @@ use App\Helpers\LogicResponse;
 
 class Service
 {
-    public function response(): LogicResponse
+    public function response(string $type = '', string $message = ''): LogicResponse
     {
+        if (!empty($type)) {
+            $type = in_array($type, ['success', 'error']) ? $type : null;
+            return LogicResponse::make($type && $type === 'success', $message)
+                ->withType($this)
+                ->withPayload($this->toArray());
+        }
+
         return LogicResponse::make()
             ->withType($this)
             ->withPayload($this->toArray());

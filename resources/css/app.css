@@ -23,46 +23,43 @@
     -ms-user-select: none;
 }
 
-@layer component {
-    *:disabled {
-        @apply no-interact opacity-90;
-    }
-
-    body {
-        @apply font-sans text-neutral antialiased min-h-screen min-w-screen max-w-screen overflow-x-hidden;
-    }
-
-    .required {
-        @apply after:content-['*'] after:text-red-500;
-    }
-
-    iconify-icon {
-        @apply scale-110 inline-block align-middle;
-    }
+@utility wh-full {
+    @apply w-full h-full;
 }
 
-@layer utilities {
-    .wh-full {
-        @apply w-full h-full;
-    }
+@utility wh-screen {
+    @apply w-screen h-screen;
+}
 
-    .wh-screen {
-        @apply w-screen h-screen;
-    }
+@utility min-wh-full {
+    @apply min-w-full min-h-full;
+}
 
-    .min-wh-full {
-        @apply min-w-full min-h-full;
-    }
+@utility min-wh-screen {
+    @apply min-w-screen min-h-screen;
+}
 
-    .min-wh-screen {
-        @apply min-w-screen min-h-screen;
-    }
+@utility max-wh-full {
+    @apply max-w-full max-h-full;
+}
 
-    .max-wh-full {
-        @apply max-w-full max-h-full;
-    }
+@utility max-wh-screen {
+    @apply max-w-screen max-h-screen;
+}
 
-    .max-wh-screen {
-        @apply max-w-screen max-h-screen;
-    }
+*:disabled {
+    @apply no-interact opacity-90;
+}
+
+.disabled,
+.disabled:disabled {
+    @apply opacity-60 no-interact;
+}
+
+.required {
+    @apply after:content-['*'] after:text-red-500;
+}
+
+iconify-icon {
+    @apply scale-110 inline-block align-middle;
 }

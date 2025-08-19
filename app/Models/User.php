@@ -11,7 +11,8 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +22,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
+        'type'
     ];
 
     /**
@@ -44,6 +47,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+    public static function getTypeOptions(): array
+    {
+        return [
+            'owner',
+            'admin',
+            'student',
+            'teacher',
+            'supervisor'
         ];
     }
 

@@ -1,13 +1,21 @@
 @props([
-    'action' => '',
     'bordered' => false,
-    'shadowed' => false,
-    'title' => null,
+    'class' => 'w-full',
     'desc' => null,
+    'shadowed' => false,
+    'submit' => '',
+    'title' => null,
+    'name' => null,
 ])
 
-<x-card class="w-full max-w-2xl" :$title :$desc :$bordered :$shadowed>
-    <form class="flex flex-col gap-12" wire:submit="{{ $action }}" {{ $attributes }}>
+@php
+    $name = str($name ?? 'form')
+        ->camel()
+        ->toString();
+@endphp
+
+<x-card class="{{ $class }}" :$title :$desc :$bordered :$shadowed>
+    <form class="wh-full flex flex-col gap-12" id="{{ $name }}" wire:submit="{{ $submit }}">
         {{ $content ?? $slot }}
     </form>
 </x-card>
