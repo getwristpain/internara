@@ -13,13 +13,25 @@ class Program extends Model
      * @var array<string>
      */
     protected $fillable = [
+        'school_id',
         'title',
-        'slug',
         'year',
         'semester',
         'date_start',
         'date_end',
         'status',
         'description',
+        'slug',
     ];
+
+    public function setSlugAttribute(): void
+    {
+        $slug = implode(' ', [
+            $this->year,
+            $this->semester,
+            $this->title,
+        ]);
+
+        $this->attributes['slug'] = str($slug)->slug('-')->toString();
+    }
 }

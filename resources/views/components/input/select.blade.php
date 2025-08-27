@@ -1,5 +1,5 @@
 @props([
-    'disabled' => true,
+    'disabled' => false,
     'field' => '',
     'hint' => null,
     'icon' => 'heroicons:chevron-up-down-16-solid',
@@ -26,7 +26,7 @@
         @endisset
 
         {{-- Select Wrapper --}}
-        <div class="relative w-full min-w-full border rounded-full text-sm text-gray-500 {{ $hasErrors ? 'border-red-500 focus:outline-red-500' : 'border-neutral' }} {{ $disabled ? 'disabled' : '' }}"
+        <div class="relative w-full min-w-full border rounded-xl text-sm text-gray-500 {{ $hasErrors ? 'border-red-500 focus:outline-red-500' : 'border-neutral' }} {{ $disabled ? 'disabled' : '' }}"
             x-data="{
                 open: false,
                 options: @entangle($options),
@@ -36,7 +36,7 @@
             {{-- Display selected value / placeholder --}}
             <div class="flex items-center justify-between w-full pl-8 pr-3 py-2 cursor-pointer gap-2"
                 x-on:click="open = !open">
-                <span class="truncate"
+                <span class="truncate" x-bind:class="{ 'text-neutral': selected }"
                     x-text="selected && options && options[selected] ? options[selected] : '{{ $placeholder }}'"></span>
 
                 <x-icon class="transition-transform duration-200" x-bind:class="{ 'rotate-180': open }"

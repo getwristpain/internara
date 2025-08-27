@@ -47,19 +47,37 @@
     @apply max-w-screen max-h-screen;
 }
 
-*:disabled {
-    @apply no-interact opacity-90;
+@utility text-head {
+    @apply text-neutral font-black text-xl md:text-2xl lg:text-4xl;
 }
 
-.disabled,
-.disabled:disabled {
-    @apply opacity-60 no-interact;
+@utility text-subhead {
+    @apply text-gray-500 md:text-lg lg:text-xl;
 }
 
-.required {
-    @apply after:content-['*'] after:text-red-500;
+@utility scrollbar-hidden {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
-iconify-icon {
-    @apply scale-110 inline-block align-middle;
+@layer components {
+    *:disabled {
+        @apply no-interact opacity-90;
+    }
+
+    .disabled,
+    .disabled:disabled {
+        @apply opacity-60 no-interact;
+    }
+
+    .required {
+        @apply after:content-['*'] after:text-red-500;
+    }
+
+    iconify-icon {
+        @apply scale-110 inline-block align-middle aspect-square;
+    }
 }

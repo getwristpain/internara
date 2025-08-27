@@ -12,14 +12,15 @@ return new class () extends Migration {
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->string('title')->unique();
-            $table->string('slug')->nullable()->unique();
             $table->string('year');
             $table->string('semester');
             $table->date('date_start');
             $table->date('date_end');
             $table->string('status')->nullable();
             $table->text('description')->nullable();
+            $table->string('slug')->nullable()->unique();
             $table->timestamps();
         });
     }

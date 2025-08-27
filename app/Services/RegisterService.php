@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Services\Service;
+use App\Services\BaseService;
 
-class RegisterService extends Service
+class RegisterService extends BaseService
 {
     /**
      * Class constructor.

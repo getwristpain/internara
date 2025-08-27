@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Helpers\LogicResponse;
 
-class Service
+class BaseService
 {
     public function response(string $type = '', string $message = ''): LogicResponse
     {

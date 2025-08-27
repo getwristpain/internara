@@ -5,13 +5,16 @@ namespace App\Services;
 use App\Helpers\LogicResponse;
 use App\Helpers\Transform;
 use App\Models\User;
-use App\Services\Service;
+use App\Services\BaseService;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class AuthService extends Service
+class AuthService extends BaseService
 {
     public function register(array $data): LogicResponse
     {
@@ -19,6 +22,42 @@ class AuthService extends Service
         return $this->response()
             ->failWhen($this->ensureNotRateLimited($key))
             ->then($this->createUser($data));
+    }
+
+    public function sendPasswordResetLink(string $email): LogicResponse
+    {
+        $status = Password::sendResetLink([
+            'email' => $email
+        ]);
+
+        return $this->response()
+            ->make(
+                $status === Password::RESET_LINK_SENT,
+                __($status),
+            );
+    }
+
+    public function resetPasswordWithToken(string $email, string $token, string $newPassword, string $newPasswordConfirmation): LogicResponse
+    {
+        $status = Password::reset([
+            'email' => $email,
+            'token' => $token,
+            'password' => $newPassword,
+            'password_confirmation' => $newPasswordConfirmation
+        ], function ($user) use ($newPassword) {
+            $this->ensurePasswordHashed($newPassword);
+            $user->forceFill([
+                'password' => $newPassword
+            ])->save();
+
+            event(new PasswordReset($user));
+        });
+
+        return $this->response()
+            ->make(
+                $status === Password::PASSWORD_RESET,
+                __($status)
+            );
     }
 
     protected function createUser(array $data): LogicResponse

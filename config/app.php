@@ -8,6 +8,14 @@ return [
 
     'description' => env('APP_NAME', 'Internara') . ' - Sistem Manajemen PKL',
 
+    'author' => 'Reas Vyn',
+
+    'publisher' => 'gewristpain',
+
+    'contact' => 'reasnov.bussiness@gmail.com',
+
+    'docs' => 'https://github.com/getwristpain/internara',
+
     'env' => env('APP_ENV', 'production'),
 
     'debug' => (bool) env('APP_DEBUG', false),

@@ -4,12 +4,11 @@
     'color' => null,
     'form' => null,
     'icon' => null,
-    'iconClass' => '',
     'label' => null,
-    'labelClass' => '',
     'shadowed' => false,
     'title' => '',
     'type' => 'button',
+    'style' => [],
 ])
 
 @php
@@ -18,30 +17,55 @@
 
     $icon = match (true) {
         $color === 'primary' && empty($icon) => 'icon-park-solid:right-c',
-        $icon === 'none' => '',
+        $icon === 'hidden' => null,
         default => $icon,
     };
 
-    $colorClass = match ($color) {
-        'primary' => 'btn-neutral',
-        'secondary' => 'btn-secondary',
-        default => 'btn-ghost',
+    $style['button']['default'] =
+        'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95';
+
+    $style['button']['color'] = match ($color) {
+        'primary'
+            => 'btn-neutral btn-outline bg-gradient-to-b from-neutral-700 to-neutral-950 text-neutral-100 hover:from-neutral-950',
+        'secondary'
+            => 'btn-neutral btn-outline border-neutral-500 text-neutral-700 bg-gradient-to-b from-neutral-100 to-neutral-300 hover:from-neutral-300',
+        'error'
+            => 'btn-error btn-outline border-red-500 text-red-700 bg-gradient-to-b from-red-100 to-red-300 hover:from-red-300',
+        default => '',
     };
 
-    $shadowClass = $shadowed ? 'shadow-lg shadow-gray-300' : '';
-    $btnClass =
-        'btn rounded-full items-center gap-4 transition duration-150 ease-in-out hover:scale-110 text-nowrap flex-nowrap';
+    $style['button']['shadow'] = $shadowed
+        ? 'shadow-lg shadow-neutral-400'
+        : '';
 
-    $class = implode(' ', array_values(array_filter([$btnClass, $colorClass, $shadowClass, $class])));
+    $class .= ' ' . implode(' ', array_values($style['button']));
 @endphp
 
-<button class="{{ $class }}" type="{{ $type }}" wire:click="{{ $action }}" form="{{ $form }}"
-    title="{{ $title }}">
-    @isset($label)
-        <span class="truncate {{ $labelClass }}">{{ $label }}</span>
-    @endisset
+@if ($type === 'submit')
+    <button class="{{ $class }}" type="submit" form="{{ $form }}"
+        title="{{ $title }}" {{ $attributes }}>
+        @isset($label)
+            <span
+                class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
+        @endisset
 
-    @isset($icon)
-        <iconify-icon class="{{ $iconClass }}" icon="{{ $icon }}"></iconify-icon>
-    @endisset
-</button>
+        @isset($icon)
+            <iconify-icon class="{{ $style['icon'] ?? '' }}"
+                icon="{{ $icon }}"></iconify-icon>
+        @endisset
+    </button>
+@else
+    <button class="{{ $class }}" type="{{ $type }}"
+        wire:click="{{ $action }}" title="{{ $title }}"
+        {{ $attributes }}>
+        @isset($label)
+            <span
+                class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
+        @endisset
+
+        @isset($icon)
+            <iconify-icon class="{{ $style['icon'] ?? '' }}"
+                icon="{{ $icon }}"></iconify-icon>
+        @endisset
+    </button>
+@endif

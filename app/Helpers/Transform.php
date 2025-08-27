@@ -52,7 +52,7 @@ class Transform extends Helper
     {
         $reflection = new \ReflectionClass($object);
         $data = [];
-        foreach ($reflection->getProperties(\ReflectionProperty::IS_PUBLIC) as $prop) {
+        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
             $name = $prop->getName();
             try {
                 $data[$name] = $prop->isInitialized($object) ? $prop->getValue($object) : null;
@@ -61,7 +61,7 @@ class Transform extends Helper
             }
         }
         $methods = array_filter(
-            array_map(fn (\ReflectionMethod $m) => $m->getName(), $reflection->getMethods(\ReflectionMethod::IS_PUBLIC)),
+            array_map(fn (ReflectionMethod $m) => $m->getName(), $reflection->getMethods(ReflectionMethod::IS_PUBLIC)),
             fn ($name) => !str_starts_with($name, '__')
         );
         if (!empty($methods)) {

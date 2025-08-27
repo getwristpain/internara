@@ -1,11 +1,11 @@
 @props([
-    'bordered' => false,
-    'class' => 'w-full',
-    'desc' => null,
-    'shadowed' => false,
+    'name' => null,
     'submit' => '',
     'title' => null,
-    'name' => null,
+    'desc' => null,
+    'bordered' => false,
+    'shadowed' => false,
+    'class' => 'w-full p-4',
 ])
 
 @php
@@ -15,7 +15,8 @@
 @endphp
 
 <x-card class="{{ $class }}" :$title :$desc :$bordered :$shadowed>
-    <form class="wh-full flex flex-col gap-12" id="{{ $name }}" wire:submit="{{ $submit }}">
+    <form class="wh-full flex flex-col gap-4" id="{{ $name }}"
+        wire:submit="{{ $submit }}">
         {{ $content ?? $slot }}
     </form>
 </x-card>

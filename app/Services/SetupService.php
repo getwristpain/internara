@@ -5,12 +5,12 @@ namespace App\Services;
 use App\Models\School;
 use App\Models\User;
 use RateLimiter;
-use App\Services\Service;
+use App\Services\BaseService;
 use App\Helpers\Transform;
 use App\Helpers\LogicResponse;
 use Illuminate\Support\Facades\Session;
 
-class SetupService extends Service
+class SetupService extends BaseService
 {
     protected array $steps = [
         'setup:welcome' => 'Introduksi',
@@ -61,10 +61,11 @@ class SetupService extends Service
 
     protected function setupWelcome(): LogicResponse
     {
-        return $this->markAsCompleted('setup:welcome');
+        return $this->response()
+            ->then($this->markAsCompleted('setup:welcome'));
     }
 
-    protected function setupAccount()
+    protected function setupAccount(): LogicResponse
     {
         return $this->response()
             ->failWhen($this->ensureStepsCompleted('setup:welcome'))
@@ -72,7 +73,7 @@ class SetupService extends Service
             ->then($this->markAsCompleted('setup:account'));
     }
 
-    protected function setupSchool()
+    protected function setupSchool(): LogicResponse
     {
         $school = School::first();
 
@@ -82,7 +83,7 @@ class SetupService extends Service
             ->then($this->markAsCompleted('setup:school'));
     }
 
-    protected function setupDepartment()
+    protected function setupDepartment(): LogicResponse
     {
         return $this->response()
             ->failWhen($this->ensureStepsCompleted('setup:school'))
@@ -91,12 +92,29 @@ class SetupService extends Service
 
     protected function setupProgram()
     {
-        //
+        return $this->response()
+            ->failWhen($this->ensureStepsCompleted('setup:department'))
+            ->then($this->markAsCompleted('setup:program'));
     }
 
-    protected function setupComplete()
+    protected function setupComplete(): LogicResponse
     {
-        //
+        return $this->response()
+            ->failWhen($this->ensureStepsCompleted([
+                'setup:welcome',
+                'setup:account',
+                'setup:school',
+                'setup:department',
+                'setup:program'
+            ]))->failWhen($this->markAsCompleted('setup:complete'))
+            ->then(function ($res) {
+                session()->regenerate();
+                return $res->decide(
+                    (bool) setting('is_installed', true) ?? false,
+                    'Berhasil menyelesaikan instalasi',
+                    'Gagal menyelesaikan instalasi'
+                );
+            });
     }
 
     protected function markAsCompleted(string $step): LogicResponse

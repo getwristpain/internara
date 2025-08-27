@@ -1,20 +1,15 @@
 <?php
 
-use App\Models\Program;
-use App\Helpers\Transform;
-use App\Services\SetupService;
-use App\Livewire\Forms\ProgramForm;
 use function Livewire\Volt\{state, layout, title, protect, mount, form};
 
 state([
-    'programs' => [],
+    "programs" => [],
+    "action" => "add",
 ]);
 
-layout('components.layouts.guest');
-
-title(fn() => Transform::from('Atur Program PKL | :app_desc')->replace(':app_desc', config('app.description'))->toString());
-
-form(ProgramForm::class);
+layout("components.layouts.guest");
+title("Atur Program PKL | " . config("app.description"));
+form(App\Livewire\Forms\ProgramForm::class);
 
 mount(function () {
     $this->initialize();
@@ -22,48 +17,81 @@ mount(function () {
 });
 
 $initialize = protect(function () {
-    $this->programs = Program::all()->toArray();
+    $this->programs = app(App\Services\ProgramService::class)->getAll();
     $this->form->initialize();
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $service = app(SetupService::class);
-    $res = $service->ensureStepsCompleted('setup:department');
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:department");
 
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute('setup.department', navigate: true);
+        $this->redirectRoute("setup.department", navigate: true);
     }
 });
 
-$addProgram = function () {
+$toggleProgramModal = protect(function ($action = "add") {
+    $this->reset("action");
+    $this->action = $action;
+
+    $this->resetValidation();
+    $this->dispatch("toggle-program-modal");
+});
+
+$add = function () {
+    $this->form->add();
+    $this->toggleProgramModal();
+};
+
+$edit = function ($id) {
+    if (!$this->form->edit($id)) {
+        flash()->error("Program tidak ditemukan");
+        return;
+    }
+
+    $this->toggleProgramModal("edit");
+};
+
+$remove = function ($id) {
+    $this->form->remove($id) ? $this->initialize() : flash()->error("Gagal menghapus program");
+    $this->toggleProgramModal();
+};
+
+$submit = function () {
     $res = $this->form->submit();
     $res->passes() ? $this->initialize() : flash()->error($res->getMessage());
-    $this->dispatch('toggle-program-modal');
+    $this->toggleProgramModal();
 };
 
 $next = function () {
-    $this->redirectRoute('setup.complete', navigate: true);
+    $res = app(App\Services\SetupService::class)->perform("setup:program");
+    $res->passes() ? $this->redirectRoute("setup.complete", navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
 
-<div class="flex-1 flex flex-col gap-12 items-center justify-center pt-16">
-    <div class="space-y-2 text-center w-full">
+<div class="flex flex-1 flex-col items-center justify-center gap-8">
+    <div class="w-full space-y-2 text-center">
         <x-animate.fade-in>
-            <h1 class="text-xl md:text-2xl lg:text-4xl font-black text-neutral">Atur Program PKL</h1>
+            <h1 class="text-head">
+                Atur Program PKL
+            </h1>
         </x-animate.fade-in>
 
         <x-animate.fade-in delay="200ms">
-            <p class="md:text-lg lg:text-xl text-gray-500">Tambah dan kurang program PKL Anda dengan fleksibel.</p>
+            <p class="text-subhead">
+                Tambah dan kurang program PKL Anda dengan fleksibel.
+            </p>
         </x-animate.fade-in>
     </div>
 
-    <x-animate.fade-in class="flex-1 w-full" delay="400ms">
-        @include('partials.program.program-list')
+    <x-animate.fade-in class="w-full flex-1" delay="400ms">
+        @include("components.partials.program.program-list")
     </x-animate.fade-in>
 
-    <x-animate.fade-in class="w-full flex justify-end items-center" delay="200ms">
-        <x-button class="btn-wide md:btn-lg" label="Simpan dan Lanjutkan" action="next" color="primary" />
+    <x-animate.fade-in class="flex w-full items-center justify-end"
+        delay="200ms">
+        <x-button class="btn-wide" label="Simpan dan Lanjutkan" action="next"
+            color="primary" shadowed />
     </x-animate.fade-in>
 </div>

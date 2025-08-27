@@ -70,11 +70,7 @@
         </div>
     </div>
 
-    @if ($errors->has($field))
-        <div class="flex flex-col pt-1 w-full">
-            @foreach ($errors->get($field) as $error)
-                <span class="text-error font-semibold text-sm">{{ $error }}</span>
-            @endforeach
-        </div>
+    @if ($hasErrors)
+        <x-input.errors :$field></x-input.errors>
     @endif
 </div>

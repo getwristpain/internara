@@ -13,17 +13,15 @@ class Department extends Model
      * @var array<string>
      */
     protected $fillable = [
+        'school_id',
         'name',
-        'slug',
         'description',
-        'school_id'
+        'slug',
     ];
 
-    public function setSlugAttribute()
+    public function setSlugAttribute(): void
     {
-        if (!$this->slug) {
-            $this->attributes['slug'] = str($this->name)->slug();
-        }
+        $this->attributes['slug'] = str($this->name)->slug('-')->toString();
     }
 
     public function initials(): string

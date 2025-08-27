@@ -1,72 +1,63 @@
 <?php
 
-use App\Services\SetupService;
-use App\Helpers\LogicResponse;
-use App\Helpers\Transform;
-use App\Livewire\Forms\RegisterForm;
-use function Livewire\Volt\{state, layout, title, form, mount, protect};
+use function Livewire\Volt\{layout, title, form, mount, protect};
 
-state([
-    'type' => 'owner',
-]);
-
-layout('components.layouts.guest');
-
-title(fn() => Transform::from('Buat Akun Administrator | :app_description')->replace(':app_description', config('app.description'))->toString());
-
-form(RegisterForm::class);
+layout("components.layouts.guest");
+title("Buat Akun Administrator | " . config("app.description"));
+form(App\Livewire\Forms\RegisterForm::class);
 
 mount(function () {
-    $this->form->initialize($this->type);
+    $this->form->initialize("owner");
     $this->ensureReqStepsCompleted();
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $res = app(SetupService::class)->ensureStepsCompleted('setup:welcome');
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:welcome");
 
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute('setup', navigate: true);
+        $this->redirectRoute("setup", navigate: true);
     }
 });
 
 $next = function () {
-    $service = app(SetupService::class);
+    $res = App\Helpers\LogicResponse::make()
+        ->failWhen($this->form->submit("owner"))
+        ->then(app(App\Services\SetupService::class)->perform("setup:account"));
 
-    $res = LogicResponse::make()
-        ->failWhen($this->form->submit($this->type))
-        ->then($service->perform('setup:account'));
-
-    $res->passes() ? $this->redirectRoute('setup.school', navigate: true) : flash()->error($res->getMessage());
+    $res->passes() ? $this->redirectRoute("setup.school", navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
 
-<div class="flex-1 max-w-4xl mx-auto flex flex-col items-center justify-center gap-8 lg:gap-12 pt-16">
+<div
+    class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-8">
     <div class="w-full">
         <x-animate.fade-in>
-            <h1 class="text-xl md:text-4xl font-black">
+            <h1 class="text-head">
                 Buat Akun Administrator
             </h1>
         </x-animate.fade-in>
 
         <x-animate.fade-in delay="200ms">
-            <p class="md:text-xl text-neutral-600">
-                Kelola data sistem secara penuh untuk menyiapkan masa depan siswa.
+            <p class="text-subhead">
+                Kelola data sistem secara penuh untuk menyiapkan masa depan
+                siswa.
             </p>
         </x-animate.fade-in>
     </div>
 
     <x-animate.fade-in class="w-full max-sm:flex-1" delay="200ms">
-        @include('partials.auth.register-form', [
-            'submit' => 'next',
-            'type' => 'owner',
-            'shadowed' => true,
-            'bordered' => true,
+        @include("components.partials.auth.register-form", [
+            "submit" => "next",
+            "type" => "owner",
+            "shadowed" => true,
+            "bordered" => true,
         ])
     </x-animate.fade-in>
 
-    <x-animate.fade-in class="w-full flex justify-end" delay="400ms">
-        <x-button class="md:btn-lg z-1" type="submit" label="Buat Akun" form="registerForm" shadowed />
+    <x-animate.fade-in class="flex w-full justify-end" delay="400ms">
+        <x-button class="btn-wide" type="submit" label="Buat Akun"
+            form="registerForm" shadowed />
     </x-animate.fade-in>
 </div>

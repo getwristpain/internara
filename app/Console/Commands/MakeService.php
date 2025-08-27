@@ -32,6 +32,6 @@ class MakeService extends Command
             throw new InvalidArgumentException("The name '{$name}' must be end with 'Service'");
         }
 
-        $this->call('make:logic', ['name' => $name, '--extends' => 'App\\Services\\Service']);
+        $this->call('make:logic', ['name' => $name, '--extends' => 'App\\Services\\BaseService']);
     }
 }

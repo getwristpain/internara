@@ -7,18 +7,9 @@ foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
     require  $routeFile;
 }
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', fn () => redirect()->route('dashboard'))
+    ->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+Volt::route('dashboard', 'dashboard')
+    ->middleware('auth')
     ->name('dashboard');
-
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
-
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
-});

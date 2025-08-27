@@ -12,6 +12,7 @@ class DepartmentForm extends Form
     public array $data = [
         'name' => '',
         'description' => '',
+        'slug' => ''
     ];
 
     public function submit(): LogicResponse

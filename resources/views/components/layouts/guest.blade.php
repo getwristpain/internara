@@ -1,10 +1,14 @@
-@extends('components.layouts.app')
+@extends("components.layouts.app")
 
-@section('content')
-    <x-bg-decoration></x-bg-decoration>
-    <x-navbar fixed shadowed></x-navbar>
+@section("content")
+    <x-bg-decoration />
 
-    <main class="container mx-auto wh-full min-h-screen p-4 md:p-8 lg:p-12 flex flex-col">
+    @include("components.partials.layouts.guest.navbar", [
+        "fixed" => true,
+    ])
+
+    <main
+        class="wh-full container mx-auto flex min-h-screen flex-col p-4 px-4 pt-24 md:px-8 lg:px-16">
         {{ $slot }}
     </main>
 @endsection

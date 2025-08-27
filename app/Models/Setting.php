@@ -22,21 +22,24 @@ class Setting extends Model
     ];
 
     protected $casts = [
-        'type' => 'string',
         'flag' => 'boolean',
     ];
 
     public function getValueAttribute($value): mixed
     {
-        return Transform::from($value)->to($this->attributes['type']);
+        if ($value === null) {
+            return null;
+        }
+
+        $type = $this->attributes['type'] ?? 'string';
+        return Transform::from($value)->to($type);
     }
 
     public function setKeyAttribute($value): void
     {
         $this->attributes['key'] = Transform::from($value)
-                                        ->lower()
-                                        ->slug('_')
-                                        ->toString();
+            ->lower()->slug('_')
+            ->toString();
     }
 
     public function setValueAttribute($value): void
@@ -44,5 +47,4 @@ class Setting extends Model
         $this->attributes['type'] = gettype($value);
         $this->attributes['value'] = Transform::from($value)->toString();
     }
-
 }

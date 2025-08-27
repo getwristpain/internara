@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Helpers\Media;
 use App\Models\School;
-use App\Services\Service;
+use App\Services\BaseService;
 use App\Helpers\LogicResponse;
 
-class SchoolService extends Service
+class SchoolService extends BaseService
 {
     public function save(array $data): LogicResponse
     {
