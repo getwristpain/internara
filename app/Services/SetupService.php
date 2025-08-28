@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
+use App\Helpers\LogicResponse;
+use App\Helpers\Transform;
 use App\Models\School;
 use App\Models\User;
-use RateLimiter;
 use App\Services\BaseService;
-use App\Helpers\Transform;
-use App\Helpers\LogicResponse;
 use Illuminate\Support\Facades\Session;
+use RateLimiter;
 
 class SetupService extends BaseService
 {
@@ -69,7 +69,7 @@ class SetupService extends BaseService
     {
         return $this->response()
             ->failWhen($this->ensureStepsCompleted('setup:welcome'))
-            ->failWhen(!(User::where(['type' => 'owner'])->exists()), "Buat akun Administrator terlebih dahulu sebelum melanjutkan")
+            ->failWhen(!(User::role('owner')->exists()), "Buat akun Administrator terlebih dahulu sebelum melanjutkan")
             ->then($this->markAsCompleted('setup:account'));
     }
 

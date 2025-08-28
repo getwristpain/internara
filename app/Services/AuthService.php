@@ -7,7 +7,6 @@ use App\Helpers\Transform;
 use App\Models\User;
 use App\Services\BaseService;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
@@ -18,10 +17,11 @@ class AuthService extends BaseService
 {
     public function register(array $data): LogicResponse
     {
-        $key = "register:" . $data['email'];
+        $key = "register:" . str($data['email'] ?? $data['username'] ?? $data['name'] ?? '')->lower()->slug()->toString();
+
         return $this->response()
             ->failWhen($this->ensureNotRateLimited($key))
-            ->then($this->createUser($data));
+            ->then($this->storeUser($data));
     }
 
     public function sendPasswordResetLink(string $email): LogicResponse
@@ -60,15 +60,17 @@ class AuthService extends BaseService
             );
     }
 
-    protected function createUser(array $data): LogicResponse
+    protected function storeUser(array $data): LogicResponse
     {
+        $type = $data['type'];
+
         $this->ensureUsernameFilled($data['username'], $data['email'], $data['id']);
         $this->ensurePasswordHashed($data['password']);
 
-        $ownerId = User::where('type', 'owner')->first()?->id ?? '';
         $storedUser = $data['type'] === 'owner'
-            ? User::updateOrCreate(['id' => $ownerId], $data)
+            ? User::updateOrCreate(['id' => $data['id'] ?? ''], $data)
             : User::create($data);
+        $storedUser->syncRoles($type === 'owner' ? ['owner', 'admin'] : $type);
 
         return $this->response()->decide(
             (bool) $storedUser ?? false,

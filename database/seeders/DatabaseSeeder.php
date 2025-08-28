@@ -20,7 +20,9 @@ class DatabaseSeeder extends Seeder
     protected function runProdSeeders()
     {
         $this->call([
-            SettingSeeder::class
+            SettingSeeder::class,
+            RolesAndPermissionsSeeder::class,
+            OwnerSeeder::class,
         ]);
     }
 

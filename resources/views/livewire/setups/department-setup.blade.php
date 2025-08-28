@@ -3,16 +3,16 @@
 use function Livewire\Volt\{state, layout, title, form, mount, protect};
 
 state([
-    "departments" => [],
+    'departments' => [],
 ]);
 
-layout("components.layouts.guest");
-title("Atur Jurusan Sekolah | " . config("app.description"));
+layout('components.layouts.guest');
+title('Atur Jurusan Sekolah | ' . config('app.description'));
 form(App\Livewire\Forms\DepartmentForm::class);
 
 mount(function () {
-    $this->initialize();
     $this->ensureReqStepsCompleted();
+    $this->initialize();
 });
 
 $initialize = protect(function () {
@@ -20,10 +20,10 @@ $initialize = protect(function () {
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:school");
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:school');
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute("setup.school", navigate: true);
+        $this->redirectRoute('setup.school', navigate: true);
     }
 });
 
@@ -37,8 +37,8 @@ $remove = function ($id) {
 };
 
 $next = function () {
-    $res = app(App\Services\SetupService::class)->perform("setup:department");
-    $res->passes() ? $this->redirectRoute("setup.program", navigate: true) : flash()->error($res->getMessage());
+    $res = app(App\Services\SetupService::class)->perform('setup:department');
+    $res->passes() ? $this->redirectRoute('setup.program', navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
@@ -60,7 +60,7 @@ $next = function () {
     </div>
 
     <x-animate.fade-in class="w-full flex-1" delay="400ms">
-        @include("components.partials.department.department-list")
+        @include('components.partials.department.department-list')
     </x-animate.fade-in>
 
     <x-animate.fade-in class="flex w-full items-center justify-end"

@@ -1,31 +1,35 @@
 <?php
 
-use function Livewire\Volt\{layout, title, form, mount, protect};
+use function Livewire\Volt\{state, layout, title, form, mount, protect};
 
-layout("components.layouts.guest");
-title("Buat Akun Administrator | " . config("app.description"));
+state([
+    'type' => 'owner',
+]);
+
+layout('components.layouts.guest');
+title('Buat Akun Administrator | ' . config('app.description'));
 form(App\Livewire\Forms\RegisterForm::class);
 
 mount(function () {
-    $this->form->initialize("owner");
     $this->ensureReqStepsCompleted();
+    $this->form->initialize($this->type);
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:welcome");
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:welcome');
 
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute("setup", navigate: true);
+        $this->redirectRoute('setup', navigate: true);
     }
 });
 
 $next = function () {
     $res = App\Helpers\LogicResponse::make()
-        ->failWhen($this->form->submit("owner"))
-        ->then(app(App\Services\SetupService::class)->perform("setup:account"));
+        ->failWhen($this->form->submit())
+        ->then(app(App\Services\SetupService::class)->perform('setup:account'));
 
-    $res->passes() ? $this->redirectRoute("setup.school", navigate: true) : flash()->error($res->getMessage());
+    $res->passes() ? $this->redirectRoute('setup.school', navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
@@ -48,11 +52,11 @@ $next = function () {
     </div>
 
     <x-animate.fade-in class="w-full max-sm:flex-1" delay="200ms">
-        @include("components.partials.auth.register-form", [
-            "submit" => "next",
-            "type" => "owner",
-            "shadowed" => true,
-            "bordered" => true,
+        @include('components.partials.auth.register-form', [
+            'submit' => 'next',
+            'type' => $type,
+            'shadowed' => true,
+            'bordered' => true,
         ])
     </x-animate.fade-in>
 

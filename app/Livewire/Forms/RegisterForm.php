@@ -16,15 +16,15 @@ class RegisterForm extends Form
     public function initialize(string $type): void
     {
         $this->data = [
-            'name' => '',
-            'email' => '',
-            'password' => '',
-            'password_confirmation' => '',
+            'name' => null,
+            'email' => null,
+            'password' => null,
+            'password_confirmation' => null,
             'type' => $type,
         ];
 
         if ($type === 'owner') {
-            $owner = User::where('type', 'owner')->first();
+            $owner = User::role('owner')->first();
 
             $this->data['id'] = $owner?->id;
             $this->data['name'] = 'Administrator';
@@ -36,19 +36,22 @@ class RegisterForm extends Form
         $this->resetValidation();
         $this->validate([
             'data.name' => 'required|string|min:5|max:250',
-            'data.email' => 'sometimes|required|email|unique:users,email,' . $this->data['id'] ?? '',
-            'data.username' => 'sometimes|required|string|min:5|unique:users,username,' . $this->data['id'] ?? '',
+            'data.email' => 'required|email|unique:users,email,' . $this->data['id'] ?? '',
             'data.password' => ['required', 'confirmed', setting()->isDev() ? Password::bad() : Password::medium()],
-            'data.type' => 'required|string|in:' . implode(',', User::getTypeOptions())
+            'data.type' => 'required|string|in:' . implode(',', User::getRolesOptions())
         ], attributes: [
             'data.name' => 'nama pengguna',
             'data.email' => 'email pengguna',
-            'data.username' => 'username pegguna',
             'data.password' => 'kata sandi pengguna',
-            'data.type' => 'tipe akun'
+            'data.type' => 'tipe pengguna',
         ]);
 
+        if ($this->getErrorBag()->has('data.type')) {
+            $this->addError('data.name', $this->getErrorBag()->get('data.type')->first());
+        }
+
         $this->data['password'] = Hash::make($this->data['password']);
+        $this->data['password_confirmation'] = Hash::make($this->data['password_confirmation']);
 
         $res = app(AuthService::class)->register($this->data);
         $this->reset();

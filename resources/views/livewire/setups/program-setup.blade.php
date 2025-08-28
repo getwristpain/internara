@@ -3,17 +3,17 @@
 use function Livewire\Volt\{state, layout, title, protect, mount, form};
 
 state([
-    "programs" => [],
-    "action" => "add",
+    'programs' => [],
+    'action' => 'add',
 ]);
 
-layout("components.layouts.guest");
-title("Atur Program PKL | " . config("app.description"));
+layout('components.layouts.guest');
+title('Atur Program PKL | ' . config('app.description'));
 form(App\Livewire\Forms\ProgramForm::class);
 
 mount(function () {
-    $this->initialize();
     $this->ensureReqStepsCompleted();
+    $this->initialize();
 });
 
 $initialize = protect(function () {
@@ -22,20 +22,20 @@ $initialize = protect(function () {
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:department");
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:department');
 
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute("setup.department", navigate: true);
+        $this->redirectRoute('setup.department', navigate: true);
     }
 });
 
-$toggleProgramModal = protect(function ($action = "add") {
-    $this->reset("action");
+$toggleProgramModal = protect(function ($action = 'add') {
+    $this->reset('action');
     $this->action = $action;
 
     $this->resetValidation();
-    $this->dispatch("toggle-program-modal");
+    $this->dispatch('toggle-program-modal');
 });
 
 $add = function () {
@@ -45,15 +45,15 @@ $add = function () {
 
 $edit = function ($id) {
     if (!$this->form->edit($id)) {
-        flash()->error("Program tidak ditemukan");
+        flash()->error('Program tidak ditemukan');
         return;
     }
 
-    $this->toggleProgramModal("edit");
+    $this->toggleProgramModal('edit');
 };
 
 $remove = function ($id) {
-    $this->form->remove($id) ? $this->initialize() : flash()->error("Gagal menghapus program");
+    $this->form->remove($id) ? $this->initialize() : flash()->error('Gagal menghapus program');
     $this->toggleProgramModal();
 };
 
@@ -64,8 +64,8 @@ $submit = function () {
 };
 
 $next = function () {
-    $res = app(App\Services\SetupService::class)->perform("setup:program");
-    $res->passes() ? $this->redirectRoute("setup.complete", navigate: true) : flash()->error($res->getMessage());
+    $res = app(App\Services\SetupService::class)->perform('setup:program');
+    $res->passes() ? $this->redirectRoute('setup.complete', navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
@@ -86,7 +86,7 @@ $next = function () {
     </div>
 
     <x-animate.fade-in class="w-full flex-1" delay="400ms">
-        @include("components.partials.program.program-list")
+        @include('components.partials.program.program-list')
     </x-animate.fade-in>
 
     <x-animate.fade-in class="flex w-full items-center justify-end"

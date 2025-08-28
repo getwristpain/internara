@@ -4,29 +4,29 @@ use function Livewire\Volt\{layout, title, form, mount, protect, usesFileUploads
 
 usesFileUploads();
 
-layout("components.layouts.guest");
-title("Konfigurasi Data Sekolah | " . config("app.description"));
+layout('components.layouts.guest');
+title('Konfigurasi Data Sekolah | ' . config('app.description'));
 form(App\Livewire\Forms\SchoolForm::class);
 
 mount(function () {
-    $this->form->initialize();
     $this->ensureReqStepsCompleted();
+    $this->form->initialize();
 });
 
 $ensureReqStepsCompleted = protect(function () {
-    $res = app(App\Services\SetupService::class)->ensureStepsCompleted("setup:account");
+    $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:account');
     if ($res->fails()) {
         flash()->error($res->getMessage());
-        $this->redirectRoute("setup.account", navigate: true);
+        $this->redirectRoute('setup.account', navigate: true);
     }
 });
 
 $next = function () {
     $res = App\Helpers\LogicResponse::make()
         ->failWhen($this->form->submit())
-        ->then(app(App\Services\SetupService::class)->perform("setup:school"));
+        ->then(app(App\Services\SetupService::class)->perform('setup:school'));
 
-    $res->passes() ? $this->redirectRoute("setup.department", navigate: true) : flash()->error($res->getMessage());
+    $res->passes() ? $this->redirectRoute('setup.department', navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
@@ -49,11 +49,11 @@ $next = function () {
 
     <x-animate.fade-in class="order-2 row-span-3 w-full lg:order-1"
         delay="200ms">
-        @include("components.partials.school.school-form", [
-            "submit" => "next",
-            "bordered" => true,
-            "shadowed" => true,
-            "logo_preview" => $form->data["logo_path"],
+        @include('components.partials.school.school-form', [
+            'submit' => 'next',
+            'bordered' => true,
+            'shadowed' => true,
+            'logo_preview' => $form->data['logo_path'],
         ])
     </x-animate.fade-in>
 
