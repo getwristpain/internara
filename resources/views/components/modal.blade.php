@@ -28,8 +28,8 @@
                     <button
                         class="btn btn-circle btn-xs absolute right-4 top-4 z-10 border border-red-500 bg-red-100 hover:bg-red-200"
                         x-on:click="{{ $show }} = false">
-                        <x-icon class="cursor-pointer text-red-500"
-                            icon="mdi:close" />
+                        <iconify-icon class="cursor-pointer text-red-500"
+                            icon="mdi:close"></iconify-icon>
                     </button>
 
                     <div

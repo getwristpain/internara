@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Forms;
 
-use App\Helpers\LogicResponse;
+use Livewire\Form;
 use App\Models\User;
+use App\Services\AuthService;
+use App\Helpers\LogicResponse;
+use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Attributes\Validate;
-use Livewire\Form;
 
 class LoginForm extends Form
 {
@@ -17,9 +18,7 @@ class LoginForm extends Form
         'remember' => ''
     ];
 
-    protected string $field = 'email';
-
-    public function submit()
+    public function submit(): LogicResponse
     {
         $this->resetErrorbag();
         $this->resetValidation();
@@ -29,26 +28,15 @@ class LoginForm extends Form
             'data.password' => 'required|string'
         ]);
 
-        $this->field = filter_var($this->data['username'], FILTER_VALIDATE_EMAIL)
-            ? 'email' : 'username';
+        $res = app(AuthService::class)->login($this->data);
 
-        $login = Auth::attempt([
-            $this->field => $this->data['username'],
-            'password' => $this->data['password']
-        ], $this->data['remember']);
-
-        $login
-            ? session()->regenerate()
-            : $this->addError(
+        if ($res->fails()) {
+            $this->addError(
                 'data.username',
-                "Kombinasi email/username atau password salah."
+                'Kombinasi email/username atau password salah.'
             );
+        }
 
-        return LogicResponse::make()
-            ->decide(
-                $login,
-                'Selamat datang kembali!',
-                'Gagal untuk masuk.'
-            );
+        return $res;
     }
 }

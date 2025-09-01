@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Helpers\Transform;
 use App\Helpers\LogicResponse;
+use RateLimiter;
 
 class BaseService
 {
@@ -23,5 +25,27 @@ class BaseService
     public function toArray(): array
     {
         return [];
+    }
+
+    public function ensureNotRateLimited(string $key, int $maxAttempts = 5): LogicResponse
+    {
+        $key = $this->generateTrottleKey($key);
+
+        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($key);
+            $message = Transform::from("Terlalu banyak melakukan percobaan. Tunggu hingga :seconds detik.")
+                ->replace(':seconds', $seconds)
+                ->toString();
+
+            return $this->response()->error($message);
+        }
+
+        RateLimiter::increment($key);
+        return $this->response()->success();
+    }
+
+    protected function generateTrottleKey(string $key): string
+    {
+        return strtolower(trim($key)) . ':' . (auth()->id() ?? request()->getClientIp());
     }
 }

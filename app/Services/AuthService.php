@@ -3,18 +3,46 @@
 namespace App\Services;
 
 use App\Helpers\LogicResponse;
-use App\Helpers\Transform;
-use App\Models\User;
-use App\Services\BaseService;
-use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class AuthService extends BaseService
+class AuthService extends UserService
 {
+    public function login(array $data)
+    {
+        $key = 'login:' . str($data['username'] ?? '')->lower()->slug()->toString();
+        $field = filter_var($data['username'], FILTER_VALIDATE_EMAIL)
+            ? 'email' : 'username';
+
+        $login = Auth::attempt([
+            $field => $data['username'],
+            'password' => $data['password']
+        ], $data['remember']);
+
+
+        if ($login) {
+            session()->regenerate();
+            RateLimiter::clear($key);
+
+            $user = auth()->user();
+            $user->hasRole('owner')
+                ? redirect()->intended('/admin')
+                : redirect()->intended('/dashboard');
+        }
+
+
+        return LogicResponse::make()
+            ->failWhen($this->ensureNotRateLimited($key))
+            ->then(fn ($res) => $res->decide(
+                $login,
+                'Selamat datang kembali!',
+                'Gagal untuk masuk.'
+            ));
+    }
+
     public function register(array $data): LogicResponse
     {
         $key = "register:" . str($data['email'] ?? $data['username'] ?? $data['name'] ?? '')->lower()->slug()->toString();
@@ -58,60 +86,5 @@ class AuthService extends BaseService
                 $status === Password::PASSWORD_RESET,
                 __($status)
             );
-    }
-
-    protected function storeUser(array $data): LogicResponse
-    {
-        $type = $data['type'];
-
-        $this->ensureUsernameFilled($data['username'], $data['email'], $data['id']);
-        $this->ensurePasswordHashed($data['password']);
-
-        $storedUser = $data['type'] === 'owner'
-            ? User::updateOrCreate(['id' => $data['id'] ?? ''], $data)
-            : User::create($data);
-        $storedUser->syncRoles($type === 'owner' ? ['owner', 'admin'] : $type);
-
-        return $this->response()->decide(
-            (bool) $storedUser ?? false,
-            'Akun pengguna berhasil dibuat.',
-            'Gagal menyimpan akun pengguna.'
-        );
-    }
-
-    protected function ensureUsernameFilled(?string &$ref, ?string $default, string|int|null $id = null): void
-    {
-        $ref ??= $default;
-
-        $validator = Validator::make(
-            data: ['username' => $ref],
-            rules: ['username' => 'required|string|min:5|unique:users,username,' . $id],
-            attributes: ['username' => 'username pengguna']
-        );
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-    }
-
-    public function ensurePasswordHashed(?string &$ref): void
-    {
-        if (!str_starts_with($ref, '$2y$')) {
-            $ref = Hash::make($ref);
-        }
-    }
-
-    protected function ensureNotRateLimited(string $key, int $maxAttempts = 5): LogicResponse
-    {
-        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            $message = Transform::from("Terlalu banyak percobaan mendaftar akun. Tunggu hingga :seconds detik.")
-                ->replace(':seconds', RateLimiter::avaliableIn($key))
-                ->toString();
-
-            return $this->response()->error($message);
-        }
-
-        RateLimiter::increment($key);
-        return $this->response()->success();
     }
 }

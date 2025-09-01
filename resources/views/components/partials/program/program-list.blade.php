@@ -1,13 +1,13 @@
 @props([
-    "list" => "programs",
-    "submit" => "submit",
-    "showModal" => "",
-    "action" => "add",
+    'list' => 'programs',
+    'submit' => 'submit',
+    'showModal' => '',
+    'action' => 'add',
 ])
 
 @php
-    $btnSubmitLabel = $action === "add" ? "Tambah" : "Simpan";
-    $btnSubmitIcon = $action === "add" ? "mdi:plus" : "famicons:save";
+    $btnSubmitLabel = $action === 'add' ? 'Tambah' : 'Simpan';
+    $btnSubmitIcon = $action === 'add' ? 'mdi:plus' : 'famicons:save';
 @endphp
 
 <div x-data="{
@@ -52,9 +52,9 @@
             <div class="wh-full flex cursor-pointer flex-row items-center justify-center gap-4 p-4"
                 x-bind:class="{ 'min-h-24': programs.length === 0 }"
                 x-on:click="$wire.add()">
-                <x-icon
+                <iconify-icon
                     class="block rounded-full border-2 border-neutral-500 p-1"
-                    icon="mdi:plus" />
+                    icon="mdi:plus"></iconify-icon>
                 <span class="block text-center font-bold lg:text-left">Tambah
                     Program</span>
             </div>
@@ -63,16 +63,16 @@
 
     <x-modal class="w-full max-w-2xl" show="showModal">
         <div class="w-full">
-            @include("components.partials.program.program-form")
+            @include('components.partials.program.program-form')
         </div>
 
         <div class="flex w-full justify-end gap-4 pt-8" x-data="{
-            program: @entangle("form.data").live,
+            program: @entangle('form.data').live,
         }">
-            @if ($action === "edit")
-                <x-button label="Hapus" icon="tabler:trash-filled"
-                    type="button" color="error" action="remove(program.id)"
-                    shadowed />
+            @if ($action === 'edit')
+                <x-button class="flex-row-reverse" label="Hapus"
+                    icon="tabler:trash-filled" type="button" color="error"
+                    action="remove(program.id)" shadowed />
             @endif
 
             <x-button class="flex-row-reverse" type="submit"

@@ -8,7 +8,6 @@ use App\Models\School;
 use App\Models\User;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\Session;
-use RateLimiter;
 
 class SetupService extends BaseService
 {
@@ -130,22 +129,13 @@ class SetupService extends BaseService
         }
     }
 
-    protected function ensureNotRateLimited(string $step, int $maxAttempts = 20): LogicResponse
+    public function ensureNotRateLimited(string $step, int $maxAttempts = 20): LogicResponse
     {
-        if (RateLimiter::tooManyAttempts($step, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($step);
-            $message = Transform::from('Terlalu banyak melakukan aksi. Tunggu hingga :seconds detik.')
-                ->replace(':seconds', $seconds)
-                ->toString();
-
-            return $this->response()->error($message);
-        }
-
-        RateLimiter::increment($step);
-        return $this->response();
+        $key = "setup:{$step}";
+        return parent::ensureNotRateLimited($key, $maxAttempts);
     }
 
-    protected function ensureNotInstalled(): LogicResponse
+    public function ensureNotInstalled(): LogicResponse
     {
         $isInstalled = setting()->isInstalled();
         return $this->response()

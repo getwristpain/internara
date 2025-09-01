@@ -24,6 +24,7 @@ class OwnerSeeder extends Seeder
         User::updateOrCreate(
             ['email' => $user['email']],
             $user
-        )->assignRole(['owner', 'admin']);
+        )->assignRole(['admin', 'owner'])
+        ->syncStatuses('protected');
     }
 }

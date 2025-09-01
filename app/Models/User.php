@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasStatuses;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasRoles;
+    use HasStatuses;
     use HasUuids;
     use Notifiable;
 
@@ -36,6 +38,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
+        'id',
         'password',
         'remember_token',
     ];
@@ -58,10 +61,32 @@ class User extends Authenticatable
         return [
             'owner',
             'admin',
-            'student',
             'teacher',
+            'student',
             'supervisor'
         ];
+    }
+
+    public static function isOwner(User|string|int|null $id = null): bool
+    {
+        $id ??= auth()->id();
+
+        if ($id instanceof User) {
+            $id = $id->id;
+        }
+
+        return User::find($id)?->hasRole('owner') ?? false;
+    }
+
+    public static function isAdmin(User|string|int|null $id = null): bool
+    {
+        $id ??= auth()->id();
+
+        if ($id instanceof User) {
+            $id = $id->id;
+        }
+
+        return User::find($id)?->hasRole('admin') ?? false;
     }
 
     /**
@@ -74,5 +99,10 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    public function statuses(): MorphToMany
+    {
+        return $this->morphToMany(Status::class, 'statusable');
     }
 }

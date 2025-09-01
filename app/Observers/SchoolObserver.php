@@ -11,35 +11,35 @@ class SchoolObserver
     {
         $settings = [
             [
-                'key' => 'app_name',
+                'key' => 'brand_name',
                 'value' => $school->name,
-                'type' => 'string',
             ],
             [
-                'key' => 'app_logo',
+                'key' => 'brand_logo',
                 'value' => $school->logo_path,
-                'type' => 'string',
             ]
         ];
 
-        Setting::upsert($settings, ['key'], ['value', 'type']);
+        foreach ($settings as $set) {
+            Setting::updateOrCreate(['key' => $set['key']], $set);
+        }
     }
 
     public function updated(School $school)
     {
         $settings = [
             [
-                'key' => 'app_name',
+                'key' => 'brand_name',
                 'value' => $school->name,
-                'type' => 'string',
             ],
             [
-                'key' => 'app_logo',
+                'key' => 'brand_logo',
                 'value' => $school->logo_path,
-                'type' => 'string',
             ]
         ];
 
-        Setting::upsert($settings, ['key'], ['value', 'type']);
+        foreach ($settings as $set) {
+            Setting::updateOrCreate(['key' => $set['key']], $set);
+        }
     }
 }

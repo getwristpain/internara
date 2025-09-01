@@ -64,9 +64,9 @@
                 {{ $required }} {{ $autofocus }} {{ $disabled }}
                 wire:target="{{ $field }}"></textarea>
 
-            <x-icon
+            <iconify-icon
                 class="z-2 absolute left-3 top-5 -translate-y-1/2 transform text-center text-sm text-neutral-400"
-                icon="{{ $icon }}"></x-icon>
+                icon="{{ $icon }}"></iconify-icon>
         @else
             <input
                 class="input glass {{ $hasErrors ? 'border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none' : 'focus:ring-1 focus:ring-neutral-200 focus:outline-none' }} w-full rounded-xl !border pl-8 disabled:border-neutral-500 disabled:bg-neutral-200 disabled:text-neutral-400"
@@ -75,9 +75,9 @@
                 {{ $required }} {{ $autofocus }} {{ $disabled }}
                 wire:target="{{ $field }}" />
 
-            <x-icon
+            <iconify-icon
                 class="z-2 absolute left-3 top-1/2 -translate-y-1/2 transform text-center text-sm text-neutral-400"
-                icon="{{ $icon }}"></x-icon>
+                icon="{{ $icon }}"></iconify-icon>
         @endif
     </div>
 

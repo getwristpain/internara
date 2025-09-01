@@ -2,17 +2,12 @@
 
 use function Livewire\Volt\{layout, title, form};
 
-layout("components.layouts.guest");
-title("Masuk | " . setting("app_name"));
+layout('components.layouts.guest');
+title('Masuk | ' . setting('brand_name'));
 form(App\Livewire\Forms\LoginForm::class);
 
 $login = function () {
-    $res = $this->form->submit();
-
-    if ($res->passes()) {
-        flash()->success($res->getMessage());
-        $this->redirectRoute("dashboard", navigate: true);
-    }
+    $this->form->submit();
 };
 
 ?>
@@ -34,8 +29,8 @@ $login = function () {
     </div>
 
     <div class="w-full">
-        @include("components.partials.auth.login-form", [
-            "submit" => "login",
+        @include('components.partials.auth.login-form', [
+            'submit' => 'login',
         ])
     </div>
 

@@ -22,11 +22,11 @@ class SettingService
 
             return collect($keys)
                 ->mapWithKeys(function ($key) use ($models) {
-                    if ($key === 'app_name' && !$this->isInstalled()) {
+                    if ($key === 'brand_name' && !$this->isInstalled()) {
                         return [$key => config('app.name')];
                     }
 
-                    if ($key === 'app_logo' && !$this->isInstalled()) {
+                    if ($key === 'brand_logo' && !$this->isInstalled()) {
                         return [$key => config('app.logo')];
                     }
 
@@ -35,11 +35,11 @@ class SettingService
                 ->toArray() ?? $default;
         }
 
-        if ($keys === 'app_name' && !$this->isInstalled()) {
+        if ($keys === 'brand_name' && !$this->isInstalled()) {
             return config('app.name');
         }
 
-        if ($keys === 'app_logo' && !$this->isInstalled()) {
+        if ($keys === 'brand_logo' && !$this->isInstalled()) {
             return config('app.logo');
         }
 
