@@ -7,7 +7,7 @@ state([
 ]);
 
 layout('components.layouts.guest');
-title('Lupa Kata Sandi | ' . setting('app_name'));
+title('Lupa Kata Sandi | ' . setting()->cached('brand_name'));
 
 $send = function () {
     $this->resetValidation();
@@ -34,7 +34,7 @@ $toLogin = function () {
 ?>
 
 <div
-    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center gap-8 lg:pt-8">
+    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-12">
     <div class="space-y-1 text-center">
         <x-animate.fade-in>
             <h1 class="text-head">

@@ -3,7 +3,7 @@
 use function Livewire\Volt\{layout, title, form};
 
 layout('components.layouts.guest');
-title('Masuk | ' . setting('brand_name'));
+title('Masuk | ' . setting()->cached('brand_name'));
 form(App\Livewire\Forms\LoginForm::class);
 
 $login = function () {
@@ -13,7 +13,7 @@ $login = function () {
 ?>
 
 <div
-    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-8">
+    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-12">
     <div class="w-full space-y-1 text-center">
         <x-animate.fade-in>
             <h1 class="text-head">

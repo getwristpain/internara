@@ -44,8 +44,8 @@ $next = function () {
 ?>
 
 <div
-    class="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-8">
-    <div class="w-full text-center">
+    class="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center gap-12 pt-16 lg:p-8 lg:pt-16">
+    <div class="w-full space-y-1 text-center">
         <x-animate.fade-in>
             <h1 class="text-head">
                 Atur Jurusan Sekolah

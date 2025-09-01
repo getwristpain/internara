@@ -4,17 +4,18 @@
 
 ### Owner/Admin
 
-- [ ] Instalasi (Application Setup)
-  - [ ] Admin sekolah menginstal aplikasi dengan menuju ke halaman `/setup`
-  - [ ] Terdapat welcome page yang berisi langkah instalasi aplikasi
-  - [ ] Admin membuat akun akun pengguna yang ditandai sebagai `admin` sekaligus `owner`
-  - [ ] Admin menyetel data awal sekolah
-  - [ ] Admin menambahkan data jurusan sekolah
-  - [ ] Admin menambahkan daftar program PKL
-  - [ ] Di halaman akhir, aplikasi akan ditandai sebagai `installed`
-  - [ ] Jika seluruh proses berhasil, alihkan menuju halaman `/login`
-  - [ ] Tambahkan middleware untuk memudahkan identifikasi penginstalan sistem dan menyaring akses pengguna
+- [v] Instalasi (Application Setup)
+  - [v] Admin sekolah menginstal aplikasi dengan menuju ke halaman `/setup`
+  - [v] Terdapat welcome page yang berisi langkah instalasi aplikasi
+  - [v] Admin membuat akun akun pengguna yang ditandai sebagai `admin` sekaligus `owner`
+  - [v] Admin menyetel data awal sekolah
+  - [v] Admin menambahkan data jurusan sekolah
+  - [v] Admin menambahkan daftar program PKL
+  - [v] Di halaman akhir, aplikasi akan ditandai sebagai `installed`
+  - [v] Jika seluruh proses berhasil, alihkan menuju halaman `/login`
+  - [v] Tambahkan middleware untuk memudahkan identifikasi penginstalan sistem dan menyaring akses pengguna
 - [ ] Otentikasi dan Otorisasi:
+  - [ ] Admin masuk menggunakan email dan password yang telah dibuat
   - [ ] Pengguna dengan peran `admin` akan dialihkan menuju `/admin` saat masuk
   - [ ] Tidak ada registrasi akun secara eksternal untuk peran `admin`
   - [ ] Admin panel hanya dapat diakses oleh pengguna dengan peran `admin`

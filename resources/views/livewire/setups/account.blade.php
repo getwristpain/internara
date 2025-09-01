@@ -35,8 +35,8 @@ $next = function () {
 ?>
 
 <div
-    class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-8">
-    <div class="w-full">
+    class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-12 pt-16 lg:pt-0">
+    <div class="w-full space-y-1">
         <x-animate.fade-in>
             <h1 class="text-head">
                 Buat Akun Administrator
@@ -45,8 +45,8 @@ $next = function () {
 
         <x-animate.fade-in delay="200ms">
             <p class="text-subhead">
-                Kelola data sistem secara penuh untuk menyiapkan masa depan
-                siswa.
+                Kendalikan sistem dengan akun pusat dan kelola data secara
+                penuh.
             </p>
         </x-animate.fade-in>
     </div>

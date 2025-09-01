@@ -31,8 +31,8 @@ $next = function () {
 
 ?>
 
-<div class="grid flex-1 grid-cols-1 gap-8 lg:grid-cols-2">
-    <div class="order-1 w-full lg:order-2 lg:pt-12">
+<div class="grid flex-1 grid-cols-1 gap-12 pt-16 lg:grid-cols-2">
+    <div class="order-1 w-full space-y-1 lg:order-2 lg:pt-12">
         <x-animate.fade-in>
             <h1 class="text-head">
                 Konfigurasi Data Sekolah

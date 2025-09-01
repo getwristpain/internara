@@ -70,8 +70,9 @@ $next = function () {
 
 ?>
 
-<div class="flex flex-1 flex-col items-center justify-center gap-8">
-    <div class="w-full space-y-2 text-center">
+<div
+    class="flex flex-1 flex-col items-center justify-center gap-8 pt-16 lg:p-8 lg:pt-16">
+    <div class="w-full space-y-1 text-center">
         <x-animate.fade-in>
             <h1 class="text-head">
                 Atur Program PKL

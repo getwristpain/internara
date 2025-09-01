@@ -17,19 +17,28 @@ class SchoolFactory extends Factory
      */
     public function definition(): array
     {
-        $name = 'Sekolah Kejuruan ' . $this->faker->city;
+        $address = fake()->address();
+        $city = str($address)
+            ->explode(',')
+            ->slice(-2, 1)
+            ->first();
+
+        $city = preg_replace('/\d+/', '', trim($city));
+        $city = preg_replace('/\s+/', ' ', trim($city));
+
+        $name = 'Sekolah Kejuruan '.$city;
         $slug = Transform::from($name)->initials()->slug('')->toString();
 
-        $domain = $this->faker->safeEmailDomain();
+        $domain = fake()->safeEmailDomain();
         $web = implode('.', ['http://www', $slug, $domain]);
 
         return [
             'name' => $name,
             'email' => $slug.'@'.$domain,
-            'telp' => $this->faker->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
-            'fax' => $this->faker->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
-            'address' => $this->faker->address(),
-            'principal_name' => $this->faker->name(),
+            'telp' => fake()->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
+            'fax' => fake()->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
+            'address' => $address,
+            'principal_name' => fake()->name(),
             'website' => $web,
             'logo_path' => config('app.logo'),
         ];
