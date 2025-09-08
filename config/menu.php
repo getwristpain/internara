@@ -3,17 +3,17 @@
 return [
     [
         'label' => 'Dashboard',
-        'icon' => 'mage:dashboard-fill',
+        'icon' => 'ri-dashboard-horizontal-fill',
         'route' => 'dashboard',
     ],
     [
         'label' => 'Example',
-        'icon' => 'mdi:home',
+        'icon' => 'polaris-home-filled-icon',
         'route' => 'home',
     ],
     [
         'label' => 'Example 2',
-        'icon' => 'mingcute:settings-3-fill',
+        'icon' => 'heroicon-s-archive-box',
         'submenu' => [
             [
                 'label' => 'Submenu 1',

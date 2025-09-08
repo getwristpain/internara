@@ -1,5 +1,6 @@
 @props([
     'menu' => config('menu'),
+    'icon' => 'heroicon-s-archive-box',
 ])
 
 <div
@@ -19,7 +20,7 @@
                             x-on:click="open = !open">
                             <span
                                 class="btn btn-square {{ $active ? 'bg-neutral-900 text-neutral-100' : 'bg-inherit text-inherit' }} rounded-xl border-none">
-                                <iconify-icon icon="{{ $item['icon'] ?? 'mingcute:right-fill' }}"></iconify-icon>
+                                <x-icon class="icon-md" name="{{ $item['icon'] ?? $icon }}"></x-icon>
                             </span>
 
                             <div
@@ -29,9 +30,8 @@
                                         {{ $item['label'] ?? 'Untitled' }}
                                     </span>
 
-                                    <iconify-icon class="transition-transform duration-200"
-                                        x-bind:class="(open ? 'rotate-180' : '')"
-                                        icon="icon-park-solid:down-one"></iconify-icon>
+                                    <x-icon class="icon-md transition-transform duration-200"
+                                        x-bind:class="(open ? 'rotate-180' : '')" name="iconpark-down"></x-icon>
                                 </div>
                             </div>
                         </div>
@@ -51,8 +51,7 @@
                                     href="{{ route($submenu['route'] ?? 'home') }}" wire:navigate>
                                     <span
                                         class="btn btn-square {{ $active ? 'bg-neutral-900 text-neutral-100' : 'bg-inherit text-inherit' }} rounded-xl border-none">
-                                        <iconify-icon
-                                            icon="{{ $submenu['icon'] ?? 'mingcute:right-fill' }}"></iconify-icon>
+                                        <x-icon class="icon-md" name="{{ $submenu['icon'] ?? $icon }}"></x-icon>
                                     </span>
 
                                     <span
@@ -66,7 +65,7 @@
                         href="{{ route($item['route'] ?? 'home') }}" wire:navigate>
                         <span
                             class="btn btn-square {{ $active ? 'bg-neutral-900 text-neutral-100' : 'bg-inherit text-inherit' }} rounded-xl border-none">
-                            <iconify-icon icon="{{ $item['icon'] ?? 'mingcute:right-fill' }}"></iconify-icon>
+                            <x-icon class="icon-md" name="{{ $item['icon'] ?? $icon }}"></x-icon>
                         </span>
 
                         <span

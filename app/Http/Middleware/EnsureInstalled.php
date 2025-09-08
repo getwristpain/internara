@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureInstalledMiddleware
+class EnsureInstalled
 {
     /**
      * Handle an incoming request.
@@ -28,7 +28,7 @@ class EnsureInstalledMiddleware
 
     protected function isInstallRoute(Request $request): bool
     {
-        return $request->is('setup*');
+        return $request->routeIs('setup*');
     }
 
     protected function isLivewireRequest(Request $request): bool

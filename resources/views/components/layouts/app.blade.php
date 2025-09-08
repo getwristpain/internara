@@ -3,10 +3,10 @@
 @section('content')
     <x-bg-decoration />
 
-    <div class="wh-full flex min-h-screen gap-8">
+    <div class="wh-full flex min-h-screen">
         @include('components.partials.layouts.auth.sidebar')
 
-        <main class="flex flex-1 flex-col gap-8">
+        <main class="wh-full flex flex-1 flex-col">
             {{ $slot }}
         </main>
     </div>

@@ -14,7 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware
             ->web([
-                App\Http\Middleware\EnsureInstalledMiddleware::class
+                App\Http\Middleware\EnsureInstalled::class,
+                App\Http\Middleware\CheckUserStatus::class,
             ])
             ->alias([
                 'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

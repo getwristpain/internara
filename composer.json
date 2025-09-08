@@ -13,14 +13,17 @@
     "require": {
         "php": "^8.2",
         "andreiio/blade-remix-icon": "^3.6",
+        "blade-ui-kit/blade-icons": "^1.8",
         "codeat3/blade-google-material-design-icons": "^1.20",
         "codeat3/blade-iconpark": "^1.7",
+        "eduard9969/blade-polaris-icons": "^2.8",
         "filament/filament": "^4.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/volt": "^1.7",
         "owenvoke/blade-fontawesome": "^2.9",
         "php-flasher/flasher-laravel": "^2.1",
+        "secondnetwork/blade-tabler-icons": "^3.34",
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {

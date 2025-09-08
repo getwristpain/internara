@@ -7,6 +7,6 @@ title('Dashboard | ' . setting()->cached('brand_name'));
 
 ?>
 
-<div>
-    //
+<div class="grid flex-1 grid-cols-1 p-4 md:grid-cols-2 md:p-8 lg:grid-cols-4">
+    <x-widget.account />
 </div>

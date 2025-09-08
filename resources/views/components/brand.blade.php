@@ -3,6 +3,7 @@
     'logo' => asset(setting()->cached('brand_logo', default: config('app.logo'))),
     'class' => '',
     'style' => [],
+    'url' => '/',
 ])
 
 @php
@@ -11,11 +12,9 @@
     $class .= ' ' . implode(' ', array_values($style));
 @endphp
 
-<a href="{{ url('/') }}" wire:navigate tabindex="0">
+<a href="{{ url($url) }}" wire:navigate tabindex="0">
     <div class="{{ $class }}">
-        <img class="aspect-square h-4 w-auto scale-110" src="{{ $logo }}"
-            alt="Logo">
-        <span
-            class="text-neutral truncate text-lg font-bold">{{ $name }}</span>
+        <img class="aspect-square h-4 w-auto scale-110" src="{{ $logo }}" alt="Logo">
+        <span class="text-neutral truncate text-lg font-bold">{{ $name }}</span>
     </div>
 </a>
