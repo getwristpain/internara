@@ -1,4 +1,4 @@
-# User Flow - Internara
+# User Flow – Internara (Revisi MVP Final)
 
 ## Owner/Admin
 
@@ -6,10 +6,12 @@
 
 * Admin membuka `/setup`.
 * Welcome page menampilkan langkah instalasi.
-* Admin membuat akun **admin** pertama (role: `admin` + `owner`, status `protected`).
+* Admin membuat akun **admin pertama** (role: `admin` + `owner`, status `protected`).
 * Admin mengisi data sekolah → menambahkan jurusan → menambahkan daftar program PKL.
 * Setelah selesai → aplikasi ditandai `installed` → diarahkan ke `/login`.
-* Middleware: jika belum `installed`, semua akses diarahkan ke `/setup`.
+* Middleware:
+  * Jika aplikasi **belum `installed`**, semua akses diarahkan ke `/setup`.
+  * Jika aplikasi sudah `installed`, hanya halaman login & public yang terbuka.
 
 ### Login
 
@@ -19,15 +21,18 @@
 ### Verifikasi Registrasi & Penempatan Siswa
 
 * Admin melihat daftar siswa `pending-verification`.
-* Memvalidasi profil siswa dan penempatan PKL.
-* Status valid → siswa menjadi `active`.
+* Memvalidasi:
+  * Profil siswa → status `Active`.
+  * Penempatan PKL → jika valid, siswa siap diverifikasi.
+* Status akhir siswa → `Verified` setelah diverifikasi.
 
 ### Monitoring Penugasan & Penilaian PKL
 
-* Admin memantau upload **laporan PKL** & **PPT presentasi**.
-* Memverifikasi status: `submitted`, `approved`, atau `revision`.
-* Admin dapat mengunci hasil penilaian → status siswa menjadi `graduated`.
+* Admin memantau upload **Laporan PKL** & **PPT Presentasi**.
+* Memverifikasi status tugas: `submitted`, `approved`, atau `revision`.
+* Admin dapat **mengunci hasil penilaian** → status siswa menjadi `graduated`.
 * Admin dapat mengunduh rekap nilai seluruh siswa (PDF/Excel).
+* Sistem mengirim notifikasi ke Teacher/Supervisor ketika siswa upload tugas.
 
 ---
 
@@ -36,18 +41,20 @@
 ### Registrasi & Aktivasi
 
 * Siswa membuka `/register` → buat akun → otomatis login (`student`, status `pending-activation`).
-* Middleware `CheckUserStatus`: jika `pending-activation` → redirect ke `/internship/registration`.
+* Middleware `CheckUserStatus`:
+  * Jika `pending-activation` → redirect ke `/internship/registration`.
 * Di `/internship/registration`, siswa:
-
   * Lengkapi profil (nisn, kontak, dll).
-  * Pilih program PKL aktif dan penempatan tersedia.
-* Submit → status `pending-verification`.
-* Admin verifikasi → status siswa `active`.
+  * Pilih program PKL aktif.
+  * Pilih penempatan tersedia atau ajukan penempatan baru.
+* Submit → status `Active`.
+* Admin memverifikasi → status siswa menjadi `Verified`.
 
 ### Dashboard Siswa
 
-* Lihat status akun dan progres PKL.
+* Lihat status akun (`Active` / `Verified`) dan progres PKL.
 * Lihat status tugas (laporan & PPT).
+* Dashboard menampilkan reminder upload tugas dan status review.
 * Tombol logout.
 
 ### Penugasan Akhir PKL
@@ -74,12 +81,13 @@
 
 ### Monitoring Penugasan
 
-* Review **laporan PKL** & **PPT presentasi** → `approved` / `revision`.
+* Review **Laporan PKL** & **PPT Presentasi** → beri status `approved` / `revision`.
 * Memberi catatan tambahan jika diperlukan.
 
 ### Penilaian Siswa
 
-* Mengisi form penilaian untuk siswa bimbingan (kedisiplinan, keterampilan teknis, komunikasi, etika kerja, laporan & presentasi).
+* Mengisi form penilaian siswa bimbingan:
+  * Kedisiplinan, keterampilan teknis, komunikasi, etika kerja, laporan & presentasi.
 * Status penilaian: `not-evaluated`, `in-progress`, `evaluated`.
 * Hasil penilaian tersimpan di sistem.
 
@@ -89,14 +97,14 @@
 
 ### Login & Dashboard
 
-* Supervisor login dengan akun yang dibuat oleh Admin → diarahkan ke dashboard `/supervisor`.
-* Lihat daftar siswa yang ditempatkan di perusahaan.
+* Supervisor login dengan akun dibuat oleh Admin → diarahkan ke dashboard `/supervisor`.
+* Lihat daftar siswa yang ditempatkan di perusahaannya.
 
 ### Monitoring Penugasan
 
-* Supervisor dapat melihat upload **laporan PKL** & **PPT presentasi** siswa.
+* Supervisor dapat melihat upload **Laporan PKL** & **PPT Presentasi** siswa.
 * Memberi feedback/catatan tambahan untuk kualitas laporan.
-* Persetujuan Supervisor bersifat **opsional**, untuk memastikan laporan sesuai standar industri.
+* Persetujuan Supervisor bersifat **opsional**.
 
 ### Penilaian Siswa (Opsional)
 
@@ -108,10 +116,3 @@
 
 * Supervisor dapat mengakses rekap evaluasi siswa yang ditempatkan di perusahaannya.
 * Bisa diunduh untuk arsip internal industri (opsional).
-
----
-
-⚡ **Catatan MVP:**
-
-* Fokus utama tetap: **pendaftaran PKL → pengumpulan tugas (laporan & PPT) → penilaian PKL**.
-* Supervisor hadir untuk **feedback dan penilaian opsional**, mendukung validasi industri.
