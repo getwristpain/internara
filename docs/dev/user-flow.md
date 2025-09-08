@@ -1,38 +1,40 @@
-# User Flow – Internara (Revisi MVP Final)
+# User Flow – Internara
 
-## Owner/Admin
+## Admin / Owner
 
 ### Instalasi (Application Setup)
 
 * Admin membuka `/setup`.
 * Welcome page menampilkan langkah instalasi.
-* Admin membuat akun **admin pertama** (role: `admin` + `owner`, status `protected`).
-* Admin mengisi data sekolah → menambahkan jurusan → menambahkan daftar program PKL.
+* Admin membuat akun **Admin pertama** (role: `admin` + `owner`, status `protected`).
+* Admin mengisi data sekolah → menambahkan jurusan → menambahkan program PKL.
 * Setelah selesai → aplikasi ditandai `installed` → diarahkan ke `/login`.
 * Middleware:
+
   * Jika aplikasi **belum `installed`**, semua akses diarahkan ke `/setup`.
-  * Jika aplikasi sudah `installed`, hanya halaman login & public yang terbuka.
+  * Jika sudah `installed`, hanya halaman login & public yang terbuka.
 
 ### Login
 
 * Admin login dengan email & password → diarahkan ke `/admin`.
-* Hanya `admin`/`owner` yang bisa mengakses panel admin.
+* Hanya `admin`/`owner` yang bisa mengakses panel Admin.
 
-### Verifikasi Registrasi & Penempatan Siswa
+### Verifikasi Registrasi & Penempatan Student
 
-* Admin melihat daftar siswa `pending-verification`.
+* Admin melihat daftar Student `pending-verification`.
 * Memvalidasi:
-  * Profil siswa → status `Active`.
-  * Penempatan PKL → jika valid, siswa siap diverifikasi.
-* Status akhir siswa → `Verified` setelah diverifikasi.
+
+  * Profil → status Student berubah menjadi `Active`.
+  * Penempatan PKL → jika valid, Student siap diverifikasi.
+* Status akhir Student → `Verified` setelah diverifikasi.
 
 ### Monitoring Penugasan & Penilaian PKL
 
-* Admin memantau upload **Laporan PKL** & **PPT Presentasi**.
-* Memverifikasi status tugas: `submitted`, `approved`, atau `revision`.
-* Admin dapat **mengunci hasil penilaian** → status siswa menjadi `graduated`.
-* Admin dapat mengunduh rekap nilai seluruh siswa (PDF/Excel).
-* Sistem mengirim notifikasi ke Teacher/Supervisor ketika siswa upload tugas.
+* Admin memantau upload **Laporan PKL** & **PPT Presentasi** Student.
+* Memverifikasi status tugas: `submitted`, `approved`, `revision`.
+* Admin dapat **mengunci hasil penilaian** → status Student menjadi `graduated`.
+* Admin dapat mengunduh rekap nilai seluruh Student (PDF/Excel).
+* Sistem mengirim notifikasi ke Teacher dan Supervisor saat Student upload tugas.
 
 ---
 
@@ -40,21 +42,22 @@
 
 ### Registrasi & Aktivasi
 
-* Siswa membuka `/register` → buat akun → otomatis login (`student`, status `pending-activation`).
+* Student membuka `/register` → buat akun → otomatis login (`student`, status `pending-activation`).
 * Middleware `CheckUserStatus`:
+
   * Jika `pending-activation` → redirect ke `/internship/registration`.
-* Di `/internship/registration`, siswa:
-  * Lengkapi profil (nisn, kontak, dll).
+* Di `/internship/registration`, Student:
+
+  * Lengkapi profil (nisn, kontak, dll) → status menjadi `Active`.
   * Pilih program PKL aktif.
   * Pilih penempatan tersedia atau ajukan penempatan baru.
-* Submit → status `Active`.
-* Admin memverifikasi → status siswa menjadi `Verified`.
+* Admin memverifikasi → status Student menjadi `Verified`.
 
-### Dashboard Siswa
+### Dashboard Student
 
 * Lihat status akun (`Active` / `Verified`) dan progres PKL.
-* Lihat status tugas (laporan & PPT).
-* Dashboard menampilkan reminder upload tugas dan status review.
+* Lihat status tugas (Laporan PKL & PPT).
+* Dashboard menampilkan reminder upload & status review.
 * Tombol logout.
 
 ### Penugasan Akhir PKL
@@ -62,21 +65,21 @@
 * Upload **Laporan PKL** (PDF/DOCX) & **PPT Presentasi**.
 * Sistem validasi file (format, ukuran).
 * Status tugas: `submitted`, `approved`, `revision`.
-* Dashboard menampilkan reminder upload & status review.
+* Dashboard menampilkan reminder dan status review.
 
 ### Penilaian PKL
 
-* Siswa melihat nilai dari Teacher (wajib) dan Supervisor (opsional).
+* Student melihat nilai dari **Teacher** dan **Supervisor** (kedua penilaian **wajib**).
 * Ringkasan nilai & status penilaian tersedia di dashboard.
-* Siswa dapat mengunduh **rapor PKL** (PDF).
+* Student dapat mengunduh **rapor PKL** (PDF).
 
 ---
 
-## Teacher (Guru Pembimbing)
+## Teacher
 
 ### Dashboard Teacher
 
-* Lihat daftar siswa bimbingan dan status penugasan & penilaian.
+* Lihat daftar Student bimbingan dan status penugasan & penilaian.
 * Notifikasi tugas yang perlu diverifikasi.
 
 ### Monitoring Penugasan
@@ -84,35 +87,36 @@
 * Review **Laporan PKL** & **PPT Presentasi** → beri status `approved` / `revision`.
 * Memberi catatan tambahan jika diperlukan.
 
-### Penilaian Siswa
+### Penilaian Student
 
-* Mengisi form penilaian siswa bimbingan:
-  * Kedisiplinan, keterampilan teknis, komunikasi, etika kerja, laporan & presentasi.
+* Mengisi form penilaian Student bimbingan:
+
+  * Kedisiplinan, keterampilan teknis, komunikasi, etika kerja, Laporan PKL & PPT.
 * Status penilaian: `not-evaluated`, `in-progress`, `evaluated`.
 * Hasil penilaian tersimpan di sistem.
 
 ---
 
-## Supervisor (Pembimbing Industri)
+## Supervisor
 
 ### Login & Dashboard
 
 * Supervisor login dengan akun dibuat oleh Admin → diarahkan ke dashboard `/supervisor`.
-* Lihat daftar siswa yang ditempatkan di perusahaannya.
+* Lihat daftar Student yang ditempatkan di perusahaan.
 
 ### Monitoring Penugasan
 
-* Supervisor dapat melihat upload **Laporan PKL** & **PPT Presentasi** siswa.
+* Supervisor wajib **melihat upload Laporan PKL & PPT** Student.
 * Memberi feedback/catatan tambahan untuk kualitas laporan.
-* Persetujuan Supervisor bersifat **opsional**.
+* Persetujuan Supervisor bersifat **wajib**.
 
-### Penilaian Siswa (Opsional)
+### Penilaian Student
 
-* Supervisor dapat mengisi penilaian tambahan terkait performa siswa di lapangan.
+* Supervisor wajib mengisi penilaian terkait performa Student di lapangan.
 * Status penilaian: `not-evaluated` / `evaluated`.
-* Nilai Supervisor digabungkan dengan nilai Teacher jika tersedia.
+* Nilai Supervisor digabungkan dengan nilai Teacher untuk perhitungan akhir.
 
 ### Laporan Rekap Evaluasi
 
-* Supervisor dapat mengakses rekap evaluasi siswa yang ditempatkan di perusahaannya.
+* Supervisor dapat mengakses rekap evaluasi Student yang ditempatkan di perusahaannya.
 * Bisa diunduh untuk arsip internal industri (opsional).
