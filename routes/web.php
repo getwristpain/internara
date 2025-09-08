@@ -7,7 +7,7 @@ foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
     require  $routeFile;
 }
 
-Route::get('/', fn () => redirect()->route('dashboard'))
+Route::get('/', fn () => redirect()->route('login'))
     ->name('home');
 
 Volt::route('dashboard', 'dashboard')

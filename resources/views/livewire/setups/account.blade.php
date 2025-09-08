@@ -34,8 +34,7 @@ $next = function () {
 
 ?>
 
-<div
-    class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-12 pt-16 lg:pt-0">
+<div class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-12 pt-16 lg:pt-0">
     <div class="w-full space-y-1">
         <x-animate.fade-in>
             <h1 class="text-head">
@@ -53,15 +52,12 @@ $next = function () {
 
     <x-animate.fade-in class="w-full max-sm:flex-1" delay="200ms">
         @include('components.partials.auth.register-form', [
+            'title' => '',
+            'desc' => '',
             'submit' => 'next',
             'type' => $type,
             'shadowed' => true,
             'bordered' => true,
         ])
-    </x-animate.fade-in>
-
-    <x-animate.fade-in class="flex w-full justify-end" delay="400ms">
-        <x-button class="btn-wide" type="submit" label="Buat Akun"
-            form="registerForm" shadowed />
     </x-animate.fade-in>
 </div>

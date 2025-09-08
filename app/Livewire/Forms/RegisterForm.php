@@ -16,6 +16,7 @@ class RegisterForm extends Form
     public function initialize(string $type): void
     {
         $this->data = [
+            'id' => null,
             'name' => null,
             'email' => null,
             'password' => null,
@@ -37,7 +38,7 @@ class RegisterForm extends Form
         $this->validate([
             'data.name' => 'required|string|min:5|max:250',
             'data.email' => 'required|email|unique:users,email,' . $this->data['id'] ?? '',
-            'data.password' => ['required', 'confirmed', setting()->isDev() ? Password::bad() : Password::medium()],
+            'data.password' => ['required', 'confirmed', Password::auto()],
             'data.type' => 'required|string|in:' . implode(',', User::getRolesOptions())
         ], attributes: [
             'data.name' => 'nama pengguna',
@@ -54,7 +55,10 @@ class RegisterForm extends Form
         $this->data['password_confirmation'] = Hash::make($this->data['password_confirmation']);
 
         $res = app(AuthService::class)->register($this->data);
-        $this->reset();
+
+        if ($this->data['type'] !== 'student') {
+            $this->reset();
+        }
 
         return $res;
     }

@@ -2,13 +2,18 @@
 
 namespace App\Helpers;
 
-class Support 
+use Illuminate\Database\Eloquent\Model;
+
+class Support
 {
     /**
-     * Class constructor.
+     * @param array $attributes
+     * @param string<class-string> $model
+     *
+     * @return array
      */
-    public function __construct()
+    public static function filterFillable(array $attributes, string $model): array
     {
-        //
+        return array_intersect_key($attributes, array_flip(app($model)->getFillable()));
     }
 }

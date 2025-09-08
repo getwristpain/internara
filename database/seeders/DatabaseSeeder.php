@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
     {
         if (setting()->isDev()) {
             $this->call([
+                UsersSeeder::class,
                 SchoolSeeder::class,
                 DepartmentSeeder::class,
                 ProgramSeeder::class,

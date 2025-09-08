@@ -41,4 +41,13 @@ class Generator extends Helper
             ? implode('-', [$datetime, $finalKey])
             : $finalKey;
     }
+
+    public static function username(string $prefix = 'u', int $numDigit = 8): string
+    {
+        $prefix = strtolower(trim($prefix));
+
+        return empty($prefix)
+            ? fake()->unique()->randomNumber($numDigit, true)
+            : implode('_', [$prefix, fake()->unique()->randomNumber($numDigit, true)]);
+    }
 }

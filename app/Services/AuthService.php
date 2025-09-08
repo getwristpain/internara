@@ -7,49 +7,45 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 
 class AuthService extends UserService
 {
-    public function login(array $data)
+    public function login(array $data): LogicResponse
     {
-        $key = 'login:' . str($data['username'] ?? '')->lower()->slug()->toString();
-        $field = filter_var($data['username'], FILTER_VALIDATE_EMAIL)
+        $identifier = $data['id'] ?? $data['username'] ?? $data['email'];
+
+        $key = 'login:' . str($identifier ?? '')->lower()->slug()->toString();
+        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL)
             ? 'email' : 'username';
 
-        $login = Auth::attempt([
-            $field => $data['username'],
-            'password' => $data['password']
-        ], $data['remember']);
+        $login = isset($data['id'])
+            ? Auth::loginUsingId($identifier, $data['remember'] ?? false)
+            : Auth::attempt([
+                $field => $identifier,
+                'password' => $data['password']
+            ], $data['remember'] ?? false);
 
-
-        if ($login) {
+        if ((bool) $login ?? false) {
             session()->regenerate();
             RateLimiter::clear($key);
-
-            $user = auth()->user();
-            $user->hasRole('owner')
-                ? redirect()->intended('/admin')
-                : redirect()->intended('/dashboard');
         }
-
 
         return LogicResponse::make()
             ->failWhen($this->ensureNotRateLimited($key))
             ->then(fn ($res) => $res->decide(
-                $login,
-                'Selamat datang kembali!',
-                'Gagal untuk masuk.'
+                (bool) $login ?? false,
+                'Berhasil masuk',
+                'Gagal untuk masuk'
             ));
     }
 
     public function register(array $data): LogicResponse
     {
-        $key = "register:" . str($data['email'] ?? $data['username'] ?? $data['name'] ?? '')->lower()->slug()->toString();
+        $key = "register:" . str($data['email'] ?? $data['name'] ?? '')->lower()->slug()->toString();
 
         return $this->response()
             ->failWhen($this->ensureNotRateLimited($key))
-            ->then($this->storeUser($data));
+            ->then($this->store($data));
     }
 
     public function sendPasswordResetLink(string $email): LogicResponse

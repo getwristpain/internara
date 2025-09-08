@@ -7,8 +7,12 @@ use Illuminate\Validation\Rules\Password as PasswordRules;
 
 class Password extends PasswordRules
 {
-    public static function default(int $min = 8): static
+    public static function auto(int $min = 8): static
     {
+        if (!setting()->isDev()) {
+            return static::medium($min);
+        }
+
         return static::bad($min);
     }
 
@@ -17,10 +21,6 @@ class Password extends PasswordRules
      */
     public static function bad(int $min = 8): static
     {
-        if (!setting()->isDev()) {
-            return static::medium($min);
-        }
-
         return static::min($min);
     }
 

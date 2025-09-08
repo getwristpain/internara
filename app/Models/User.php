@@ -3,21 +3,26 @@
 namespace App\Models;
 
 use App\Traits\HasStatuses;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasRoles;
     use HasStatuses;
     use HasUuids;
+    use MustVerifyEmail;
     use Notifiable;
 
     /**
@@ -30,6 +35,7 @@ class User extends Authenticatable
         'email',
         'username',
         'password',
+        'avatar_url',
     ];
 
     /**
@@ -63,7 +69,8 @@ class User extends Authenticatable
             'admin',
             'teacher',
             'student',
-            'supervisor'
+            'supervisor',
+            'guest'
         ];
     }
 
@@ -104,5 +111,20 @@ class User extends Authenticatable
     public function statuses(): MorphToMany
     {
         return $this->morphToMany(Status::class, 'statusable');
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin() || $this->isOwner();
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar_url ?? null;
     }
 }

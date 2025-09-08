@@ -16,32 +16,39 @@ class StatusesSeeder extends Seeder
         $statuses = [
             'user' => [
                 [
+                    'name' => 'pending-activation',
+                    'color' => 'yellow',
+                    'icon' => 'ri-time-line',
+                ],
+                [
                     'name' => 'protected',
-                    'color' => 'success'
+                    'color' => 'primary',
+                    'icon' => 'gmdi-admin-panel-settings-o',
                 ],
                 [
                     'name' => 'verified',
-                    'color' => 'success'
+                    'color' => 'blue',
+                    'icon' => 'ri-verified-badge-line',
                 ],
                 [
                     'name' => 'active',
-                    'color' => 'info'
+                    'color' => 'green',
+                    'icon' => 'heroicon-o-check-circle',
                 ],
                 [
                     'name' => 'inactive',
                     'color' => 'muted',
+                    'icon' => 'heroicon-o-x-circle',
                 ],
                 [
                     'name' => 'banned',
-                    'color' => 'danger'
+                    'color' => 'red',
+                    'icon' => 'fas-ban',
                 ],
                 [
-                    'name' => 'pending-activation',
-                    'color' => 'warning',
-                ],
-                [
-                    'name' => 'archieved',
-                    'color' => 'secondary'
+                    'name' => 'archived',
+                    'color' => 'secondary',
+                    'icon' => 'heroicon-o-archive-box',
                 ],
             ]
         ];

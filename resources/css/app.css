@@ -55,6 +55,10 @@
     @apply text-gray-500 md:text-lg lg:text-xl;
 }
 
+@utility text-link {
+    @apply transition ease-in-out duration-150 hover:underline;
+}
+
 @utility scrollbar-hidden {
     scrollbar-width: none;
 

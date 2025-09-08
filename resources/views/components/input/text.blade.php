@@ -51,17 +51,15 @@
 
 <div class="{{ $class }}">
     @isset($label)
-        <x-label for="{{ $id }}" :$hint
-            :$required>{{ $label }}</x-label>
+        <x-label for="{{ $id }}" :$hint :$required>{{ $label }}</x-label>
     @endisset
 
     <div class="relative flex w-full items-center">
         @if ($type === 'textarea' || $type === 'address')
             <textarea
                 class="input glass {{ $hasErrors ? 'border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none' : 'focus:ring-1 focus:ring-neutral-200 focus:outline-none' }} min-h-24 w-full text-wrap rounded-xl !border p-2 pl-8 disabled:border-neutral-500 disabled:bg-neutral-200 disabled:text-neutral-400"
-                id="{{ $id }}" wire:model="{{ $field }}"
-                type="{{ $type }}" placeholder="{{ $placeholder }}"
-                {{ $required }} {{ $autofocus }} {{ $disabled }}
+                id="{{ $id }}" wire:model="{{ $field }}" autocomplete="{{ $id }}" type="{{ $type }}"
+                placeholder="{{ $placeholder }}" {{ $required }} {{ $autofocus }} {{ $disabled }}
                 wire:target="{{ $field }}"></textarea>
 
             <iconify-icon
@@ -70,10 +68,9 @@
         @else
             <input
                 class="input glass {{ $hasErrors ? 'border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none' : 'focus:ring-1 focus:ring-neutral-200 focus:outline-none' }} w-full rounded-xl !border pl-8 disabled:border-neutral-500 disabled:bg-neutral-200 disabled:text-neutral-400"
-                id="{{ $id }}" wire:model="{{ $field }}"
-                type="{{ $type }}" placeholder="{{ $placeholder }}"
-                {{ $required }} {{ $autofocus }} {{ $disabled }}
-                wire:target="{{ $field }}" />
+                id="{{ $id }}" wire:model="{{ $field }}" autocomplete="{{ $id }}"
+                type="{{ $type }}" placeholder="{{ $placeholder }}" {{ $required }} {{ $autofocus }}
+                {{ $disabled }} wire:target="{{ $field }}" />
 
             <iconify-icon
                 class="z-2 absolute left-3 top-1/2 -translate-y-1/2 transform text-center text-sm text-neutral-400"

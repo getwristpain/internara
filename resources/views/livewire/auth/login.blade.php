@@ -7,35 +7,39 @@ title('Masuk | ' . setting()->cached('brand_name'));
 form(App\Livewire\Forms\LoginForm::class);
 
 $login = function () {
-    $this->form->submit();
+    $res = $this->form->submit();
+    if ($res->fails()) {
+        flash()->error($res->getMessage());
+        return;
+    }
+
+    if (auth()->user()->hasRole('admin')) {
+        $this->redirectIntended('/admin', navigate: true);
+    } else {
+        $this->redirectIntended('/dashboard', navigate: true);
+    }
 };
 
 ?>
 
-<div
-    class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-12">
+<div class="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-12">
     <div class="w-full space-y-1 text-center">
-        <x-animate.fade-in>
+        <x-animate>
             <h1 class="text-head">
                 Selamat Datang Kembali!
             </h1>
-        </x-animate.fade-in>
+        </x-animate>
 
-        <x-animate.fade-in>
+        <x-animate delay="200ms">
             <p class="text-subhead">
                 Masuk dan kelola aktivitas PKL Anda dengan aman.
             </p>
-        </x-animate.fade-in>
+        </x-animate>
     </div>
 
-    <div class="w-full">
+    <x-animate class="w-full" delay="400ms">
         @include('components.partials.auth.login-form', [
             'submit' => 'login',
         ])
-    </div>
-
-    <div class="flex w-full items-center justify-end">
-        <x-button shadowed type="submit" form="loginForm"
-            label="Masuk"></x-button>
-    </div>
+    </x-animate>
 </div>

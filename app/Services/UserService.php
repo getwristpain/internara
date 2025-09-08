@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Helpers\Generator;
 use App\Helpers\LogicResponse;
+use App\Helpers\Support;
 use App\Models\User;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\Hash;
@@ -11,17 +13,19 @@ use Illuminate\Validation\ValidationException;
 
 class UserService extends BaseService
 {
-    public function storeUser(array $data): LogicResponse
+    public function store(array $data): LogicResponse
     {
-        $type = $data['type'];
+        $type = $data['type'] ?? 'guest';
 
-        $this->ensureUsernameFilled($data['username'], $data['email'], $data['id']);
+        $this->ensureUsernameFilled($type, $data['username'], $data['id']);
         $this->ensurePasswordHashed($data['password']);
 
         $storedUser = $data['type'] === 'owner'
-            ? User::updateOrCreate(['id' => $data['id'] ?? ''], $data)
-            : User::create($data);
+            ? User::updateOrCreate(['id' => $data['id'] ?? ''], Support::filterFillable($data, User::class))
+            : User::create(Support::filterFillable($data, User::class));
+
         $storedUser->syncRoles($type === 'owner' ? ['owner', 'admin'] : $type);
+        $storedUser->syncStatuses($type === 'owner' ? 'protected' : 'pending-activation', 'user');
 
         return $this->response()->decide(
             (bool) $storedUser ?? false,
@@ -30,9 +34,17 @@ class UserService extends BaseService
         );
     }
 
-    public function ensureUsernameFilled(?string &$ref, ?string $default, string|int|null $id = null): void
+    public function ensureUsernameFilled(string $type, ?string &$ref, string|int|null $id = null): void
     {
-        $ref ??= $default;
+        $prefix = match ($type) {
+            'admin', 'owner' => 'adm',
+            'student' => 'st',
+            'teacher' => 'te',
+            'supervisor' => 'sv',
+            default => 'u',
+        };
+
+        $ref ??= Generator::username($prefix);
 
         $validator = Validator::make(
             data: ['username' => $ref],

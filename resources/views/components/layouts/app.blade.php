@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html data-theme="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('components.layouts.layout')
 
-    <head>
-        @include('components.partials.layouts.head')
-    </head>
+@section('content')
+    <x-bg-decoration />
 
-    <body class="min-wh-screen max-w-screen overflow-x-hidden font-sans text-neutral antialiased">
-        @yield('content')
-        @stack('scripts')
-    </body>
+    <div class="wh-full flex min-h-screen gap-8">
+        @include('components.partials.layouts.auth.sidebar')
 
-</html>
+        <main class="flex flex-1 flex-col gap-8">
+            {{ $slot }}
+        </main>
+    </div>
+@endsection

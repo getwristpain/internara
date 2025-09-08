@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\Generator;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -16,8 +17,8 @@ class OwnerSeeder extends Seeder
     {
         $user = [
             'name' => 'Administrator',
-            'email' => 'admin@example.com',
-            'username' => 'admin',
+            'email' => 'superadmin@example.com',
+            'username' => Generator::username('ad', 8),
             'password' => Hash::make('password'),
         ];
 
