@@ -38,9 +38,10 @@ class SchoolFactory extends Factory
             'telp' => fake()->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
             'fax' => fake()->regexify('0[0-9]{3}-[0-9]{4}-[0-9]{4}'),
             'address' => $address,
+            'postal_code' => fake()->unique()->randomNumber(nbDigits: 6, strict: true),
             'principal_name' => fake()->name(),
             'website' => $web,
-            'logo_path' => config('app.logo'),
+            'logo' => config('app.logo'),
         ];
     }
 }

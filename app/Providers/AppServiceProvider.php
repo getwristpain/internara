@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,5 +28,7 @@ class AppServiceProvider extends ServiceProvider
         foreach (glob(app_path('Helpers/Functions/*.php')) as $file) {
             require_once $file;
         }
+
+        Blade::directive('css', fn ($expression) => "<?php echo e(css($expression)); ?>");
     }
 }

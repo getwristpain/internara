@@ -2,13 +2,9 @@
 
 @section('content')
     <x-bg-decoration />
+    <x-navbar home_url="#" fixed />
 
-    @include('components.partials.layouts.guest.navbar', [
-        'fixed' => true,
-        'home_url' => '#',
-    ])
-
-    <main class="wh-full container mx-auto flex min-h-screen flex-col p-4">
+    <main class="wh-full container mx-auto flex min-h-screen flex-col p-4 md:p-8">
         {{ $slot }}
     </main>
 @endsection

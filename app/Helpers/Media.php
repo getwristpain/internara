@@ -43,6 +43,7 @@ class Media extends Helper
         } catch (\Throwable $th) {
             $instance->response = $instance->response()
                 ->error("Gagal mengunggah berkas.")
+                ->withCode('ERROR_UPLOAD_FAILED')
                 ->debug($th);
         }
 

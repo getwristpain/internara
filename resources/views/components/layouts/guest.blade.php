@@ -1,13 +1,13 @@
 @extends('components.layouts.layout')
 
 @section('content')
-    <x-bg-decoration />
+    <x-ui.bg-decoration />
 
-    @include('components.partials.layouts.guest.navbar', [
-        'fixed' => true,
-    ])
+    <header class="w-full">
+        <x-ui.navbar fixed />
+    </header>
 
-    <main class="wh-full container mx-auto flex min-h-screen flex-col p-4">
+    <main class="wh-full container mx-auto flex min-h-screen flex-col p-4 md:p-8 lg:p-12">
         {{ $slot }}
     </main>
 @endsection

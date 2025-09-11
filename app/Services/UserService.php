@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Helpers\Generator;
 use App\Helpers\LogicResponse;
-use App\Helpers\Support;
+use App\Helpers\Helper;
 use App\Models\User;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class UserService extends BaseService
 {
-    public function store(array $data): LogicResponse
+    public function save(array $data): LogicResponse
     {
         $type = $data['type'] ?? 'guest';
 
@@ -21,8 +21,8 @@ class UserService extends BaseService
         $this->ensurePasswordHashed($data['password']);
 
         $storedUser = $data['type'] === 'owner'
-            ? User::updateOrCreate(['id' => $data['id'] ?? ''], Support::filterFillable($data, User::class))
-            : User::create(Support::filterFillable($data, User::class));
+            ? User::updateOrCreate(['id' => $data['id'] ?? ''], Helper::filterFillable($data, User::class))
+            : User::create(Helper::filterFillable($data, User::class));
 
         $storedUser->syncRoles($type === 'owner' ? ['owner', 'admin'] : $type);
         $storedUser->syncStatuses($type === 'owner' ? 'protected' : 'pending-activation', 'user');

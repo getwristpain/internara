@@ -34,8 +34,8 @@ $next = function () {
 
 ?>
 
-<div class="mx-auto flex max-w-4xl flex-1 flex-col items-center justify-center gap-12 pt-16 lg:pt-0">
-    <div class="w-full space-y-1">
+<div class="mx-auto flex max-w-6xl flex-1 flex-col items-center justify-center gap-12 pt-8 lg:pt-0">
+    <div class="w-full space-y-1 text-center">
         <x-animate.fade-in>
             <h1 class="text-head">
                 Buat Akun Administrator
@@ -44,16 +44,15 @@ $next = function () {
 
         <x-animate.fade-in delay="200ms">
             <p class="text-subhead">
-                Kendalikan sistem dengan akun pusat dan kelola data secara
-                penuh.
+                Kendalikan sistem dengan akun pusat dan kelola data secara penuh.
             </p>
         </x-animate.fade-in>
     </div>
 
     <x-animate.fade-in class="w-full max-sm:flex-1" delay="200ms">
         @include('components.partials.auth.register-form', [
-            'title' => '',
-            'desc' => '',
+            'title' => 'Registrasi Akun',
+            'desc' => 'Akun utama untuk mengelola seluruh data sistem.',
             'submit' => 'next',
             'type' => $type,
             'shadowed' => true,

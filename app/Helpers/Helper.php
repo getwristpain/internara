@@ -4,6 +4,18 @@ namespace App\Helpers;
 
 class Helper
 {
+    /**
+     * @param array $attributes
+     * @param string<class-string> $model
+     *
+     * @return array
+     */
+    public static function filterFillable(array $attributes, string $model): array
+    {
+        $attributes = array_filter($attributes, fn ($i) => $i !== '' && $i !== null);
+        return array_intersect_key($attributes, array_flip(app($model)->getFillable()));
+    }
+
     public function response(string $type = '', string $message = ''): LogicResponse
     {
         if (!empty($type)) {

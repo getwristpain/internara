@@ -35,7 +35,7 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'username',
         'password',
-        'avatar_url',
+        'avatar',
     ];
 
     /**
@@ -44,7 +44,6 @@ class User extends Authenticatable implements FilamentUser
      * @var list<string>
      */
     protected $hidden = [
-        'id',
         'password',
         'remember_token',
     ];
@@ -115,7 +114,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function profile(): HasOne
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->hasOne(Profile::class);
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -125,6 +124,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar_url ?? null;
+        return $this->avatar ?? null;
     }
 }

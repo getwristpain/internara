@@ -9,6 +9,12 @@ if (! function_exists('setting')) {
      */
     function setting(string|array|null $keys = null, mixed $value = null, mixed $default = null): mixed
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Throwable $th) {
+            return null;
+        }
+
         $service = app(SettingService::class);
 
         if ($value !== null || (is_array($keys) && Arr::isAssoc($keys))) {

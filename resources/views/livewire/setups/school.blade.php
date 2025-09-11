@@ -31,7 +31,7 @@ $next = function () {
 
 ?>
 
-<div class="grid flex-1 grid-cols-1 gap-12 pt-16 lg:grid-cols-2">
+<div class="grid flex-1 grid-cols-1 gap-12 pt-8 lg:grid-cols-2">
     <div class="order-1 w-full space-y-1 lg:order-2 lg:pt-12">
         <x-animate.fade-in>
             <h1 class="text-head">
@@ -47,19 +47,16 @@ $next = function () {
         </x-animate.fade-in>
     </div>
 
-    <x-animate.fade-in class="order-2 row-span-3 w-full lg:order-1"
-        delay="200ms">
+    <x-animate.fade-in class="order-2 row-span-3 w-full lg:order-1" delay="200ms">
         @include('components.partials.school.school-form', [
             'submit' => 'next',
             'bordered' => true,
             'shadowed' => true,
-            'logo_preview' => $form->data['logo_path'],
+            'hideActions' => true,
         ])
     </x-animate.fade-in>
 
-    <x-animate.fade-in class="order-3 flex justify-end lg:justify-start"
-        delay="400ms">
-        <x-button class="btn-wide" label="Simpan & Lanjutkan" type="submit"
-            form="schoolForm" shadowed />
+    <x-animate.fade-in class="order-3 flex justify-end lg:justify-start" delay="400ms">
+        <x-button label="Simpan & Lanjutkan" type="submit" form="schoolForm" shadowed />
     </x-animate.fade-in>
 </div>

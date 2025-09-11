@@ -3,10 +3,9 @@
 namespace Database\Seeders;
 
 use App\Helpers\Generator;
-use App\Helpers\Support;
+use App\Helpers\Helper;
 use App\Models\User;
 use Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UsersSeeder extends Seeder
@@ -58,7 +57,7 @@ class UsersSeeder extends Seeder
         foreach ($users as $user) {
             $createdUser = User::updateOrCreate(
                 ['email' => $user['email']],
-                Support::filterFillable($user, User::class)
+                Helper::filterFillable($user, User::class)
             );
 
             $createdUser->assignRole($user['roles'] ?? 'guest');

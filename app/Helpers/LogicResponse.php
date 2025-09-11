@@ -205,6 +205,16 @@ class LogicResponse
         return $this->initialized && $this->success === false && $this->errors && $this->errors->isNotEmpty();
     }
 
+    public function hasStatus(string|int|null $status): bool
+    {
+        return (bool) $this->status === $status;
+    }
+
+    public function hasStatusCode(string|int|null $code): bool
+    {
+        return (bool) $this->code === $code;
+    }
+
     /** ===== Logging ===== */
     public function storeLog(string $level = ''): static
     {

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Helper;
 use App\Helpers\Media;
 use App\Models\School;
 use App\Services\BaseService;
@@ -33,7 +34,10 @@ class SchoolService extends BaseService
     public function store(array $data): LogicResponse
     {
         $school = app(School::class);
-        $stored = $school->updateOrCreate(['id' => $data['id']], array_filter($data, fn ($item) => $item !== null));
+        $stored = $school->updateOrCreate(
+            ['id' => $data['id']],
+            Helper::filterFillable($data, School::class)
+        );
 
         return $this->response()
             ->decide(

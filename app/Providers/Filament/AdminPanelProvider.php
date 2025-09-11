@@ -25,10 +25,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->profile()
-            ->brandName(setting('brand_name', default: config('app.name')))
-            ->brandLogo(asset(setting('brand_logo', default: config('app.logo'))))
-            ->favicon(asset(setting('brand_logo', default: config('app.logo'))))
+            ->brandName(setting()?->cached('brand_name', config('app.name')))
+            ->brandLogo(asset(setting()?->cached('brand_logo', config('app.logo')) ?? ''))
+            ->favicon(asset(setting()?->cached('brand_logo', config('app.logo')) ?? ''))
             ->darkMode()
             ->font(
                 'Rethink Sans',

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\LogicResponse;
 use App\Models\Setting;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
@@ -21,18 +22,22 @@ class SettingService
                 ->pluck('value', 'key');
 
             return collect($keys)
-                ->mapWithKeys(function ($key) use ($models) {
-                    if ($key === 'brand_name' && !$this->isInstalled()) {
-                        return [$key => config('app.name')];
+                ->mapWithKeys(function ($key) use ($models, $default) {
+                    if (!$this->isInstalled() && str_starts_with($key, 'brand_')) {
+                        return match ($key) {
+                            'brand_name' => config('app.name'),
+                            'brand_logo' => config('app.logo'),
+                            default => null,
+                        };
                     }
 
-                    if ($key === 'brand_logo' && !$this->isInstalled()) {
-                        return [$key => config('app.logo')];
+                    if (is_array($default) && empty($models[$key]) && isset($default[$key])) {
+                        return [$key => $default['key']];
                     }
 
                     return [$key => $models[$key]];
                 })
-                ->toArray() ?? $default;
+                ->toArray() ?? [];
         }
 
         if ($keys === 'brand_name' && !$this->isInstalled()) {

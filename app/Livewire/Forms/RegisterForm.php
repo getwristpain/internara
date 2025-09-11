@@ -36,7 +36,7 @@ class RegisterForm extends Form
     {
         $this->resetValidation();
         $this->validate([
-            'data.name' => 'required|string|min:5|max:250',
+            'data.name' => 'required|string|max:50',
             'data.email' => 'required|email|unique:users,email,' . $this->data['id'] ?? '',
             'data.password' => ['required', 'confirmed', Password::auto()],
             'data.type' => 'required|string|in:' . implode(',', User::getRolesOptions())

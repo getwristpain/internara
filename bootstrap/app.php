@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware
             ->web([
-                App\Http\Middleware\EnsureInstalled::class,
+                App\Http\Middleware\EnsureAppInstalled::class,
                 App\Http\Middleware\CheckUserStatus::class,
             ])
             ->alias([

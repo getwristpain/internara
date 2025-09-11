@@ -17,9 +17,10 @@ return new class () extends Migration {
             $table->string('telp')->nullable();
             $table->string('fax')->nullable();
             $table->text('address')->nullable();
+            $table->string('postal_code')->nullable();
             $table->string('principal_name')->nullable();
             $table->string('website')->nullable();
-            $table->string('logo_path')->nullable();
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }

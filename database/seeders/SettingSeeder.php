@@ -44,7 +44,7 @@ class SettingSeeder extends Seeder
             ],
             [
                 'key' => 'is_installed',
-                'value' => true,
+                'value' => false,
                 'label' => 'Aplikasi Terinstal',
             ],
         ];

@@ -23,8 +23,9 @@ class School extends Model
         'telp',
         'fax',
         'address',
+        'postal_code',
         'principal_name',
         'website',
-        'logo_path',
+        'logo',
     ];
 }

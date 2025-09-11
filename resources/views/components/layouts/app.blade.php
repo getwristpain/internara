@@ -4,7 +4,7 @@
     <x-bg-decoration />
 
     <div class="wh-full flex min-h-screen">
-        @include('components.partials.layouts.auth.sidebar')
+        <x-sidebar />
 
         <main class="wh-full flex flex-1 flex-col">
             {{ $slot }}

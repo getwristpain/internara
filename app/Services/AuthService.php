@@ -45,7 +45,7 @@ class AuthService extends UserService
 
         return $this->response()
             ->failWhen($this->ensureNotRateLimited($key))
-            ->then($this->store($data));
+            ->then($this->save($data));
     }
 
     public function sendPasswordResetLink(string $email): LogicResponse
