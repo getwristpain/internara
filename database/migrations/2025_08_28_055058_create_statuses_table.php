@@ -24,10 +24,12 @@ return new class () extends Migration {
         Schema::create('statusables', function (Blueprint $table) {
             $table->id();
             $table->foreignId('status_id')->constrained()->cascadeOnDelete();
-            $table->morphs('statusable');
+            $table->string('statusable_id');
+            $table->string('statusable_type');
             $table->timestamps();
 
-            $table->unique(['status_id', 'statusable_id', 'statusable_type'], 'statusables_unique');
+            $table->index(['statusable_id', 'statusable_type']);
+            $table->unique(['status_id', 'statusable_id', 'statusable_type']);
         });
     }
 
