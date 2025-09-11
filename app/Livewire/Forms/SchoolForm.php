@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Helpers\Media;
 use Livewire\Form;
 use App\Models\School;
 use App\Helpers\LogicResponse;
@@ -18,7 +19,7 @@ class SchoolForm extends Form
         $this->data = array_merge(
             $school->toArray(),
             [
-                'logo' => $school?->logo ? asset($school?->logo) : null,
+                'logo' => Media::asset($school?->logo),
                 'logo_file' => null
             ]
         );

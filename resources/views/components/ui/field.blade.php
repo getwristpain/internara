@@ -43,7 +43,7 @@
     @endif
 
     {{-- Input --}}
-    <div class="container">
+    <div class="container" wire:key="{{ $name }}">
         @if ($componentExists)
             @includeif("components.ui.form.{$type}", [
                 'name' => $name,

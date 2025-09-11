@@ -7,16 +7,15 @@
 ])
 
 @php
-    $labelClass = 'label flex-wrap pl-2 gap-0 text-sm text-neutral-800';
-    $class = implode(' ', array_values(array_filter([$labelClass, $class])));
+    $required = $required ? 'required' : '';
 
-    $style['required'] = $required ? 'required' : '';
+    $class = css($class, 'label flex-wrap pl-2 gap-0 text-sm text-neutral-800');
 @endphp
 
 <label class="{{ $class }}" for="{{ $for }}">
     <div class="flex space-x-0">
         <span>{{ $slot }}</span>
-        <span class="{{ $style['required'] }}"></span>
+        <span class="{{ $required }}"></span>
     </div>
 
     @isset($hint)

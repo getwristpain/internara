@@ -15,8 +15,12 @@ class Media extends Helper
 
     protected ?array $meta = null;
 
-    public static function asset(string $url): string
+    public static function asset(?string $url): ?string
     {
+        if ($url === null) {
+            return null;
+        }
+
         return str_starts_with($url, 'http') || str_starts_with($url, 'www')
             ? $url : asset($url);
     }

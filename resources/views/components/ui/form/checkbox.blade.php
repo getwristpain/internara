@@ -1,49 +1,42 @@
 @props([
+    'attributes' => [],
+    'name' => '',
     'field' => '',
     'label' => null,
     'hint' => null,
     'required' => false,
+    'disabled' => false,
     'class' => '',
     'style' => [],
 ])
 
 @php
-    // Normalisasi ID
-    $id = str($field)->replace('.', '_')->snake()->toString();
-
-    // Error state
     $hasErrors = $errors->has($field);
 
-    // Wrapper style (unifikasi jadi 1 level)
-    $style['component'] = [
-        'container' => 'py-2 pl-1 flex items-center gap-2',
+    $style = [
+        'base' => css('py-2 pl-1 flex items-center gap-1 flex-nowrap'),
+        'input' => css('checkbox checkbox-xs checkbox-neutral focus:outline-neutral', [
+            'border-red-500 focus:outline-red-500' => $hasErrors,
+        ]),
+        'label' => css('truncate'),
     ];
 
-    // Input style
-    $style['input'] = [
-        'base' => 'checkbox checkbox-xs checkbox-neutral',
-        'focus' => 'focus:outline-neutral',
-        'error' => $hasErrors ? 'border-red-500 focus:outline-red-500' : '',
-    ];
-
-    // Format class strings
-    $componentClass = trim($class . ' ' . implode(' ', array_values($style['component'])));
-    $inputClass = trim(implode(' ', array_values($style['input'])));
+    $class = css($class, $style['base']);
 @endphp
 
-<div class="{{ $componentClass }}">
-    <div class="flex items-center">
-        <input class="{{ $inputClass }}" id="{{ $id }}" type="checkbox" wire:model="{{ $field }}"
-            {{ $required ? 'required' : '' }} />
+<div class="{{ $class }}">
+    <input class="{{ $style['input'] ?? '' }}" id="{{ $name }}" name="{{ $name }}" type="checkbox"
+        wire:model.live="{{ $field }}"
+        {{ $attributes->merge([
+            'required' => $required,
+            'disabled' => $disabled,
+        ]) }} />
 
-        @isset($label)
-            <x-label for="{{ $id }}" :required="$required" :$hint>
+    @isset($label)
+        <x-ui.label for="{{ $name }}" :$required :$hint>
+            <span class="{{ $style['label'] ?? '' }}">
                 {{ $label }}
-            </x-label>
-        @endisset
-    </div>
-
-    @if ($hasErrors)
-        <x-input.errors :$field />
-    @endif
+            </span>
+        </x-ui.label>
+    @endisset
 </div>

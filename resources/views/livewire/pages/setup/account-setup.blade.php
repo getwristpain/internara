@@ -1,6 +1,6 @@
 <?php
 
-use function Livewire\Volt\{state, layout, title, form, mount, protect};
+use function Livewire\Volt\{state, layout, title, form, mount, protect, updated};
 
 state([
     'type' => 'owner',
@@ -18,6 +18,10 @@ mount(function () {
     $this->checkValue = $this->form->data['email'];
 });
 
+updated([
+    'form.data' => fn() => dd($this->form->data),
+]);
+
 $checkReqSteps = protect(function () {
     $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:welcome');
 
@@ -28,18 +32,16 @@ $checkReqSteps = protect(function () {
 });
 
 $next = function () {
-    $this->form->data['email'] = 'clicked';
+    $res = App\Helpers\LogicResponse::make()
+        ->failWhen($this->form->submit())
+        ->then(app(App\Services\SetupService::class)->perform('setup:account'));
 
-    // $res = App\Helpers\LogicResponse::make()
-    //     ->failWhen($this->form->submit())
-    //     ->then(app(App\Services\SetupService::class)->perform('setup:account'));
-
-    // $res->passes() ? $this->redirectRoute('setup.school', navigate: true) : flash()->error($res->getMessage());
+    $res->passes() ? $this->redirectRoute('setup.school', navigate: true) : flash()->error($res->getMessage());
 };
 
 ?>
 
-<div class="mx-auto flex max-w-6xl flex-1 flex-col items-center justify-center gap-12 pt-8 lg:pt-0">
+<div class="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-12 max-md:pt-12 lg:items-center">
     <div class="w-full space-y-1 text-center">
         <x-ui.animate>
             <h1 class="text-head">
@@ -54,7 +56,7 @@ $next = function () {
         </x-ui.animate>
     </div>
 
-    <x-ui.animate class="w-full max-sm:flex-1" delay="200ms">
+    <x-ui.animate class="w-full" delay="200ms">
         @include('components.partials.auth.register-form', [
             'submit' => 'next',
             'bordered' => true,

@@ -12,7 +12,7 @@
     <x-ui.animate class="w-full">
         <x-ui.form :$name :$submit :$title :$desc :$shadowed :$bordered>
             <div class="flex w-full flex-col gap-4">
-                <div class="grid w-full grid-cols-1 gap-x-4 lg:grid-cols-2" x-data x-init="$watch('$wire.form.data.password', value => $wire.form.data.password_confirmation = value)">
+                <div class="grid w-full grid-cols-1 gap-x-4 lg:grid-cols-2">
                     <x-ui.field type="name" field="form.data.name" label="Nama" placeholder="Masukkan nama pengguna..."
                         required :disabled="$type === 'owner'" />
                     <x-ui.field type="email" field="form.data.email" label="Email"
@@ -23,7 +23,7 @@
                         placeholder="Konfirmasi Kata Sandi..." required />
                 </div>
 
-                @if ($type === 'student')
+                @if ($type !== 'owner')
                     <div class="flex flex-col items-center py-4">
                         <x-ui.button type="link" label="Sudah punya akun? Masuk" action="login" />
                     </div>

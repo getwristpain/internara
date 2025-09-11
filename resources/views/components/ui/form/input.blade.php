@@ -14,9 +14,6 @@
 ])
 
 @php
-    // Default fallback dari field
-    $name ??= str($field)->replace('.', '_')->snake()->toString();
-
     // Error state
     $hasErrors = $errors->has($field);
 
@@ -64,7 +61,7 @@
     $class = css($class, $style['base']);
 @endphp
 
-<div class="{{ $class }}" x-data="{ value: @entangle($field).live }">
+<div class="{{ $class }}">
     @if ($type === 'textarea' || $type === 'address')
         <textarea
             {{ $attributes->merge([
@@ -79,7 +76,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            x-model="value" x-on:blur="$wire.set('{{ $field }}', value)"></textarea>
+            wire:model.live="{{ $field }}"></textarea>
 
         <iconify-icon class="{{ $style['icon']['textarea'] }}" icon="{{ $icon }}"></iconify-icon>
     @else
@@ -96,7 +93,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            x-model="value" />
+            wire:model.live="{{ $field }}" />
 
         <iconify-icon class="{{ $style['icon']['input'] }}" icon="{{ $icon }}"></iconify-icon>
     @endif
