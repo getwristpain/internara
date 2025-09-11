@@ -1,4 +1,18 @@
-<div class="mx-auto flex max-w-6xl flex-1 flex-col items-center justify-center gap-12">
+<?php
+
+use function Livewire\Volt\{layout, title};
+
+layout('components.layouts.guest');
+title('Selamat Datang | ' . config('app.description'));
+
+$next = function () {
+    $res = app(App\Services\SetupService::class)->perform('setup:welcome');
+    $res->passes() ? $this->redirectRoute('setup.account', navigate: true) : flash()->error($res->getMessage());
+};
+
+?>
+
+<div class="flex flex-1 flex-col items-center justify-center gap-12">
     <x-ui.animate class="w-full lg:hidden">
         <figure class="flex flex-col items-center justify-center">
             <img class="w-full max-w-lg" src="{{ asset('images/drawkit/teamworks/teamwork-5.svg') }}"
@@ -16,14 +30,14 @@
         <div class="space-y-1 text-center">
             <x-ui.animate>
                 <h1 class="text-head">
-                    Fokus pada Siswa, Demi Pengalaman PKL yang Bermakna ❤️✨
+                    Bantu Sekolah Anda Bekerja Lebih Cerdas
                 </h1>
             </x-ui.animate>
 
             <x-ui.animate delay="200ms">
                 <p class="text-subhead">
-                    Dengan sistem yang rapi dan efisien, {{ $shared->settings['brand_name'] }} mendukung sekolah menjaga
-                    kualitas PKL agar benar-benar memberi nilai tambah bagi perkembangan siswa.
+                    Bangun fondasi digital yang rapi dan efisien untuk mendukung
+                    kegiatan Praktek Kerja Lapangan.
                 </p>
             </x-ui.animate>
         </div>

@@ -2,6 +2,7 @@
     'home_url' => '/',
     'type' => 'glass',
     'fixed' => false,
+    'class' => '',
     'style' => [],
 ])
 
@@ -14,9 +15,11 @@
         'content' => css('container mx-auto'),
         'menu' => css('flex items-center justify-between gap-4'),
     ];
+
+    $class = css($class, $style['base']);
 @endphp
 
-<nav class="{{ $style['base'] }}">
+<nav class="{{ $class }}">
     {{-- Content --}}
     <div class="{{ $style['content'] }}">
         {{-- Brand --}}

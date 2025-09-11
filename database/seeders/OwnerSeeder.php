@@ -15,12 +15,15 @@ class OwnerSeeder extends Seeder
      */
     public function run(): void
     {
+
         $user = [
             'name' => 'Administrator',
-            'email' => 'superadmin@example.com',
+            'email' => 'owner@example.com',
             'username' => Generator::username('ad', 8),
             'password' => Hash::make('password'),
         ];
+
+        User::role('owner')->delete();
 
         User::updateOrCreate(
             ['email' => $user['email']],

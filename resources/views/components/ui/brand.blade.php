@@ -1,23 +1,21 @@
 @props([
+    'url' => '/',
     'class' => '',
     'style' => [],
-    'url' => '/',
 ])
 
 @php
     $url = empty($url) || $url === '#' ? $url : url($url);
 
     $style = [
-        'component' => [
-            'base' => 'flex items-center gap-2 block w-auto h-4',
-        ],
+        'base' => css('flex items-center gap-2 block w-auto h-4'),
         'brand' => [
-            'logo' => 'aspect-square h-4 w-auto scale-110',
-            'name' => 'text-neutral truncate text-lg font-bold',
+            'logo' => css('aspect-square h-4 w-auto scale-110'),
+            'name' => css('text-neutral truncate text-lg font-bold'),
         ],
     ];
 
-    $class .= ' ' . implode(' ', array_values($style['component']));
+    $class = css($class, $style['base']);
 @endphp
 
 <a href="{{ $url }}" wire:navigate tabindex="0">

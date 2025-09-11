@@ -15,6 +15,12 @@ class Media extends Helper
 
     protected ?array $meta = null;
 
+    public static function asset(string $url): string
+    {
+        return str_starts_with($url, 'http') || str_starts_with($url, 'www')
+            ? $url : asset($url);
+    }
+
     public static function upload(?UploadedFile $file, string $directory = '', string $label = '', string $disk = 'public'): static
     {
         $instance = new static();

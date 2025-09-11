@@ -1,20 +1,15 @@
 <?php
 
-use App\Livewire\Setup\Pages\WelcomePage;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-if (!setting()?->isInstalled()) {
-    Route::prefix('setup')
-        ->middleware(['guest'])
-        ->group(function () {
-            Route::get('/welcome', WelcomePage::class)->name('setup');
-
-            // Volt::route('/welcome', 'setups.welcome')->name('setup');
-            // Volt::route('/account', 'setups.account')->name('setup.account');
-            // Volt::route('/school', 'setups.school')->name('setup.school');
-            // Volt::route('/department', 'setups.department')->name('setup.department');
-            // Volt::route('/program', 'setups.program')->name('setup.program');
-            // Volt::route('/completion', 'setups.completion')->name('setup.complete');
-        });
-}
+Route::prefix('setup')
+    ->middleware(['guest'])
+    ->group(function () {
+        Volt::route('/welcome', 'pages.setup.welcome-setup')->name('setup');
+        Volt::route('/account', 'pages.setup.account-setup')->name('setup.account');
+        Volt::route('/school', 'pages.setup.school-setup')->name('setup.school');
+        Volt::route('/department', 'pages.setup.department-setup')->name('setup.department');
+        Volt::route('/program', 'pages.setup.program-setup')->name('setup.program');
+        Volt::route('/completion', 'pages.setup.completion-setup')->name('setup.complete');
+    });

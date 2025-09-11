@@ -13,6 +13,8 @@
 ])
 
 @php
+    $target = $target ?: $action;
+
     $color = match (true) {
         empty($color) && $type === 'submit' => 'primary',
         empty($color) && $type === 'link' => 'link',
@@ -26,11 +28,12 @@
     };
 
     $style = [
-        'button' => [
-            'base' =>
-                'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95',
-            'shadow' => $shadowed ? 'shadow-lg shadow-neutral-400' : '',
-            'color' => match ($color) {
+        'base' => css(
+            'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95',
+            [
+                'shadow-lg shadow-neutral-400' => $shadowed,
+            ],
+            match ($color) {
                 'primary'
                     => 'btn-neutral btn-outline bg-gradient-to-b from-neutral-700 to-neutral-950 text-neutral-100 hover:from-neutral-950',
                 'secondary'
@@ -40,47 +43,55 @@
                 'link' => 'btn-ghost',
                 default => '',
             },
-        ],
-        'icon' => '',
+        ),
     ];
 
-    $class = trim($class . ' ' . implode(' ', array_values($style['button'])));
+    $class = css($class, $style['base']);
 @endphp
 
 @if ($type === 'link')
+    {{-- Button Link --}}
     <a class="{{ $class }}" role="button" href="{{ route($action ?? '') ?? '#' }}" tabindex="0" wire:navigate
         {{ $attributes }}>
+        {{-- Label --}}
         @isset($label)
             <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
         @endisset
-
+        {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] }}" icon="{{ $icon }}" />
+            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
         @endisset
     </a>
 @elseif ($type === 'submit')
+    {{-- Button Submit --}}
     <button class="{{ $class }}" type="submit" form="{{ $form }}" title="{{ $title }}"
         {{ $attributes }}>
+        {{-- Loading Spinner --}}
         <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
-            wire:loading.class="block"></span>
-
+            wire:loading.class.remove="hidden"></span>
+        {{-- Label --}}
         @isset($label)
             <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
         @endisset
-
+        {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] }}" icon="{{ $icon }}" />
+            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
         @endisset
     </button>
 @else
+    {{-- General Button --}}
     <button class="{{ $class }}" type="{{ $type }}" wire:click="{{ $action }}"
         title="{{ $title }}" {{ $attributes }}>
+        {{-- Loading Spinner --}}
+        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
+            wire:loading.class.remove="hidden"></span>
+        {{-- Label --}}
         @isset($label)
             <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
         @endisset
-
+        {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] }}" icon="{{ $icon }}" />
+            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
         @endisset
     </button>
 @endif

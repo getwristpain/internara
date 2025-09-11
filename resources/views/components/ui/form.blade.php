@@ -14,8 +14,8 @@
         ->toString();
 @endphp
 
-<x-card class="{{ $class }}" :$title :$desc :$bordered :$shadowed>
+<x-ui.card class="{{ $class }}" :$title :$desc :$bordered :$shadowed>
     <form class="wh-full flex flex-col gap-4" id="{{ $name }}" wire:submit="{{ $submit }}">
         {{ $content ?? $slot }}
     </form>
-</x-card>
+</x-ui.card>

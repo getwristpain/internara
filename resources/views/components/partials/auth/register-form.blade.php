@@ -3,40 +3,39 @@
     'title' => 'Registrasi Akun',
     'desc' => 'Pendaftaran akun hanya ditujukan untuk siswa',
     'type' => 'student',
-    'submit' => 'register',
+    'submit' => 'submit',
     'shadowed' => false,
     'bordered' => false,
-    'hideAction' => false,
 ])
 
 <div class="flex w-full flex-col gap-12">
-    <x-animate class="w-full">
-        <x-form :$name :$submit :$title :$desc :$shadowed :$bordered>
+    <x-ui.animate class="w-full">
+        <x-ui.form :$name :$submit :$title :$desc :$shadowed :$bordered>
             <div class="flex w-full flex-col gap-4">
-                <div class="grid w-full grid-cols-1 gap-x-4 lg:grid-cols-2">
-                    <x-input type="name" field="form.data.name" label="Nama" placeholder="Masukkan nama pengguna..."
+                <div class="grid w-full grid-cols-1 gap-x-4 lg:grid-cols-2" x-data x-init="$watch('$wire.form.data.password', value => $wire.form.data.password_confirmation = value)">
+                    <x-ui.field type="name" field="form.data.name" label="Nama" placeholder="Masukkan nama pengguna..."
                         required :disabled="$type === 'owner'" />
-                    <x-input type="email" field="form.data.email" label="Email"
+                    <x-ui.field type="email" field="form.data.email" label="Email"
                         placeholder="Masukkan email pengguna..." required />
-                    <x-input type="password" field="form.data.password" label="Kata Sandi"
+                    <x-ui.field type="password" field="form.data.password" label="Kata Sandi"
                         placeholder="Masukkan Kata Sandi..." required />
-                    <x-input type="password" field="form.data.password_confirmation" label="Konfirmasi Kata Sandi"
+                    <x-ui.field type="password" field="form.data.password_confirmation" label="Konfirmasi Kata Sandi"
                         placeholder="Konfirmasi Kata Sandi..." required />
                 </div>
 
-                @if (!$hideAction && $type === 'student')
+                @if ($type === 'student')
                     <div class="flex flex-col items-center py-4">
-                        <x-button type="link" label="Sudah punya akun? Masuk" action="login" />
+                        <x-ui.button type="link" label="Sudah punya akun? Masuk" action="login" />
                     </div>
                 @endif
             </div>
-        </x-form>
-    </x-animate>
+        </x-ui.form>
+    </x-ui.animate>
 
-    <x-animate class="w-full" delay="200ms">
+    <x-ui.animate class="w-full" delay="200ms">
         <div class="flex items-center justify-end gap-4">
-            <x-button type="submit" form="{{ $name }}" label="Buat Akun" target="{{ $submit }}"
+            <x-ui.button type="submit" form="{{ $name }}" label="Buat Akun" target="{{ $submit }}"
                 shadowed />
         </div>
-    </x-animate>
+    </x-ui.animate>
 </div>
