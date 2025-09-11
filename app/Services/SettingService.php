@@ -2,21 +2,34 @@
 
 namespace App\Services;
 
-use App\Helpers\LogicResponse;
 use App\Models\Setting;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use App\Helpers\LogicResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Collection;
 
 class SettingService
 {
-    public function all(): Collection
+    public function all(): ?Collection
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Throwable $th) {
+            return null;
+        }
+
         return Setting::all();
     }
 
     public function get(string|array $keys, mixed $default = null): mixed
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Throwable $th) {
+            return null;
+        }
+
         if (is_array($keys)) {
             $models = Setting::query()->whereIn('key', $keys)
                 ->pluck('value', 'key');
@@ -53,6 +66,12 @@ class SettingService
 
     public function cached(string|array $keys, mixed $default = null, int $ttl = 3600): mixed
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Throwable $th) {
+            return null;
+        }
+
         if (is_array($keys)) {
             return collect($keys)->mapWithKeys(fn ($k) => [
                 $k => Cache::remember(
@@ -72,6 +91,12 @@ class SettingService
 
     public function set(array|string $keys, mixed $value = null): Setting|int|null
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Throwable $th) {
+            return null;
+        }
+
         if (is_array($keys)) {
             if (! Arr::isAssoc($keys)) {
                 throw new \InvalidArgumentException('The $keys parameter must be an associative array.');
