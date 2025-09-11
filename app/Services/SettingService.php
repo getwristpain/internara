@@ -15,12 +15,12 @@ class SettingService
     public function all(): ?Collection
     {
         try {
-            DB::connection()->getPdo();
+            return Setting::all();
         } catch (\Throwable $th) {
+            LogicResponse::make()->debug($th);
+        } finally {
             return null;
         }
-
-        return Setting::all();
     }
 
     public function get(string|array $keys, mixed $default = null): mixed
