@@ -5,10 +5,8 @@ namespace App\Services;
 use App\Models\Setting;
 use Illuminate\Support\Arr;
 use App\Helpers\LogicResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Schema;
 
 class SettingService
 {
@@ -18,7 +16,6 @@ class SettingService
             return Setting::all();
         } catch (\Throwable $th) {
             LogicResponse::make()->debug($th);
-        } finally {
             return null;
         }
     }
@@ -60,7 +57,6 @@ class SettingService
             return Setting::where('key', $keys)->first()?->value ?? $default;
         } catch (\Throwable $th) {
             LogicResponse::make()->debug($th);
-        } finally {
             return null;
         }
     }
@@ -85,7 +81,6 @@ class SettingService
             );
         } catch (\Throwable $th) {
             LogicResponse::make()->debug($th);
-        } finally {
             return null;
         }
     }
@@ -117,7 +112,6 @@ class SettingService
             return $setting;
         } catch (\Throwable $th) {
             LogicResponse::make()->debug($th);
-        } finally {
             return null;
         }
     }
