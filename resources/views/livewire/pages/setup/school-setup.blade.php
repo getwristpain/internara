@@ -57,7 +57,6 @@ $next = function () {
     </x-ui.animate>
 
     <x-ui.animate class="order-3 flex justify-end lg:justify-start" delay="400ms">
-        <x-ui.button type="submit" form="schoolForm" label="Simpan & Lanjutkan" target="next" wire:click="next"
-            shadowed />
+        <x-ui.button label="Simpan & Lanjutkan" action="next" color="primary" shadowed />
     </x-ui.animate>
 </div>

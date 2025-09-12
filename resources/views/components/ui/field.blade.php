@@ -59,6 +59,6 @@
 
     {{-- Error Messages --}}
     @if ($hasErrors)
-        @include('components.ui.form.error')
+        @include('components.ui.form.errors')
     @endif
 </div>

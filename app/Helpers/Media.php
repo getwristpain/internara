@@ -21,7 +21,7 @@ class Media extends Helper
             return null;
         }
 
-        return str_starts_with($url, 'http') || str_starts_with($url, 'www')
+        return str_starts_with($url, 'http') || str_starts_with($url, 'www') || str_starts_with($url, 'data:')
             ? $url : asset($url);
     }
 

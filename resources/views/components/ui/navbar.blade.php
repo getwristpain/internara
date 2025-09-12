@@ -8,7 +8,7 @@
 
 @php
     $style = [
-        'base' => css('navbar px-4 md:px-8 lg:px-12 w-full', [
+        'base' => css('navbar px-4 lg:px-8 w-full', [
             'fixed z-10 top-0 left-0' => $fixed,
             'glass shadow-none' => $type === 'glass',
         ]),

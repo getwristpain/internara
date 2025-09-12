@@ -1,19 +1,18 @@
 @props([
     'list' => 'departments',
-    'submit' => 'add',
+    'addAction' => 'add',
 ])
 
 <div class="wh-full flex flex-col items-center justify-center gap-12">
-    <x-form class="w-full px-4 py-3" :$submit name="departmentForm" bordered>
-        <div class="flex justify-center items-center gap-4 flex-grow">
-            <x-input.text type="text" field="form.data.name" placeholder="Masukkan nama jurusan..." required
-                autofocus />
-            <x-button class="max-sm:btn-square flex-row-reverse" :style="['label' => 'hidden sm:inline']" label="Tambah" type="submit"
-                icon="mdi:plus" form="departmentForm" title="Tambah Jurusan" />
+    <x-ui.form class="w-full px-4 py-3" :submit="$addAction" bordered>
+        <div class="flex w-full flex-nowrap gap-4" x-data>
+            <x-ui.field type="text" field="form.data.name" placeholder="Masukkan nama jurusan..." required autofocus />
+            <x-ui.button class="max-sm:btn-square my-2 flex-row-reverse" :style="['label' => 'hidden sm:inline']" label="Tambah" color="primary"
+                icon="mdi:plus" title="Tambah Jurusan" :action="$addAction" :target="$addAction" />
         </div>
-    </x-form>
+    </x-ui.form>
 
-    <div class="flex-1 w-full max-w-2xl flex flex-wrap gap-4 justify-center" x-data="{
+    <div class="flex w-full max-w-4xl flex-1 flex-wrap justify-center gap-4" x-data="{
         departments: @entangle($list).live ?? [],
         remove(id, index) {
             this.departments.splice(index, 1);
@@ -21,13 +20,11 @@
         }
     }">
         <template x-for="(dept, index) in departments" :key="index">
-            <div class="px-4 py-2 border border-gray-400 rounded-xl transition ease-in-out duration-300 hover:bg-gray-200 flex gap-2 items-center justify-between"
-                x-if="dept.id">
-                <span class="text-neutral" x-text="dept.name"></span>
-                <button class="btn btn-outline btn-circle btn-xs text-red-500 border-red-500 hover:bg-red-200"
-                    x-on:click="remove(dept.id, index)">
-                    <iconify-icon icon="tabler:trash-filled"></iconify-icon>
-                </button>
+            <div
+                class="flex items-center justify-between gap-2 rounded-xl border border-neutral-400 px-4 py-2 transition duration-300 ease-in-out hover:bg-gradient-to-br hover:from-neutral-100 hover:to-neutral-200/80">
+                <span class="text-neutral truncate" x-text="dept.name"></span>
+                <x-ui.button class="btn-circle btn-xs border-none bg-transparent text-neutral-700 hover:text-red-500"
+                    icon="tabler-x" x-on:click="remove(dept.id, index)" />
             </div>
         </template>
 

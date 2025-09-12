@@ -43,7 +43,7 @@
     $style = [
         'base' => css('relative flex items-center w-full'),
         'input' => css('input glass w-full rounded-xl !border pl-8', [
-            'border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none' => $hasErrors,
+            '!border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none' => $hasErrors,
             'focus:ring-1 focus:ring-neutral-200 focus:outline-none' => !$hasErrors,
             'disabled:border-neutral-500 disabled:bg-neutral-200 disabled:text-neutral-400' => $disabled,
             'min-h-24 p-2 text-wrap' => $type === 'textarea' || $type === 'address',
@@ -76,7 +76,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            wire:model.live="{{ $field }}"></textarea>
+            wire:model.live.debounce.500ms="{{ $field }}"></textarea>
 
         <iconify-icon class="{{ $style['icon']['textarea'] }}" icon="{{ $icon }}"></iconify-icon>
     @else
@@ -93,7 +93,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            wire:model.live="{{ $field }}" />
+            wire:model.live.debounce.500ms="{{ $field }}" />
 
         <iconify-icon class="{{ $style['icon']['input'] }}" icon="{{ $icon }}"></iconify-icon>
     @endif

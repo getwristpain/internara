@@ -66,32 +66,36 @@
     {{-- Button Submit --}}
     <button class="{{ $class }}" type="submit" form="{{ $form }}" title="{{ $title }}"
         {{ $attributes }}>
-        {{-- Loading Spinner --}}
-        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
-            wire:loading.class.remove="hidden"></span>
         {{-- Label --}}
         @isset($label)
             <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
         @endisset
         {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
+            <span wire:target="{{ $target }}" wire:loading.class="hidden">
+                <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
+            </span>
         @endisset
+        {{-- Loading Spinner --}}
+        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
+            wire:loading.class.remove="hidden"></span>
     </button>
 @else
     {{-- General Button --}}
     <button class="{{ $class }}" type="{{ $type }}" wire:click="{{ $action }}"
         title="{{ $title }}" {{ $attributes }}>
-        {{-- Loading Spinner --}}
-        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
-            wire:loading.class.remove="hidden"></span>
         {{-- Label --}}
         @isset($label)
             <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
         @endisset
         {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
+            <span wire:target="{{ $target }}" wire:loading.class="hidden">
+                <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
+            </span>
         @endisset
+        {{-- Loading Spinner --}}
+        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
+            wire:loading.class.remove="hidden"></span>
     </button>
 @endif
