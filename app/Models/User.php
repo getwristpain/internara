@@ -25,6 +25,10 @@ class User extends Authenticatable implements FilamentUser
     use MustVerifyEmail;
     use Notifiable;
 
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
