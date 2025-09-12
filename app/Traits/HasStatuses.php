@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Status;
+use App\Models\Statusable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -15,6 +16,8 @@ trait HasStatuses
     public function statuses(): MorphToMany
     {
         return $this->morphToMany(Status::class, 'statusable')
+            ->using(Statusable::class)
+            ->withPivot(['statusable_id', 'statusable_type'])
             ->withTimestamps();
     }
 
