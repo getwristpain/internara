@@ -1,19 +1,22 @@
 @props([
     'attributes' => [],
+    'style' => [],
+    'class' => '',
     'name' => '',
-    'type' => 'text',
     'field' => '',
-    'icon' => 'ion:text',
+    'type' => 'text',
     'placeholder' => '',
     'required' => false,
     'autofocus' => false,
     'disabled' => false,
     'hidden' => false,
-    'class' => '',
-    'style' => [],
+    'icon' => 'ion:text',
 ])
 
 @php
+    // Fallback default name
+    $name = $name ?: str($field)->replace('.', '_')->snake()->toString();
+
     // Error state
     $hasErrors = $errors->has($field);
 
@@ -61,7 +64,7 @@
     $class = css($class, $style['base']);
 @endphp
 
-<div class="{{ $class }}">
+<div class="{{ $class }}" x-data="{ value: @entangle($field) }">
     @if ($type === 'textarea' || $type === 'address')
         <textarea
             {{ $attributes->merge([
@@ -76,7 +79,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            wire:model.live.debounce.500ms="{{ $field }}"></textarea>
+            x-model.debounce.500ms="value"></textarea>
 
         <iconify-icon class="{{ $style['icon']['textarea'] }}" icon="{{ $icon }}"></iconify-icon>
     @else
@@ -93,7 +96,7 @@
                 'required' => $required,
                 'type' => $type,
             ]) }}
-            wire:model.live.debounce.500ms="{{ $field }}" />
+            x-model.debounce.500ms="value" />
 
         <iconify-icon class="{{ $style['icon']['input'] }}" icon="{{ $icon }}"></iconify-icon>
     @endif

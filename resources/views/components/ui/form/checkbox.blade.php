@@ -11,6 +11,9 @@
 ])
 
 @php
+    // Fallback default name
+    $name = $name ?: str($field)->replace('.', '_')->snake()->toString();
+
     $hasErrors = $errors->has($field);
 
     $style = [
@@ -24,9 +27,9 @@
     $class = css($class, $style['base']);
 @endphp
 
-<div class="{{ $class }}">
+<div class="{{ $class }}" x-data="{ value: @entangle($field) }">
     <input class="{{ $style['input'] ?? '' }}" id="{{ $name }}" name="{{ $name }}" type="checkbox"
-        wire:model.live="{{ $field }}"
+        x-model="value"
         {{ $attributes->merge([
             'required' => $required,
             'disabled' => $disabled,

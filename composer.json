@@ -40,9 +40,8 @@
     },
     "autoload": {
         "files": [
-            "app/Helpers/Functions/stateIf.php",
-            "app/Helpers/Functions/setting.php",
-            "app/Helpers/Functions/css.php"
+            "app/Helpers/Functions/helper.php",
+            "app/Helpers/Functions/setting.php"
         ],
         "psr-4": {
             "App\\": "app/",

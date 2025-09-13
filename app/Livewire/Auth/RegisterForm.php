@@ -1,17 +1,44 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\Auth;
 
-use Illuminate\Support\Facades\Hash;
-use Livewire\Form;
 use App\Models\User;
 use App\Rules\Password;
+use Livewire\Attributes\On;
+use Livewire\Component;
 use App\Services\AuthService;
-use App\Helpers\LogicResponse;
+use Illuminate\Support\Facades\Hash;
 
-class RegisterForm extends Form
+class RegisterForm extends Component
 {
+    protected AuthService $service;
+
+    protected User $user;
+
     public array $data = [];
+
+    public string $type = 'student';
+
+    public ?string $title = null;
+
+    public ?string $desc = null;
+
+    public bool $bordered = false;
+
+    public bool $shadowed = false;
+
+    public bool $hideActions = false;
+
+    public function __construct()
+    {
+        $this->service = app(AuthService::class);
+        $this->user = app(User::class);
+    }
+
+    public function mount(): void
+    {
+        $this->initialize($this->type);
+    }
 
     public function initialize(string $type): void
     {
@@ -25,15 +52,18 @@ class RegisterForm extends Form
         ];
 
         if ($type === 'owner') {
-            $owner = User::role('owner')->first();
+            $owner = $this->user->role('owner')->first();
 
             $this->data['id'] = $owner?->id;
             $this->data['name'] = 'Administrator';
         }
     }
 
-    public function submit(): LogicResponse
+    #[On('register-form-submitted')]
+    public function submit(): void
     {
+        $type = $this->data['type'];
+
         $this->resetValidation();
         $this->validate([
             'data.name' => 'required|string|max:50',
@@ -54,12 +84,25 @@ class RegisterForm extends Form
         $this->data['password'] = Hash::make($this->data['password']);
         $this->data['password_confirmation'] = Hash::make($this->data['password_confirmation']);
 
-        $res = app(AuthService::class)->register($this->data);
+        $res = $this->service->register($this->data);
+        flash($res->getMessage(), $res->getStatusType());
 
-        if ($this->data['type'] !== 'student') {
-            $this->reset();
+        if ($res->passes()) {
+            $this->refreshData();
+            $this->dispatch("{$type}-registered");
         }
+    }
 
-        return $res;
+    protected function refreshData()
+    {
+        $this->reset(['data']);
+        $this->resetErrorBag();
+
+        $this->initialize($this->type);
+    }
+
+    public function render()
+    {
+        return view('livewire.auth.register-form');
     }
 }

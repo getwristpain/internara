@@ -1,20 +1,15 @@
 @props([
-    'action' => '',
-    'class' => '',
-    'color' => null,
-    'form' => null,
-    'icon' => null,
     'label' => null,
-    'shadowed' => false,
-    'title' => '',
     'type' => 'button',
-    'style' => [],
-    'target' => '',
+    'color' => null,
+    'icon' => null,
+    'loading' => null,
+    'shadowed' => false,
+    'attributes' => [],
+    'modify' => [],
 ])
 
 @php
-    $target = $target ?: $action;
-
     $color = match (true) {
         empty($color) && $type === 'submit' => 'primary',
         empty($color) && $type === 'link' => 'link',
@@ -27,7 +22,7 @@
         default => $icon,
     };
 
-    $style = [
+    $modify = [
         'base' => css(
             'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95',
             [
@@ -46,56 +41,29 @@
         ),
     ];
 
-    $class = css($class, $style['base']);
+    $type = in_array($type, ['button', 'submit', 'reset']) ? $type : 'button';
 @endphp
 
-@if ($type === 'link')
-    {{-- Button Link --}}
-    <a class="{{ $class }}" role="button" href="{{ route($action ?? '') ?? '#' }}" tabindex="0" wire:navigate
-        {{ $attributes }}>
-        {{-- Label --}}
-        @isset($label)
-            <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
-        @endisset
+<button x-data x-cloax :class="@js($modify['base'])" type="{{ $type }}" {{ $attributes }}>
+    {{-- Label --}}
+    @isset($label)
+        <span class="{{ $modify['label'] ?? 'truncate' }}">{{ $label }}</span>
+    @endisset
+
+    @if (isset($loading))
         {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
+            <x-ui.icon class="{{ $modify['icon'] ?? 'icon-md' }}" wire:target="{{ $loading }}" wire:loading.class="hidden"
+                icon="{{ $icon }}" />
         @endisset
-    </a>
-@elseif ($type === 'submit')
-    {{-- Button Submit --}}
-    <button class="{{ $class }}" type="submit" form="{{ $form }}" title="{{ $title }}"
-        {{ $attributes }}>
-        {{-- Label --}}
-        @isset($label)
-            <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
-        @endisset
-        {{-- Icon --}}
-        @isset($icon)
-            <span wire:target="{{ $target }}" wire:loading.class="hidden">
-                <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
-            </span>
-        @endisset
+
         {{-- Loading Spinner --}}
-        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
+        <span class="loading loading-spinner hidden" wire:target="{{ $loading }}"
             wire:loading.class.remove="hidden"></span>
-    </button>
-@else
-    {{-- General Button --}}
-    <button class="{{ $class }}" type="{{ $type }}" wire:click="{{ $action }}"
-        title="{{ $title }}" {{ $attributes }}>
-        {{-- Label --}}
-        @isset($label)
-            <span class="{{ $style['label'] ?? '' }} truncate">{{ $label }}</span>
-        @endisset
-        {{-- Icon --}}
+    @else
         @isset($icon)
-            <span wire:target="{{ $target }}" wire:loading.class="hidden">
-                <x-ui.icon class="{{ $style['icon'] ?? '' }}" icon="{{ $icon }}" />
-            </span>
+            {{-- Icon --}}
+            <x-ui.icon class="{{ $modify['icon'] ?? 'icon-md' }}" icon="{{ $icon }}" />
         @endisset
-        {{-- Loading Spinner --}}
-        <span class="loading loading-spinner hidden" wire:target="{{ $target }}"
-            wire:loading.class.remove="hidden"></span>
-    </button>
-@endif
+    @endif
+</button>

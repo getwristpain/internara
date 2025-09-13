@@ -1,23 +1,48 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\School;
 
 use App\Helpers\Media;
-use Livewire\Form;
 use App\Models\School;
-use App\Helpers\LogicResponse;
+use Livewire\Attributes\On;
+use Livewire\Component;
 use App\Services\SchoolService;
+use Livewire\WithFileUploads;
 
-class SchoolForm extends Form
+class SchoolForm extends Component
 {
+    use WithFileUploads;
+
+    protected SchoolService $service;
+
     public array $data = [];
+
+    public ?string $title = null;
+
+    public ?string $desc = null;
+
+    public bool $bordered = false;
+
+    public bool $shadowed = false;
+
+    public bool $hideActions = false;
+
+    public function __construct()
+    {
+        $this->service = app(SchoolService::class);
+    }
+
+    public function mount(): void
+    {
+        $this->initialize();
+    }
 
     public function initialize(): void
     {
         $school = School::first();
 
         $this->data = array_merge(
-            $school->toArray(),
+            $school?->toArray(),
             [
                 'logo' => Media::asset($school?->logo),
                 'logo_file' => null
@@ -25,12 +50,13 @@ class SchoolForm extends Form
         );
     }
 
-    public function submit(): LogicResponse
+    #[On('school-form-submitted')]
+    public function submit(): void
     {
-        $id = School::first()?->id;
+        $this->resetValidation();
         $this->validate([
-            'data.name' => 'required|min:5|unique:schools,name,' . $id,
-            'data.email' => 'nullable|email|unique:schools,email,' . $id,
+            'data.name' => 'required|min:5|unique:schools,name,' . $this->data['id'],
+            'data.email' => 'nullable|email|unique:schools,email,' . $this->data['id'],
             'data.telp' => 'nullable|string|min:8',
             'data.fax' => 'nullable|string|min:8',
             'data.address' => 'nullable|string',
@@ -54,6 +80,25 @@ class SchoolForm extends Form
             $this->addError('data.logo_file', $this->getErrorBag()->first('data.logo'));
         }
 
-        return app(SchoolService::class)->save($this->data + ['id' => $id]);
+        $res = $this->service->save($this->data);
+        flash($res->getMessage(), $res->getStatusType());
+
+        if ($res->passes()) {
+            $this->refreshData();
+            $this->dispatch('school-saved');
+        }
+    }
+
+    protected function refreshData(): void
+    {
+        $this->reset(['data']);
+        $this->resetErrorBag();
+
+        $this->initialize();
+    }
+
+    public function render()
+    {
+        return view('livewire.school.school-form');
     }
 }

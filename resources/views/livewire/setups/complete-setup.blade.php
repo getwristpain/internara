@@ -1,30 +1,3 @@
-<?php
-
-use function Livewire\Volt\{layout, title, mount, protect};
-
-layout('components.layouts.guest');
-title('Instalasi Selesai | ' . config('app.description'));
-
-mount(function () {
-    $this->ensureReqStepsCompleted();
-});
-
-$ensureReqStepsCompleted = protect(function () {
-    $res = app(App\Services\SetupService::class)->ensureStepsCompleted('setup:program');
-
-    if ($res->fails()) {
-        flash()->error($res->getMessage());
-        $this->redirectRoute('setup.program');
-    }
-});
-
-$done = function () {
-    $res = app(App\Services\SetupService::class)->perform('setup:complete');
-    $res->passes() ? $this->redirectRoute('login') : flash()->error($res->getMessage());
-};
-
-?>
-
 <div class="flex flex-1 flex-col items-center justify-center gap-12">
     <div class="space-y-1 text-center">
         <x-animate.fade-in>
@@ -65,8 +38,7 @@ $done = function () {
 
     <x-animate.fade-in delay="400ms">
         <div class="flex w-full items-center justify-center">
-            <x-button class="btn-wide" label="Selesai & Masuk" color="primary"
-                action="done" shadowed />
+            <x-button class="btn-wide" label="Selesai & Masuk" color="primary" action="done" shadowed />
         </div>
     </x-animate.fade-in>
 </div>

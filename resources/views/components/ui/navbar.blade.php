@@ -1,31 +1,22 @@
 @props([
+    'attributes' => [],
     'home_url' => '/',
-    'type' => 'glass',
+    'type' => 'glassy',
     'fixed' => false,
-    'class' => '',
-    'style' => [],
 ])
 
-@php
-    $style = [
-        'base' => css('navbar px-4 lg:px-8 w-full', [
-            'fixed z-10 top-0 left-0' => $fixed,
-            'glass shadow-none' => $type === 'glass',
-        ]),
-        'content' => css('container mx-auto'),
-        'menu' => css('flex items-center justify-between gap-4'),
-    ];
-
-    $class = css($class, $style['base']);
-@endphp
-
-<nav class="{{ $class }}">
+<nav x-data x-cloak :class="@js(
+    css('navbar px-4 lg:px-8 w-full', [
+        'fixed z-10 top-0 left-0' => $fixed,
+        'glass shadow-none' => $type === 'glassy',
+    ]),
+)" {{ $attributes }}>
     {{-- Content --}}
-    <div class="{{ $style['content'] }}">
+    <div class="container mx-auto">
         {{-- Brand --}}
         <x-ui.brand url="{{ $home_url }}" />
         {{-- Menu --}}
-        <div class="{{ $style['menu'] }}">
+        <div class="flex items-center justify-between gap-4">
             {{ $slot }}
         </div>
     </div>

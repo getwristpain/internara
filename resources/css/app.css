@@ -68,19 +68,19 @@
 }
 
 @utility icon-sm {
-    @apply w-full max-w-3 h-auto aspect-square inline-block align-middle;
+    @apply w-full h-auto max-w-3 aspect-square inline-block object-center object-fill;
 }
 
 @utility icon-md {
-    @apply w-full max-w-5 h-auto aspect-square inline-block align-middle;
+    @apply w-full h-auto max-w-5 aspect-square inline-block object-center object-fill;
 }
 
 @utility icon-lg {
-    @apply w-full max-w-7 h-auto aspect-square inline-block align-middle;
+    @apply w-full h-auto max-w-7 aspect-square inline-block object-center object-fill;
 }
 
 @utility icon-xl {
-    @apply w-full max-w-9 h-auto aspect-square inline-block align-middle;
+    @apply w-full h-auto max-w-9 aspect-square inline-block object-center object-fill;
 }
 
 @layer components {

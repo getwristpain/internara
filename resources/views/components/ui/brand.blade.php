@@ -1,34 +1,25 @@
 @props([
+    'attributes' => [],
     'url' => '/',
-    'class' => '',
-    'style' => [],
+    'brand' => [
+        'name' => $shared->settings['brand_name'],
+        'logo' => asset($shared->settings['brand_logo']),
+    ],
 ])
 
 @php
     $url = empty($url) || $url === '#' ? $url : url($url);
-
-    $style = [
-        'base' => css('flex items-center gap-2 block w-auto h-4'),
-        'brand' => [
-            'logo' => css('aspect-square h-4 w-auto scale-110'),
-            'name' => css('text-neutral truncate text-lg font-bold'),
-        ],
-    ];
-
-    $class = css($class, $style['base']);
 @endphp
 
-<a href="{{ $url }}" wire:navigate tabindex="0">
-    <div class="{{ $class }}">
-        {{-- Brand Logo --}}
-        <span>
-            <img class="{{ $style['brand']['logo'] }}"
-                src="{{ asset($shared->settings['brand_logo'] ?? config('app.logo')) }}" alt="Logo">
-        </span>
+<a x-data x-cloak :class="@js(css('flex items-center gap-2 w-auto h-4'))" href="{{ $url }}" wire:navigate tabindex="0"
+    {{ $attributes }}>
+    {{-- Brand Logo --}}
+    <span>
+        <img class="aspect-square h-4 w-auto scale-110" src="{{ $brand['logo'] }}" alt="Logo">
+    </span>
 
-        {{-- Brand Name --}}
-        <span class="{{ $style['brand']['name'] }}">
-            {{ $shared->settings['brand_name'] ?? config('app.name') }}
-        </span>
-    </div>
+    {{-- Brand Name --}}
+    <span class="text-neutral truncate text-lg font-bold">
+        {{ $brand['name'] }}
+    </span>
 </a>

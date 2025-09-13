@@ -1,5 +1,6 @@
 @props([
     'field' => '',
+    'name' => '',
     'options' => '',
     'placeholder' => 'Pilih...',
     'required' => true,
@@ -10,8 +11,8 @@
 ])
 
 @php
-    // Normalisasi ID
-    $id = str($field)->replace('.', '_')->snake()->toString();
+    // Fallback default name
+    $name = $name ?: str($field)->replace('.', '_')->snake()->toString();
 
     // Error state
     $hasErrors = $errors->has($field);
@@ -36,7 +37,7 @@
 <div class="{{ $componentClass }}" x-data="{
     open: false,
     options: @entangle($options),
-    selected: @entangle($field).live
+    selected: @entangle($field)
 }" x-on:click.away="open = false" tabindex="0">
 
     {{-- Display selected value / placeholder --}}
@@ -55,8 +56,8 @@
     </iconify-icon>
 
     {{-- Hidden input for Livewire binding --}}
-    <input class="{{ $inputClass }}" id="{{ $id }}" type="text" wire:model="{{ $field }}"
-        {{ $required ? 'required' : '' }} {{ $disabled ? 'disabled' : '' }} />
+    <input class="{{ $inputClass }}" id="{{ $name }}" name="{{ $name }}" type="text"
+        x-model="selected" {{ $required ? 'required' : '' }} {{ $disabled ? 'disabled' : '' }} />
 
     {{-- Dropdown --}}
     <div class="absolute left-0 top-full z-10 mt-2 w-full" x-show="open"

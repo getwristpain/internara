@@ -38,7 +38,7 @@ return [
     |
     */
 
-    'layout' => 'components.layouts.layout',
+    'layout' => 'components.layouts.guest',
 
     /*
     |---------------------------------------------------------------------------

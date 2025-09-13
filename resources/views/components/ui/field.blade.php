@@ -15,17 +15,14 @@
     // Normalisasi name
     $name = str($field)->replace('.', '_')->snake()->toString();
 
-    // Bypass type
-    $type = $type === 'error' ? 'text' : $type;
+    // Component name
+    $componentName = in_array($type, ['input', 'select', 'checkbox', 'image']) ? $type : 'input';
 
     // Required marker
     $markRequired = $required ?: $markRequired;
 
     // Error state
     $hasErrors = $errors->has($field);
-
-    // Cek apakah file komponen input tersedia
-    $componentExists = File::exists(resource_path("views/components/ui/form/{$type}.blade.php"));
 
     $style = [
         'base' => css('w-full h-fit py-2 space-y-2', ['hidden' => $hidden]),
@@ -44,17 +41,10 @@
 
     {{-- Input --}}
     <div class="container" wire:key="{{ $name }}">
-        @if ($componentExists)
-            @includeif("components.ui.form.{$type}", [
-                'name' => $name,
-                'class' => $style['input'] ?? '',
-            ])
-        @else
-            @include('components.ui.form.input', [
-                'name' => $name,
-                'class' => $style['input'] ?? '',
-            ])
-        @endif
+        @includeif("components.ui.form.{$componentName}", [
+            'name' => $name,
+            'class' => $style['input'] ?? '',
+        ])
     </div>
 
     {{-- Error Messages --}}

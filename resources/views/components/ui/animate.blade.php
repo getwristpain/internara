@@ -2,16 +2,11 @@
     'type' => 'fade-in',
 ])
 
-@if ($type === 'fade-in-out')
-    <x-ui.animate.fade-in-out {{ $attributes }}>
-        {{ $slot }}
-    </x-ui.animate.fade-in-out>
-@elseif ($type === 'fade-out')
-    <x-ui.animate.fade-out {{ $attributes }}>
-        {{ $slot }}
-    </x-ui.animate.fade-out>
-@else
-    <x-ui.animate.fade-in {{ $attributes }}>
-        {{ $slot }}
-    </x-ui.animate.fade-in>
-@endif
+@php
+    $type = in_array($type, ['fade-in-out', 'fade-in', 'fade-out']) ? $type : 'fade-in';
+    $component = "ui.animate.{$type}";
+@endphp
+
+<x-dynamic-component component="{{ $component }}" {{ $attributes }}>
+    {{ $slot }}
+</x-dynamic-component>

@@ -23,8 +23,7 @@ class SetupService extends BaseService
     public function perform(string $step = ''): LogicResponse
     {
         return $this->response()
-            ->failWhen(!isset($this->steps[$step]), "Gagal melanjutkan instalasi: '{$step}' tidak diizinkan")
-            ->failWhen($this->ensureNotInstalled())
+            ->failWhen(!isset($this->steps[$step]), "Gagal melanjutkan instalasi: '{$step}' tidak diizinkan.")
             ->failWhen($this->ensureNotRateLimited($step))
             ->then(match ($step) {
                 'setup:welcome' => $this->setupWelcome(),
@@ -53,8 +52,8 @@ class SetupService extends BaseService
         $label = $this->steps[$steps] ?? 'sebelumnya';
 
         return $this->response()
-            ->failWhen(!isset($this->steps[$steps]), "Gagal melanjutkan instalasi: '{$steps}' tidak diizinkan")
-            ->failWhen(!Session::has($steps), "Pastikan untuk menyelesaikan langkah {$label} sebelum melanjutkan")
+            ->failWhen(!isset($this->steps[$steps]), "Gagal melanjutkan instalasi: '{$steps}' tidak diizinkan.")
+            ->failWhen(!Session::has($steps), "Pastikan untuk menyelesaikan langkah {$label} sebelum melanjutkan.")
             ->then(fn ($res) => $res->success());
     }
 
@@ -68,7 +67,7 @@ class SetupService extends BaseService
     {
         return $this->response()
             ->failWhen($this->ensureStepsCompleted('setup:welcome'))
-            ->failWhen(!(User::role('owner')->exists()), "Buat akun Administrator terlebih dahulu sebelum melanjutkan")
+            ->failWhen(!(User::role('owner')->exists()), "Buat akun Administrator terlebih dahulu sebelum melanjutkan.")
             ->then($this->markAsCompleted('setup:account'));
     }
 
@@ -78,7 +77,7 @@ class SetupService extends BaseService
 
         return $this->response()
             ->failWhen($this->ensureStepsCompleted('setup:account'))
-            ->failWhen(empty($school), 'Konfigurasi data sekolah terlebih dahulu sebelum melanjutkan')
+            ->failWhen(empty($school), 'Konfigurasi data sekolah terlebih dahulu sebelum melanjutkan.')
             ->then($this->markAsCompleted('setup:school'));
     }
 
@@ -110,8 +109,8 @@ class SetupService extends BaseService
                 session()->regenerate();
                 return $res->decide(
                     (bool) setting('is_installed', true) ?? false,
-                    'Berhasil menyelesaikan instalasi',
-                    'Gagal menyelesaikan instalasi'
+                    'Berhasil menyelesaikan instalasi.',
+                    'Gagal menyelesaikan instalasi.'
                 );
             });
     }
@@ -122,9 +121,9 @@ class SetupService extends BaseService
 
         try {
             Session::put($step, true);
-            return $this->response()->success("Berhasil menyelesaikan langkah {$label}");
+            return $this->response()->success("Berhasil menyelesaikan langkah {$label}.");
         } catch (\Throwable $th) {
-            return $this->response()->error("Gagal menyelesaikan langkah {$label}")
+            return $this->response()->error("Gagal menyelesaikan langkah {$label}.")
                 ->debug($th);
         }
     }
@@ -133,12 +132,5 @@ class SetupService extends BaseService
     {
         $key = "setup:{$step}";
         return parent::ensureNotRateLimited($key, $maxAttempts);
-    }
-
-    public function ensureNotInstalled(): LogicResponse
-    {
-        $isInstalled = setting()->isInstalled();
-        return $this->response()
-        ->decide(!$isInstalled, 'Selesaikan proses instalasi.', 'Gagal memulai instalasi: Aplikasi telah terinstal.');
     }
 }

@@ -1,15 +1,20 @@
 <?php
 
+use App\Livewire\Setups\AccountSetup;
+use App\Livewire\Setups\CompleteSetup;
+use App\Livewire\Setups\DepartmentSetup;
+use App\Livewire\Setups\ProgramSetup;
+use App\Livewire\Setups\SchoolSetup;
+use App\Livewire\Setups\WelcomeSetup;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
 Route::prefix('setup')
     ->middleware(['guest'])
     ->group(function () {
-        Volt::route('/welcome', 'pages.setup.welcome-setup')->name('setup');
-        Volt::route('/account', 'pages.setup.account-setup')->name('setup.account');
-        Volt::route('/school', 'pages.setup.school-setup')->name('setup.school');
-        Volt::route('/department', 'pages.setup.department-setup')->name('setup.department');
-        Volt::route('/program', 'pages.setup.program-setup')->name('setup.program');
-        Volt::route('/completion', 'pages.setup.completion-setup')->name('setup.complete');
+        Route::get('/welcome', WelcomeSetup::class)->name('setup');
+        Route::get('/account', AccountSetup::class)->name('setup.account');
+        Route::get('/school', SchoolSetup::class)->name('setup.school');
+        Route::get('/department', DepartmentSetup::class)->name('setup.department');
+        Route::get('/program', ProgramSetup::class)->name('setup.program');
+        Route::get('/complete', CompleteSetup::class)->name('setup.complete');
     });
