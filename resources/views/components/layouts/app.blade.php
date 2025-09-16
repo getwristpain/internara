@@ -1,4 +1,4 @@
-@extends('components.layouts.layout')
+@extends('components.layouts.base')
 
 @section('content')
     <x-bg-decoration />

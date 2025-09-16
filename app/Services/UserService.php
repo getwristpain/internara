@@ -13,22 +13,30 @@ use Illuminate\Validation\ValidationException;
 
 class UserService extends BaseService
 {
-    public function save(array $data): LogicResponse
+    public function save(array $data, ?User $user = null): LogicResponse
     {
         $type = $data['type'] ?? 'guest';
 
         $this->ensureUsernameFilled($type, $data['username'], $data['id']);
         $this->ensurePasswordHashed($data['password']);
 
-        $storedUser = $data['type'] === 'owner'
-            ? User::updateOrCreate(['id' => $data['id'] ?? ''], Helper::filterFillable($data, User::class))
-            : User::create(Helper::filterFillable($data, User::class));
+        // Use existing User model
+        $saved = isset($user) && $user?->exists
+            ? $user->update(Helper::filterOnly($data, $user->getFillable()))
+            : $user = User::create(Helper::filterOnly($data, app(User::class)->getFillable()));
 
-        $storedUser->syncRoles($type === 'owner' ? ['owner', 'admin'] : $type);
-        $storedUser->syncStatuses($type === 'owner' ? 'protected' : 'pending-activation', 'user');
+        // Sync Roles when roles data is set
+        if (isset($data['roles'])) {
+            $user->syncRoles($data['roles'] ?? 'guest');
+        }
+
+        // Sync Statuses when statuses data is set
+        if (isset($data['statuses'])) {
+            $user->syncStatuses($data['statuses'] ?? 'pending-activation', 'user');
+        }
 
         return $this->response()->decide(
-            (bool) $storedUser ?? false,
+            (bool) $saved ?? false,
             'Akun pengguna berhasil dibuat.',
             'Gagal menyimpan akun pengguna.'
         );

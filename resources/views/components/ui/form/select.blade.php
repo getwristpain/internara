@@ -56,8 +56,8 @@
     </iconify-icon>
 
     {{-- Hidden input for Livewire binding --}}
-    <input class="{{ $inputClass }}" id="{{ $name }}" name="{{ $name }}" type="text"
-        x-model="selected" {{ $required ? 'required' : '' }} {{ $disabled ? 'disabled' : '' }} />
+    <input class="{{ $inputClass }}" id="{{ $name }}" name="{{ $name }}" type="hidden"
+        {{ $disabled ? 'disabled' : '' }} x-model="selected" />
 
     {{-- Dropdown --}}
     <div class="absolute left-0 top-full z-10 mt-2 w-full" x-show="open"
@@ -66,7 +66,7 @@
         x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2"
         style="display: none;">
 
-        <div class="glass !border-neutral w-full rounded-xl !border bg-gray-50/10 p-2">
+        <div class="glass !border-neutral w-full rounded-xl !border bg-gray-50/80 p-2">
             <template x-for="(text, value) in options" :key="value" x-if="options.length > 0">
                 <div class="outline-neutral cursor-pointer rounded-lg px-3 py-2 transition duration-300 ease-in-out hover:outline"
                     x-on:click="selected = value; open = false" x-text="text">

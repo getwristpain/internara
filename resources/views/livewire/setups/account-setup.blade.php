@@ -8,14 +8,14 @@
 
         <x-ui.animate delay="200ms">
             <p class="text-subhead">
-                Kendalikan sistem dengan akun pusat dan kelola data secara penuh.
+                Kendalikan sistem dengan akun pusat untuk kelola data secara penuh.
             </p>
         </x-ui.animate>
     </div>
 
     <x-ui.animate class="w-full" delay="200ms">
         @livewire('auth.register-form', [
-            'desc' => 'Akun ini digunakan untuk mengelola seluruh data sistem.',
+            'desc' => 'Akun ini digunakan sebagai akun pusat untuk mengelola seluruh data sistem.',
             'type' => 'owner',
             'bordered' => true,
             'shadowed' => true,
@@ -24,6 +24,7 @@
     </x-ui.animate>
 
     <x-ui.animate class="flex w-full items-center justify-end gap-4">
-        <x-ui.button label="Buat Akun" type="submit" form="registerForm" loading="next" shadowed />
+        <x-ui.button label="Buat Akun" type="submit" form="registerForm" shadowed
+            x-on:dirty-loading.window="loading = $event.detail.loading" />
     </x-ui.animate>
 </div>

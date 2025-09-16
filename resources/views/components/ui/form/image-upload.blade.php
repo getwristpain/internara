@@ -7,6 +7,7 @@
     'height' => 24,
     'aspect' => 'square',
     'required' => false,
+    'disabled' => false,
     'style' => [],
 ])
 
@@ -46,34 +47,50 @@
         <div class="relative flex min-h-24 w-full items-center justify-center overflow-hidden">
             <!-- Jika ada preview -->
             <template x-if="imagePreview">
-                <div class="{{ $style['preview'] ?? '' }}">
+                <div class="{{ $style['preview'] ?? '' }}" wire:target="{{ $field }}"
+                    wire:loading.class="opacity-0">
                     <img class="h-full w-full rounded-xl object-cover" :src="imagePreview" alt="Preview" />
                 </div>
             </template>
 
             <!-- Jika tidak ada preview -->
             <template x-if="!imagePreview">
-                <x-ui.no-image size="{{ $style['size'] }}" />
+                <x-ui.no-image size="{{ $style['size'] }}" wire:target="{{ $field }}"
+                    wire:loading.class="opacity-0" />
             </template>
+
+            {{-- Placeholder Loading Effect --}}
+            <span class="animate-move-x {{ $style['preview'] }} absolute block bg-neutral-500"
+                wire:target="{{ $field }}" wire:loading></span>
         </div>
 
         <!-- Overlay trigger -->
-        <div
-            class="absolute left-0 top-0 h-full min-h-24 w-full p-2 opacity-0 transition duration-300 ease-in-out group-hover:opacity-95">
-            <button
-                class="glass !border-3 flex h-full w-full cursor-pointer items-center justify-center rounded-lg border-dashed !border-neutral-300 bg-neutral-100 text-center !shadow-none"
+        <div class="glass absolute left-0 top-0 h-full min-h-24 w-full rounded-xl p-2 opacity-0 transition duration-300 ease-in-out group-hover:opacity-95"
+            wire:target="{{ $field }}" wire:loading.class="hidden">
+            <div class="glass !border-3 flex h-full w-full cursor-pointer items-center justify-center rounded-xl border-dashed !border-neutral-300 bg-white text-center !shadow-none"
                 x-on:click="$refs.imageInput.click()">
                 {{-- Placeholder --}}
-                <span
-                    class="rounded-full border border-neutral-300 bg-neutral-100/50 px-4 py-2 font-bold text-neutral-500">
+                <span class="truncate rounded-full border bg-neutral-900 px-8 py-2 font-medium text-neutral-100">
                     {{ $placeholder }}
                 </span>
-            </button>
+            </div>
+        </div>
+
+        <!-- Uploading -->
+        <div class="glass z-2 absolute left-0 top-0 h-full min-h-24 w-full rounded-xl p-2"
+            wire:target="{{ $field }}" wire:loading>
+            <div
+                class="glass flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br from-white to-neutral-50 text-center">
+                <span
+                    class="animate-pulse truncate rounded-full border border-neutral-300 bg-white px-8 py-2 font-medium text-neutral-700">
+                    Uploading...
+                </span>
+            </div>
         </div>
 
         <!-- Hidden input -->
         <input class="hidden" id="{{ $name }}" name="{{ $name }}" x-ref="imageInput" type="file"
-            accept="image/*" wire:model="{{ $field }}" {{ $required ? 'required' : '' }}
-            x-on:change="updatePreview" />
+            accept="image/*" wire:model="{{ $field }}" {{ $disabled ? 'disabled' : '' }}
+            x-on:change="updatePreview" wire:target="{{ $field }}" wire:loading.attr="disabled" />
     </div>
 </div>

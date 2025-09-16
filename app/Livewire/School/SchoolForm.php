@@ -4,7 +4,7 @@ namespace App\Livewire\School;
 
 use App\Helpers\Media;
 use App\Models\School;
-use Livewire\Attributes\On;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use App\Services\SchoolService;
 use Livewire\WithFileUploads;
@@ -14,6 +14,8 @@ class SchoolForm extends Component
     use WithFileUploads;
 
     protected SchoolService $service;
+
+    protected ?School $school = null;
 
     public array $data = [];
 
@@ -27,7 +29,7 @@ class SchoolForm extends Component
 
     public bool $hideActions = false;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(SchoolService::class);
     }
@@ -37,20 +39,43 @@ class SchoolForm extends Component
         $this->initialize();
     }
 
-    public function initialize(): void
+    public function initialize(bool $loadData = true): void
     {
-        $school = School::first();
+        $this->reset('data');
+        $this->resetErrorBag();
 
-        $this->data = array_merge(
-            $school?->toArray(),
-            [
-                'logo' => Media::asset($school?->logo),
-                'logo_file' => null
-            ]
-        );
+        $this->data = [
+            'name' => null,
+            'email' => null,
+            'telp' => null,
+            'fax' => null,
+            'address' => null,
+            'principal_name' => null,
+            'website' => null,
+            'logo' => null,
+            'logo_file' => null,
+        ];
+
+        if ($loadData) {
+            $this->loadSchoolData();
+        }
     }
 
-    #[On('school-form-submitted')]
+    public function loadSchoolData(): void
+    {
+        $this->school = $this->service->get();
+
+        if ($this->school?->exists) {
+            $this->data = array_merge(
+                $this->data,
+                $this->school?->toArray(),
+                [
+                'logo' => Media::asset($this->school?->logo),
+            ]
+            );
+        }
+    }
+
     public function submit(): void
     {
         $this->resetValidation();
@@ -63,7 +88,7 @@ class SchoolForm extends Component
             'data.principal_name' => 'nullable|string',
             'data.website' => 'nullable|string',
             'data.logo' => 'sometimes|nullable|string',
-            'data.logo_file' => 'sometimes|nullable|image|max:2048',
+            'data.logo_file' => 'sometimes|nullable|image|mimes:jpg,png,webp|max:2048',
         ], attributes: [
             'data.name' => 'nama sekolah',
             'data.email' => 'email sekolah',
@@ -76,29 +101,28 @@ class SchoolForm extends Component
             'data.logo_file' => 'logo sekolah',
         ]);
 
-        if ($this->getErrorBag()->has('data.logo')) {
-            $this->addError('data.logo_file', $this->getErrorBag()->first('data.logo'));
-        }
-
-        $res = $this->service->save($this->data);
+        $res = $this->service->save($this->data, $this->school);
         flash($res->getMessage(), $res->getStatusType());
 
         if ($res->passes()) {
-            $this->refreshData();
-            $this->dispatch('school-saved');
+            $this->initialize();
+            $this->dispatch('school-form:saved');
         }
-    }
-
-    protected function refreshData(): void
-    {
-        $this->reset(['data']);
-        $this->resetErrorBag();
-
-        $this->initialize();
     }
 
     public function render()
     {
         return view('livewire.school.school-form');
+    }
+
+    public function exception($e, $stopPropagation)
+    {
+        if ($e instanceof ValidationException) {
+            $validator = $e->validator;
+
+            if ($validator->errors()->has('data.logo')) {
+                $this->addError('data.logo_file', $validator->errors()->get('data.logo'));
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@ class WelcomeSetup extends Component
 {
     protected SetupService $service;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(SetupService::class);
     }

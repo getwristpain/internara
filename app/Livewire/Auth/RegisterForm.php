@@ -4,7 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Models\User;
 use App\Rules\Password;
-use Livewire\Attributes\On;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +13,7 @@ class RegisterForm extends Component
 {
     protected AuthService $service;
 
-    protected User $user;
+    protected ?User $user = null;
 
     public array $data = [];
 
@@ -29,80 +29,87 @@ class RegisterForm extends Component
 
     public bool $hideActions = false;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(AuthService::class);
-        $this->user = app(User::class);
     }
 
     public function mount(): void
     {
-        $this->initialize($this->type);
+        $this->initialize();
     }
 
-    public function initialize(string $type): void
+    protected function initialize(bool $loadData = true): void
     {
+        $this->reset('data');
+        $this->resetErrorBag();
+
         $this->data = [
-            'id' => null,
-            'name' => null,
+            'name' => $this->type === 'owner' ? 'Administrator' : null,
             'email' => null,
             'password' => null,
             'password_confirmation' => null,
-            'type' => $type,
+            'type' => $this->type,
         ];
 
-        if ($type === 'owner') {
-            $owner = $this->user->role('owner')->first();
-
-            $this->data['id'] = $owner?->id;
-            $this->data['name'] = 'Administrator';
+        if ($loadData) {
+            $this->loadUserData();
         }
     }
 
-    #[On('register-form-submitted')]
+    protected function loadUserData(): void
+    {
+        if ($this->type === 'owner') {
+            $this->user = User::query()
+                ->select(['id', 'name', 'email'])
+                ->role('owner')->get();
+
+            $this->data = array_merge($this->data, $this->user?->toArray());
+        }
+    }
+
     public function submit(): void
     {
         $type = $this->data['type'];
-
         $this->resetValidation();
-        $this->validate([
-            'data.name' => 'required|string|max:50',
-            'data.email' => 'required|email|unique:users,email,' . $this->data['id'] ?? '',
-            'data.password' => ['required', 'confirmed', Password::auto()],
-            'data.type' => 'required|string|in:' . implode(',', User::getRolesOptions())
-        ], attributes: [
-            'data.name' => 'nama pengguna',
-            'data.email' => 'email pengguna',
-            'data.password' => 'kata sandi pengguna',
-            'data.type' => 'tipe pengguna',
-        ]);
 
-        if ($this->getErrorBag()->has('data.type')) {
-            $this->addError('data.name', $this->getErrorBag()->get('data.type')->first());
-        }
+        $this->validate([
+                'data.name' => 'required|string|max:50',
+                'data.email' => 'required|email|unique:users,email,' . $this->data['id'] ?? '',
+                'data.password' => ['required', 'confirmed', Password::auto()],
+                'data.type' => 'required|string|in:' . implode(',', User::getRolesOptions())
+            ], attributes: [
+                'data.name' => 'nama pengguna',
+                'data.email' => 'email pengguna',
+                'data.password' => 'kata sandi pengguna',
+                'data.type' => 'tipe pengguna',
+            ]);
 
         $this->data['password'] = Hash::make($this->data['password']);
         $this->data['password_confirmation'] = Hash::make($this->data['password_confirmation']);
 
-        $res = $this->service->register($this->data);
+        $res = $this->service->register($this->data, $this->user);
         flash($res->getMessage(), $res->getStatusType());
 
         if ($res->passes()) {
-            $this->refreshData();
-            $this->dispatch("{$type}-registered");
+            $this->initialize();
+            $this->dispatch("register-form:{$type}-registered");
         }
-    }
-
-    protected function refreshData()
-    {
-        $this->reset(['data']);
-        $this->resetErrorBag();
-
-        $this->initialize($this->type);
     }
 
     public function render()
     {
         return view('livewire.auth.register-form');
+    }
+
+    public function exception($e, $stopPropagation)
+    {
+        if ($e instanceof ValidationException) {
+            $validator = $e->validator;
+
+            if ($validator->errors()->has('data.type')) {
+                $this->addError('data.email', $validator->errors()->get('data.type'));
+            }
+        }
     }
 }

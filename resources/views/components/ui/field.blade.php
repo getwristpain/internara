@@ -15,9 +15,6 @@
     // Normalisasi name
     $name = str($field)->replace('.', '_')->snake()->toString();
 
-    // Component name
-    $componentName = in_array($type, ['input', 'select', 'checkbox', 'image']) ? $type : 'input';
-
     // Required marker
     $markRequired = $required ?: $markRequired;
 
@@ -29,6 +26,14 @@
     ];
 
     $class = css($class, $style['base']);
+
+    // Component name
+    $componentName = match ($type) {
+        'checkbox' => 'checkbox',
+        'image' => 'image-upload',
+        'select' => 'select',
+        default => 'input',
+    };
 @endphp
 
 <div class="{{ $class }}">

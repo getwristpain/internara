@@ -14,7 +14,7 @@ class DepartmentList extends Component
 
     public array $data = [];
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(DepartmentService::class);
     }
@@ -24,16 +24,21 @@ class DepartmentList extends Component
         $this->initialize();
     }
 
-    protected function initialize(): void
+    protected function initialize(bool $loadData = true): void
     {
-        $this->reset(['departments']);
-        $this->resetErrorBag();
-
-        $this->departments = $this->service->getAll();
         $this->data = [
             'name' => '',
             'description' => '',
         ];
+
+        if ($loadData) {
+            $this->loadDeptData();
+        }
+    }
+
+    protected function loadDeptData(): void
+    {
+        $this->departments = $this->service->getAll();
     }
 
     public function add(): void

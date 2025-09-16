@@ -18,6 +18,6 @@
     </x-ui.animate>
 
     <x-ui.animate class="flex w-full items-center justify-end" delay="200ms">
-        <x-ui.button class="btn-wide" label="Lanjutkan" wire:click="next" color="primary" loading="next" shadowed />
+        <x-ui.button class="btn-wide" label="Lanjutkan" wire:click="next" color="primary" dirty="next" shadowed />
     </x-ui.animate>
 </div>

@@ -1,10 +1,17 @@
-@extends('components.layouts.layout')
+@props([
+    'class' => 'items-center',
+])
+
+@extends('components.layouts.base')
 
 @section('content')
-    <x-bg-decoration />
-    <x-navbar home_url="#" fixed />
+    <x-ui.bg-decoration />
 
-    <main class="wh-full container mx-auto flex min-h-screen flex-col p-4 md:p-8">
+    <header class="w-full">
+        <x-ui.navbar home_url="#" />
+    </header>
+
+    <main class="wh-full {{ $class }} container mx-auto flex min-h-screen flex-col p-4 md:p-8">
         {{ $slot }}
     </main>
 @endsection

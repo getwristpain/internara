@@ -2,16 +2,14 @@
     'departments' => [],
 ])
 
-<div class="wh-full flex flex-col items-center justify-center gap-12">
+<div class="wh-full flex flex-col items-center justify-center gap-8">
     {{-- Department Form --}}
     <x-ui.form class="w-full px-4 py-3" submit="add" bordered>
         <div class="flex w-full flex-nowrap gap-4">
             <x-ui.field type="text" field="data.name" placeholder="Masukkan nama jurusan..." required autofocus />
 
-            <button class="btn btn-primary max-md:btn-square my-2 rounded-xl" type="submit">
-                <x-ui.icon icon="tabler-plus" />
-                <span class="max-md:hidden">Tambah</span>
-            </button>
+            <x-ui.button class="max-md:btn-square my-2 flex-row-reverse" label="Tambah" type="submit" icon="tabler-plus"
+                dirty="add" adapted />
         </div>
     </x-ui.form>
 
@@ -19,8 +17,8 @@
     <div class="flex w-full max-w-4xl flex-1 flex-wrap justify-center gap-4" x-data="{
         departments: @entangle('departments').live,
         remove(id, index) {
-            this.departments.splice(index, 1);
             $wire.remove(id);
+            this.departments.splice(index, 1);
         }
     }">
 

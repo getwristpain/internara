@@ -10,7 +10,12 @@ use App\Helpers\LogicResponse;
 
 class SchoolService extends BaseService
 {
-    public function save(array $data): LogicResponse
+    public function get(): ?School
+    {
+        return School::first();
+    }
+
+    public function save(array $data, ?School $school = null): LogicResponse
     {
         $upload = Media::upload($data['logo_file'] ?? null, 'schools', 'School Logo');
         $logoPath = $upload->getPath();
@@ -21,29 +26,21 @@ class SchoolService extends BaseService
 
         return $this->response()
             ->failWhen($upload->getResponse())
-            ->then(function ($res) use ($data, $upload) {
+            ->then(function ($res) use ($data, $school, $upload) {
                 if ($res->fails()) {
                     $upload->drop();
                     return $res;
                 }
 
-                return $this->store($data);
+                $stored = isset($school) && $school->exists
+                    ? $school->update(Helper::filterOnly($data, $school->getFillable()))
+                    : $school = School::first()?->update(Helper::filterOnly($data, app(School::class)->getFillable()));
+
+                return $res->decide(
+                    (bool) $stored ?? false,
+                    'Berhasil menyimpan data sekolah',
+                    'Gagal menyimpan data sekolah'
+                );
             });
-    }
-
-    public function store(array $data): LogicResponse
-    {
-        $school = app(School::class);
-        $stored = $school->updateOrCreate(
-            ['id' => $data['id']],
-            Helper::filterFillable($data, School::class)
-        );
-
-        return $this->response()
-            ->decide(
-                (bool) $stored ?? false,
-                'Berhasil menyimpan data sekolah',
-                'Gagal menyimpan data sekolah'
-            );
     }
 }

@@ -1,11 +1,13 @@
 @props([
+    'class' => '',
     'label' => null,
     'type' => 'button',
     'color' => null,
     'icon' => null,
-    'loading' => null,
+    'dirty' => null,
+    'loading' => false,
     'shadowed' => false,
-    'attributes' => [],
+    'adapted' => false,
     'modify' => [],
 ])
 
@@ -24,7 +26,7 @@
 
     $modify = [
         'base' => css(
-            'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95',
+            'btn rounded-xl items-center gap-4 transition duration-150 ease-in-out text-nowrap flex-nowrap active:scale-95 disabled:disabled',
             [
                 'shadow-lg shadow-neutral-400' => $shadowed,
             ],
@@ -39,31 +41,37 @@
                 default => '',
             },
         ),
+        'label' => css(['max-md:hidden' => $adapted && isset($label)]),
     ];
 
     $type = in_array($type, ['button', 'submit', 'reset']) ? $type : 'button';
+    $class = css($modify['base'], $class);
 @endphp
 
-<button x-data x-cloax :class="@js($modify['base'])" type="{{ $type }}" {{ $attributes }}>
+<button class="{{ $class }}" x-data="{ loading: @js($loading) }" x-cloak type="{{ $type }}" x-bind:disabled="loading"
+    wire:loading.attr="disabled" {{ $attributes }}>
     {{-- Label --}}
     @isset($label)
         <span class="{{ $modify['label'] ?? 'truncate' }}">{{ $label }}</span>
     @endisset
 
-    @if (isset($loading))
+    @if (isset($dirty))
         {{-- Icon --}}
         @isset($icon)
-            <x-ui.icon class="{{ $modify['icon'] ?? 'icon-md' }}" wire:target="{{ $loading }}" wire:loading.class="hidden"
+            <x-ui.icon class="icon-md" wire:target="{{ $dirty }}" wire:loading.class="hidden"
                 icon="{{ $icon }}" />
         @endisset
 
         {{-- Loading Spinner --}}
-        <span class="loading loading-spinner hidden" wire:target="{{ $loading }}"
+        <span class="loading loading-spinner hidden" wire:target="{{ $dirty }}"
             wire:loading.class.remove="hidden"></span>
     @else
         @isset($icon)
             {{-- Icon --}}
-            <x-ui.icon class="{{ $modify['icon'] ?? 'icon-md' }}" icon="{{ $icon }}" />
+            <x-ui.icon class="icon-md" x-show="!loading" icon="{{ $icon }}" />
+
+            {{-- Loading Spinner --}}
+            <span class="loading loading-spinner" x-show="loading"></span>
         @endisset
     @endif
 </button>

@@ -6,14 +6,14 @@ class Helper
 {
     /**
      * @param array $attributes
-     * @param string<class-string> $model
+     * @param string|array<string> $include
      *
      * @return array
      */
-    public static function filterFillable(array $attributes, string $model): array
+    public static function filterOnly(array $attributes, string|array $include = []): array
     {
-        $attributes = array_filter($attributes, fn ($i) => $i !== '' && $i !== null);
-        return array_intersect_key($attributes, array_flip(app($model)->getFillable()));
+        $attributes = array_filter($attributes, fn ($i) => $i !== null);
+        return array_intersect_key($attributes, array_flip((array) $include));
     }
 
     public function response(string $type = '', string $message = ''): LogicResponse

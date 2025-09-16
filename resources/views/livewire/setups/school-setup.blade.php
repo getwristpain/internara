@@ -23,7 +23,7 @@
     </x-ui.animate>
 
     <x-ui.animate class="order-3 flex justify-end lg:justify-start" delay="400ms">
-        <x-ui.button class="btn-wide" label="Simpan & Lanjutkan" type="submit" form="schoolForm" loading="next"
-            shadowed />
+        <x-ui.button class="btn-wide" label="Simpan & Lanjutkan" type="submit" form="schoolForm" shadowed
+            x-on:dirty-loading.window="loading = $event.detail.loading" />
     </x-ui.animate>
 </div>

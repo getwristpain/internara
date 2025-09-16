@@ -9,7 +9,7 @@ class DepartmentSetup extends Component
 {
     protected SetupService $service;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(SetupService::class);
     }
@@ -38,6 +38,12 @@ class DepartmentSetup extends Component
 
     public function render()
     {
-        return view('livewire.setups.department-setup');
+        /**
+         * @var \Illuminate\View\View $view
+         */
+        $view = view('livewire.setups.department-setup');
+        return $view->layout('components.layouts.guest', [
+            'title' => ("Konfigurasi Jurusan Sekolah | " . config('app.description')),
+        ]);
     }
 }

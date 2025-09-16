@@ -14,10 +14,11 @@
     </div>
 
     <x-ui.animate class="w-full flex-1" delay="400ms">
-        // Program list
+        @livewire('programs.program-list')
     </x-ui.animate>
 
     <x-ui.animate class="flex w-full items-center justify-end" delay="200ms">
-        <x-ui.button class="btn-wide" label="Simpan & Lanjutkan" action="next" color="primary" shadowed />
+        <x-ui.button class="btn-wide" label="Simpan & Lanjutkan" wire:click="next" color="primary" dirty="next"
+            shadowed />
     </x-ui.animate>
 </div>

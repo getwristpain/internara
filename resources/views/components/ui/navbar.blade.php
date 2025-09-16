@@ -3,14 +3,21 @@
     'home_url' => '/',
     'type' => 'glassy',
     'fixed' => false,
+    'class' => '',
 ])
 
-<nav x-data x-cloak :class="@js(
-    css('navbar px-4 lg:px-8 w-full', [
-        'fixed z-10 top-0 left-0' => $fixed,
-        'glass shadow-none' => $type === 'glassy',
-    ]),
-)" {{ $attributes }}>
+@php
+    $class = css(
+        'navbar px-4 lg:px-8 w-full',
+        [
+            'fixed z-10 top-0 left-0' => $fixed,
+            'glass shadow-none' => $type === 'glassy',
+        ],
+        $class,
+    );
+@endphp
+
+<nav class="{{ $class }}" {{ $attributes }}>
     {{-- Content --}}
     <div class="container mx-auto">
         {{-- Brand --}}

@@ -26,14 +26,14 @@ class CheckUserStatus
     {
         $user = auth()->user();
 
-        if (!$this->isInternshipRegisRoute($request) && $user->hasStatuses('pending-activation')) {
+        if (!$this->isRegistrationRoute($request) && $user->hasStatuses('pending-activation')) {
             return redirect()->route('student.registration');
         }
 
         return $next($request);
     }
 
-    protected function isInternshipRegisRoute(Request $request): bool
+    protected function isRegistrationRoute(Request $request): bool
     {
         return $request->routeIs('student.registration*');
     }

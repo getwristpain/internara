@@ -10,7 +10,7 @@ class SchoolSetup extends Component
 {
     protected SetupService $service;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(SetupService::class);
     }
@@ -29,7 +29,7 @@ class SchoolSetup extends Component
         }
     }
 
-    #[On('school-saved')]
+    #[On('school-form:saved')]
     public function next(): void
     {
         $res = $this->service->perform('setup:school');

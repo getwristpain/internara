@@ -26,7 +26,7 @@ class DepartmentService extends BaseService
     {
         $data['school_id'] ??= School::first()?->id;
 
-        $created = Department::create(Helper::filterFillable($data, Department::class));
+        $created = Department::create(Helper::filterOnly($data, app(Department::class)->getFillable()));
         $response = $this->response()->decide(
             (bool) $created ?? false,
             'Berhasil menambahkan jurusan.',

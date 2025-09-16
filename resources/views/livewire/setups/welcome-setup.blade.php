@@ -1,3 +1,7 @@
+@push('head')
+    <link rel="preload" as="image" href="{{ asset('images/drawkit/teamworks/teamwork-5.svg') }}" type="image/svg+xml">
+@endpush
+
 <div class="flex flex-1 flex-col items-center justify-center gap-8">
     <x-ui.animate class="w-full lg:hidden">
         <figure class="flex flex-col items-center justify-center">
@@ -12,7 +16,7 @@
         </figure>
     </x-ui.animate>
 
-    <div class="flex w-full flex-col items-center justify-center gap-12">
+    <div class="flex w-full flex-col items-center justify-center gap-8">
         <div class="space-y-1 text-center">
             <x-ui.animate>
                 <h1 class="text-head">
@@ -29,7 +33,7 @@
         </div>
 
         <x-ui.animate delay="400ms">
-            <x-ui.button class="btn-wide" wire:click="next" label="Mulai Instalasi" color="primary" loading="next"
+            <x-ui.button class="btn-wide" wire:click="next" label="Mulai Instalasi" color="primary" dirty="next"
                 shadowed />
         </x-ui.animate>
     </div>

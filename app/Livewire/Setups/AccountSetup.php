@@ -10,7 +10,7 @@ class AccountSetup extends Component
 {
     protected SetupService $service;
 
-    public function __construct()
+    public function boot(): void
     {
         $this->service = app(SetupService::class);
     }
@@ -29,7 +29,7 @@ class AccountSetup extends Component
         }
     }
 
-    #[On('owner-registered')]
+    #[On('register-form:owner-registered')]
     public function next(): void
     {
         $res = $this->service->perform('setup:account');

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\LogicResponse;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -39,13 +40,17 @@ class AuthService extends UserService
             ));
     }
 
-    public function register(array $data): LogicResponse
+    public function register(array $data, ?User $user = null): LogicResponse
     {
         $key = "register:" . str($data['email'] ?? $data['name'] ?? '')->lower()->slug()->toString();
+        $type = $data['type'] ?? 'guest';
+
+        $data['roles'] = $type === 'owner' ? ['owner', 'admin'] : $type;
+        $data['statuses'] = in_array($type, ['admin', 'owner']) ? 'protected' : 'pending-activation';
 
         return $this->response()
             ->failWhen($this->ensureNotRateLimited($key))
-            ->then($this->save($data));
+            ->then($this->save($data, $user));
     }
 
     public function sendPasswordResetLink(string $email): LogicResponse

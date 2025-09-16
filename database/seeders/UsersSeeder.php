@@ -57,7 +57,7 @@ class UsersSeeder extends Seeder
         foreach ($users as $user) {
             $createdUser = User::updateOrCreate(
                 ['email' => $user['email']],
-                Helper::filterFillable($user, User::class)
+                Helper::filterOnly($user, app(User::class)->getFillable())
             );
 
             $createdUser->assignRole($user['roles'] ?? 'guest');
