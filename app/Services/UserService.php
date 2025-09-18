@@ -4,46 +4,70 @@ namespace App\Services;
 
 use App\Helpers\Generator;
 use App\Helpers\LogicResponse;
-use App\Helpers\Helper;
 use App\Models\User;
-use App\Services\BaseService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class UserService extends BaseService
 {
-    public function save(array $data, ?User $user = null): LogicResponse
+    /**
+     * @var User|null The user model instance for subsequent operations.
+     */
+    private ?User $user = null;
+
+    /**
+     * Sets the user model instance for subsequent operations.
+     *
+     * @param User|null $user
+     * @return static
+     */
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * Saves a new user or updates an existing one.
+     *
+     * @param array $data
+     * @return LogicResponse
+     */
+    public function save(array $data): LogicResponse
+    {
+        try {
+            $this->ensureUsernameFilled($data);
+            $this->ensurePasswordHashed($data);
+
+            $user = $this->user ?? new User();
+            $user->fill($data)->save();
+
+            if (isset($data['roles'])) {
+                $user->syncRoles($data['roles'] ?? 'student');
+            }
+
+            if (isset($data['statuses'])) {
+                $user->syncStatuses($data['statuses'] ?? 'pending-activation', 'user');
+            }
+
+            return $this->respond(true, 'Berhasil menyimpan data pengguna.', ['user' => $user]);
+        } catch (\Throwable $th) {
+            return $this->respond(false, 'Gagal menyimpan data pengguna.')->debug($th);
+        }
+    }
+
+    /**
+     * Ensures the username is filled, generating one if it's empty.
+     *
+     * @param array $data
+     * @return void
+     * @throws ValidationException
+     */
+    private function ensureUsernameFilled(array &$data): void
     {
         $type = $data['type'] ?? 'guest';
 
-        $this->ensureUsernameFilled($type, $data['username'], $data['id']);
-        $this->ensurePasswordHashed($data['password']);
-
-        // Use existing User model
-        $saved = isset($user) && $user?->exists
-            ? $user->update(Helper::filterOnly($data, $user->getFillable()))
-            : $user = User::create(Helper::filterOnly($data, app(User::class)->getFillable()));
-
-        // Sync Roles when roles data is set
-        if (isset($data['roles'])) {
-            $user->syncRoles($data['roles'] ?? 'guest');
-        }
-
-        // Sync Statuses when statuses data is set
-        if (isset($data['statuses'])) {
-            $user->syncStatuses($data['statuses'] ?? 'pending-activation', 'user');
-        }
-
-        return $this->response()->decide(
-            (bool) $saved ?? false,
-            'Akun pengguna berhasil dibuat.',
-            'Gagal menyimpan akun pengguna.'
-        );
-    }
-
-    public function ensureUsernameFilled(string $type, ?string &$ref, string|int|null $id = null): void
-    {
         $prefix = match ($type) {
             'admin', 'owner' => 'adm',
             'student' => 'st',
@@ -52,11 +76,11 @@ class UserService extends BaseService
             default => 'u',
         };
 
-        $ref ??= Generator::username($prefix);
+        $data['username'] ??= Generator::username($prefix);
 
         $validator = Validator::make(
-            data: ['username' => $ref],
-            rules: ['username' => 'required|string|min:5|unique:users,username,' . $id],
+            data: ['username' => $data['username']],
+            rules: ['username' => 'required|string|min:5|unique:users,username,' . ($this->user->id ?? '')],
             attributes: ['username' => 'username pengguna']
         );
 
@@ -65,10 +89,16 @@ class UserService extends BaseService
         }
     }
 
-    public function ensurePasswordHashed(?string &$ref): void
+    /**
+     * Ensures the password is hashed if it's not already.
+     *
+     * @param array $data
+     * @return void
+     */
+    private function ensurePasswordHashed(array &$data): void
     {
-        if (!str_starts_with($ref, '$2y$')) {
-            $ref = Hash::make($ref);
+        if (isset($data['password']) && !str_starts_with($data['password'], '$2y$')) {
+            $data['password'] = Hash::make($data['password']);
         }
     }
 }

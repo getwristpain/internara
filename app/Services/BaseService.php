@@ -2,49 +2,55 @@
 
 namespace App\Services;
 
-use App\Helpers\Transform;
 use App\Helpers\LogicResponse;
-use RateLimiter;
+use Illuminate\Support\Facades\RateLimiter;
 
 class BaseService
 {
-    public function response(string $type = '', string $message = ''): LogicResponse
+    /**
+     * Creates a configured LogicResponse instance.
+     *
+     * @param bool $success
+     * @param string $message
+     * @param array $payload
+     * @return LogicResponse
+     */
+    protected function respond(bool $success, string $message = '', array $payload = []): LogicResponse
     {
-        if (!empty($type)) {
-            $type = in_array($type, ['success', 'error']) ? $type : null;
-            return LogicResponse::make($type && $type === 'success', $message)
-                ->withType($this)
-                ->withPayload($this->toArray());
+        return LogicResponse::make($success, $message, payload: $payload)
+            ->withType($this);
+    }
+
+    /**
+     * Checks if the user has exceeded the attempt limit.
+     *
+     * @param string $key
+     * @param int $maxAttempts
+     * @return LogicResponse
+     */
+    protected function ensureNotRateLimited(string $key, int $maxAttempts = 5): LogicResponse
+    {
+        $throttleKey = $this->generateThrottleKey($key);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $maxAttempts)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $message = str("Terlalu banyak percobaan. Mohon tunggu selama :seconds detik.")
+                ->replace(':seconds', $seconds)->toString();
+
+            return $this->respond(false, $message);
         }
 
-        return LogicResponse::make()
-            ->withType($this)
-            ->withPayload($this->toArray());
+        RateLimiter::hit($throttleKey);
+        return $this->respond(true);
     }
 
-    public function toArray(): array
-    {
-        return [];
-    }
-
-    public function ensureNotRateLimited(string $key, int $maxAttempts = 5): LogicResponse
-    {
-        $key = $this->generateTrottleKey($key);
-
-        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            $seconds = RateLimiter::availableIn($key);
-            $message = Transform::from("Terlalu banyak melakukan percobaan. Tunggu hingga :seconds detik.")
-                ->replace(':seconds', $seconds)
-                ->toString();
-
-            return $this->response()->error($message);
-        }
-
-        RateLimiter::increment($key);
-        return $this->response()->success();
-    }
-
-    protected function generateTrottleKey(string $key): string
+    /**
+     * Generates a unique key for the rate limiter based on the user or IP.
+     *
+     * @param string $key
+     * @return string
+     */
+    private function generateThrottleKey(string $key): string
     {
         return strtolower(trim($key)) . ':' . (auth()->id() ?? request()->getClientIp());
     }

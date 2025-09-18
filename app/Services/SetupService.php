@@ -3,16 +3,19 @@
 namespace App\Services;
 
 use App\Helpers\LogicResponse;
-use App\Helpers\Transform;
 use App\Models\School;
 use App\Models\User;
-use App\Services\BaseService;
 use Illuminate\Support\Facades\Session;
 
 class SetupService extends BaseService
 {
-    protected array $steps = [
-        'setup:welcome' => 'Introduksi',
+    /**
+     * The list of all setup steps.
+     *
+     * @var array<string, string>
+     */
+    private static array $steps = [
+        'setup:welcome' => 'Pengenalan',
         'setup:account' => 'Konfigurasi Administrator',
         'setup:school' => 'Konfigurasi Sekolah',
         'setup:department' => 'Konfigurasi Jurusan',
@@ -20,12 +23,18 @@ class SetupService extends BaseService
         'setup:complete' => 'Finalisasi',
     ];
 
+    /**
+     * Initiates the installation process for a given step.
+     *
+     * @param string $step
+     * @return LogicResponse
+     */
     public function perform(string $step = ''): LogicResponse
     {
-        return $this->response()
-            ->failWhen(!isset($this->steps[$step]), "Gagal melanjutkan instalasi: '{$step}' tidak diizinkan.")
+        return $this->respond(true)
+            ->failWhen($this->isStepInvalid($step))
             ->failWhen($this->ensureNotRateLimited($step))
-            ->then(match ($step) {
+            ->then(fn () => match ($step) {
                 'setup:welcome' => $this->setupWelcome(),
                 'setup:account' => $this->setupAccount(),
                 'setup:school' => $this->setupSchool(),
@@ -35,102 +44,180 @@ class SetupService extends BaseService
             });
     }
 
+    /**
+     * Ensures previous steps have been completed.
+     *
+     * @param string|string[] $steps
+     * @return LogicResponse
+     */
     public function ensureStepsCompleted(string|array $steps): LogicResponse
     {
-        if (is_array($steps)) {
-            foreach ($steps as $step) {
-                $res = $this->ensureStepsCompleted($step);
+        $steps = (array) $steps;
 
-                if ($res->fails()) {
-                    return $res;
-                }
+        foreach ($steps as $step) {
+            if (!Session::has($step)) {
+                $label = self::$steps[$step] ?? 'langkah sebelumnya';
+                return $this->respond(false, "Mohon selesaikan '{$label}' untuk melanjutkan.");
             }
-
-            return $res;
         }
 
-        $label = $this->steps[$steps] ?? 'sebelumnya';
-
-        return $this->response()
-            ->failWhen(!isset($this->steps[$steps]), "Gagal melanjutkan instalasi: '{$steps}' tidak diizinkan.")
-            ->failWhen(!Session::has($steps), "Pastikan untuk menyelesaikan langkah {$label} sebelum melanjutkan.")
-            ->then(fn ($res) => $res->success());
+        return $this->respond(true);
     }
 
-    protected function setupWelcome(): LogicResponse
+    /**
+     * Sets up the welcome step.
+     *
+     * @return LogicResponse
+     */
+    private function setupWelcome(): LogicResponse
     {
-        return $this->response()
-            ->then($this->markAsCompleted('setup:welcome'));
+        return $this->processStep('setup:welcome');
     }
 
-    protected function setupAccount(): LogicResponse
+    /**
+     * Sets up the account configuration step.
+     *
+     * @return LogicResponse
+     */
+    private function setupAccount(): LogicResponse
     {
-        return $this->response()
-            ->failWhen($this->ensureStepsCompleted('setup:welcome'))
-            ->failWhen(!(User::role('owner')->exists()), "Buat akun Administrator terlebih dahulu sebelum melanjutkan.")
-            ->then($this->markAsCompleted('setup:account'));
+        return $this->checkAndProcess('setup:welcome', 'setup:account', fn () => $this->respond(true)
+            ->failWhen(!User::role('owner')->exists(), "Buat akun Administrator terlebih dahulu."));
     }
 
-    protected function setupSchool(): LogicResponse
+    /**
+     * Sets up the school configuration step.
+     *
+     * @return LogicResponse
+     */
+    private function setupSchool(): LogicResponse
     {
-        $school = School::first();
-
-        return $this->response()
-            ->failWhen($this->ensureStepsCompleted('setup:account'))
-            ->failWhen(empty($school), 'Konfigurasi data sekolah terlebih dahulu sebelum melanjutkan.')
-            ->then($this->markAsCompleted('setup:school'));
+        return $this->checkAndProcess('setup:account', 'setup:school', fn () => $this->respond(true)
+            ->failWhen(!School::exists(), 'Konfigurasi data sekolah terlebih dahulu.'));
     }
 
-    protected function setupDepartment(): LogicResponse
+    /**
+     * Sets up the department configuration step.
+     *
+     * @return LogicResponse
+     */
+    private function setupDepartment(): LogicResponse
     {
-        return $this->response()
-            ->failWhen($this->ensureStepsCompleted('setup:school'))
-            ->then($this->markAsCompleted('setup:department'));
+        return $this->checkAndProcess('setup:school', 'setup:department');
     }
 
-    protected function setupProgram()
+    /**
+     * Sets up the program configuration step.
+     *
+     * @return LogicResponse
+     */
+    private function setupProgram(): LogicResponse
     {
-        return $this->response()
-            ->failWhen($this->ensureStepsCompleted('setup:department'))
-            ->then($this->markAsCompleted('setup:program'));
+        return $this->checkAndProcess('setup:department', 'setup:program');
     }
 
-    protected function setupComplete(): LogicResponse
+    /**
+     * Finalizes the entire installation process.
+     *
+     * @return LogicResponse
+     */
+    private function setupComplete(): LogicResponse
     {
-        return $this->response()
+        return $this->respond(true)
             ->failWhen($this->ensureStepsCompleted([
                 'setup:welcome',
                 'setup:account',
                 'setup:school',
                 'setup:department',
                 'setup:program'
-            ]))->failWhen($this->markAsCompleted('setup:complete'))
+            ]))
             ->then(function ($res) {
-                session()->regenerate();
+                setting('is_installed', true);
+                Session::flush();
                 return $res->decide(
-                    (bool) setting('is_installed', true) ?? false,
-                    'Berhasil menyelesaikan instalasi.',
-                    'Gagal menyelesaikan instalasi.'
+                    (bool) setting('is_installed'),
+                    'Instalasi selesai. Aplikasi siap digunakan!',
+                    'Instalasi gagal. Mohon periksa kembali konfigurasi Anda.'
                 );
             });
     }
 
-    protected function markAsCompleted(string $step): LogicResponse
+    /**
+     * Checks a prerequisite step and then processes the current step.
+     *
+     * @param string $prerequisiteStep
+     * @param string $currentStep
+     * @param callable|null $callback
+     * @return LogicResponse
+     */
+    private function checkAndProcess(string $prerequisiteStep, string $currentStep, callable $callback = null): LogicResponse
     {
-        $label = $this->steps[$step] ?? 'Instalasi';
+        $response = $this->ensureStepsCompleted($prerequisiteStep);
+        if ($response->fails()) {
+            return $response;
+        }
+
+        return $this->processStep($currentStep, $callback);
+    }
+
+    /**
+     * Checks if the installation step is invalid.
+     *
+     * @param string $step
+     * @return LogicResponse
+     */
+    private function isStepInvalid(string $step): LogicResponse
+    {
+        return $this->respond(true)
+            ->failWhen(!isset(self::$steps[$step]), "Langkah tidak valid. Mohon pastikan URL benar.");
+    }
+
+    /**
+     * Processes and marks an installation step as completed.
+     *
+     * @param string $step
+     * @param callable|null $callback
+     * @return LogicResponse
+     */
+    private function processStep(string $step, callable $callback = null): LogicResponse
+    {
+        $response = $this->respond(true);
+
+        if ($callback) {
+            $response = $response->then($callback);
+        }
+
+        return $response->then(fn ($res) => $this->markAsCompleted($step));
+    }
+
+    /**
+     * Marks a step as completed in the session.
+     *
+     * @param string $step
+     * @return LogicResponse
+     */
+    private function markAsCompleted(string $step): LogicResponse
+    {
+        $label = self::$steps[$step] ?? 'Instalasi';
 
         try {
             Session::put($step, true);
-            return $this->response()->success("Berhasil menyelesaikan langkah {$label}.");
+            return $this->respond(true, "Langkah '{$label}' berhasil diselesaikan.");
         } catch (\Throwable $th) {
-            return $this->response()->error("Gagal menyelesaikan langkah {$label}.")
+            return $this->respond(false, "Terjadi kesalahan saat menyelesaikan langkah '{$label}'. Mohon coba lagi.")
                 ->debug($th);
         }
     }
 
-    public function ensureNotRateLimited(string $step, int $maxAttempts = 20): LogicResponse
+    /**
+     * Ensures a step is not rate-limited.
+     *
+     * @param string $step
+     * @param int $maxAttempts
+     * @return LogicResponse
+     */
+    protected function ensureNotRateLimited(string $step, int $maxAttempts = 20): LogicResponse
     {
-        $key = "setup:{$step}";
-        return parent::ensureNotRateLimited($key, $maxAttempts);
+        return parent::ensureNotRateLimited("setup:{$step}", $maxAttempts);
     }
 }

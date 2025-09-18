@@ -26,7 +26,7 @@ class ProfileService extends BaseService
             Support::filterFillable($data, Profile::class)
         ) ?? false;
 
-        return $this->response()
+        return $this->respond()
             ->failWhen($handleAvatar->getResponse())
             ->failWhen(!$updatedUser && !$updatedProfile, 'Gagal menyimpan profil pengguna.')
             ->then(function ($res) use ($handleAvatar) {

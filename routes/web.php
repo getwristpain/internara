@@ -1,15 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
-foreach (glob(__DIR__ . '/web/*.php') as $routeFile) {
-    require  $routeFile;
-}
+// Include your route files from the 'web' directory
+require __DIR__ . '/web/auth.php';
+require __DIR__ . '/web/setup.php';
+// Add any other route files here...
 
-Route::get('/', fn () => redirect()->route('login'))
+/**
+ * Redirects the root URL to the login page.
+ * The redirect method is more efficient than a full route handler.
+ */
+Route::redirect('/', '/login')
     ->name('home');
-
-Volt::route('dashboard', 'dashboard')
-    ->middleware('auth')
-    ->name('dashboard');

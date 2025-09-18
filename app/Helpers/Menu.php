@@ -2,9 +2,7 @@
 
 namespace App\Helpers;
 
-use App\Helpers\Helper;
-
-class Menu extends Helper
+class Menu
 {
     public static function all(): array
     {

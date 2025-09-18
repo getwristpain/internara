@@ -12,11 +12,9 @@ class Logout
      */
     public function __invoke()
     {
-        Auth::guard('web')->logout();
-
-        Session::invalidate();
-        Session::regenerateToken();
-
-        return redirect('/');
+        $response = app(\App\Services\AuthService::class)->logout();
+        return $response->passes()
+            ? redirect('/')
+            : session()->flash('error', $response->getMessage());
     }
 }

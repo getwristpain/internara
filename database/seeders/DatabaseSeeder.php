@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 
     protected function runDevSeeders()
     {
-        if (setting()->isDev()) {
+        if (app()->environment('local')) {
             $this->call([
                 UsersSeeder::class,
                 SchoolSeeder::class,

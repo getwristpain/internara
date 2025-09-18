@@ -3,89 +3,117 @@
 namespace App\Services;
 
 use App\Helpers\LogicResponse;
-use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthService extends UserService
 {
+    /**
+     * Authenticates a user based on credentials.
+     *
+     * @param array $data
+     * @return LogicResponse
+     */
     public function login(array $data): LogicResponse
     {
         $identifier = $data['id'] ?? $data['username'] ?? $data['email'];
+        $password = $data['password'] ?? null;
+        $remember = $data['remember'] ?? false;
 
-        $key = 'login:' . str($identifier ?? '')->lower()->slug()->toString();
-        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL)
-            ? 'email' : 'username';
+        $key = 'login:' . Str::slug($identifier ?? '');
+        $isEmail = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+        $field = $isEmail ? 'email' : 'username';
 
-        $login = isset($data['id'])
-            ? Auth::loginUsingId($identifier, $data['remember'] ?? false)
-            : Auth::attempt([
-                $field => $identifier,
-                'password' => $data['password']
-            ], $data['remember'] ?? false);
+        return $this->ensureNotRateLimited($key)
+            ->then(function () use ($identifier, $password, $field, $remember, $key) {
+                $loggedIn = isset($data['id'])
+                    ? Auth::loginUsingId($identifier, $remember)
+                    : Auth::attempt([$field => $identifier, 'password' => $password], $remember);
 
-        if ((bool) $login ?? false) {
-            session()->regenerate();
-            RateLimiter::clear($key);
-        }
+                if ($loggedIn) {
+                    session()->regenerate();
+                    RateLimiter::clear($key);
+                    return $this->respond(true, 'Berhasil masuk.');
+                }
 
-        return LogicResponse::make()
-            ->failWhen($this->ensureNotRateLimited($key))
-            ->then(fn ($res) => $res->decide(
-                (bool) $login ?? false,
-                'Berhasil masuk',
-                'Gagal untuk masuk'
-            ));
+                return $this->respond(false, 'Kredensial tidak valid.');
+            });
     }
 
-    public function register(array $data, ?User $user = null): LogicResponse
+    /**
+     * Registers a new user or updates an existing one.
+     *
+     * @param array $data
+     * @return LogicResponse
+     */
+    public function register(array $data): LogicResponse
     {
-        $key = "register:" . str($data['email'] ?? $data['name'] ?? '')->lower()->slug()->toString();
-        $type = $data['type'] ?? 'guest';
+        $key = 'register:' . Str::slug($data['email'] ?? $data['name'] ?? '');
 
-        $data['roles'] = $type === 'owner' ? ['owner', 'admin'] : $type;
-        $data['statuses'] = in_array($type, ['admin', 'owner']) ? 'protected' : 'pending-activation';
+        // Determine roles and statuses based on the user type
+        $data['roles'] = ($data['type'] ?? 'student') === 'owner'
+            ? ['owner', 'admin']
+            : $data['type'];
 
-        return $this->response()
-            ->failWhen($this->ensureNotRateLimited($key))
-            ->then($this->save($data, $user));
+        $data['statuses'] = in_array($data['type'] ?? 'student', ['admin', 'owner'])
+            ? 'protected'
+            : 'pending-activation';
+
+        return $this->ensureNotRateLimited($key)
+            ->then(fn () => $this->save($data));
     }
 
+    /**
+     * Logs out the current user.
+     *
+     * @return LogicResponse
+     */
+    public function logout(): LogicResponse
+    {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return $this->respond(true, 'Berhasil keluar.');
+    }
+
+    /**
+     * Sends a password reset link to the user's email.
+     *
+     * @param string $email
+     * @return LogicResponse
+     */
     public function sendPasswordResetLink(string $email): LogicResponse
     {
-        $status = Password::sendResetLink([
-            'email' => $email
-        ]);
+        $status = Password::sendResetLink(['email' => $email]);
 
-        return $this->response()
-            ->make(
-                $status === Password::RESET_LINK_SENT,
-                __($status),
-            );
+        return $this->respond($status === Password::RESET_LINK_SENT, __($status));
     }
 
+    /**
+     * Resets a user's password using a token.
+     *
+     * @param string $email
+     * @param string $token
+     * @param string $newPassword
+     * @param string $newPasswordConfirmation
+     * @return LogicResponse
+     */
     public function resetPasswordWithToken(string $email, string $token, string $newPassword, string $newPasswordConfirmation): LogicResponse
     {
         $status = Password::reset([
-            'email' => $email,
-            'token' => $token,
-            'password' => $newPassword,
-            'password_confirmation' => $newPasswordConfirmation
+            'email'                 => $email,
+            'token'                 => $token,
+            'password'              => $newPassword,
+            'password_confirmation' => $newPasswordConfirmation,
         ], function ($user) use ($newPassword) {
-            $this->ensurePasswordHashed($newPassword);
-            $user->forceFill([
-                'password' => $newPassword
-            ])->save();
-
+            $user->forceFill(['password' => $newPassword])->save();
             event(new PasswordReset($user));
         });
 
-        return $this->response()
-            ->make(
-                $status === Password::PASSWORD_RESET,
-                __($status)
-            );
+        return $this->respond($status === Password::PASSWORD_RESET, __($status));
     }
 }

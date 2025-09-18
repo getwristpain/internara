@@ -1,6 +1,6 @@
 @props([
     'title' => $shared->settings['brand_name'],
-    'favicon' => asset($shared->settings['brand_logo']),
+    'favicon' => $shared->settings['brand_logo'],
 ])
 
 <!DOCTYPE html>
@@ -15,7 +15,7 @@
         <title>{{ $title }}</title>
 
         {{-- Favicon --}}
-        <link rel="preload" as="image" href="{{ asset($shared->settings['brand_logo']) }}" type="image/png">
+        <link rel="preload" as="image" href="{{ $favicon }}" type="image/png">
         <link rel="shortcut icon" href="{{ $favicon }}" type="image/x-icon">
 
         {{-- Google Fonts --}}

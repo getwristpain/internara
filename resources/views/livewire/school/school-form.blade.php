@@ -11,7 +11,7 @@
 <x-ui.form :$name :$submit :$title :$desc :$shadowed :$bordered>
     <div class="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
         <x-ui.field class="col-span-full" type="image" field="data.logo_file" label="Logo Sekolah"
-            placeholder="Unggah Logo" aspect="square" preview="data.logo" />
+            placeholder="Unggah Logo" aspect="square" preview="data.logo_url" />
         <x-ui.field type="business" field="data.name" label="Nama Sekolah" placeholder="Masukkan nama sekolah..."
             required />
         <x-ui.field type="email" field="data.email" label="Email Sekolah" placeholder="Masukkan email sekolah..."

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\Transform;
 use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
@@ -26,6 +25,11 @@ class Department extends Model
 
     public function initials(): string
     {
-        return Transform::from($this->attributes['name'] ?? null)->initials()->toString();
+        $initials = str($this->attributes['name'] ?? null)
+            ->explode(' ')
+            ->map(fn ($word) => str($word)->substr(0, 1)->upper())
+            ->implode('');
+
+        return $initials;
     }
 }

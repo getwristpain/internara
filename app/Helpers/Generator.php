@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 /**
  * Generator helper for creating unique keys.
  */
-class Generator extends Helper
+class Generator
 {
     /**
      * Generate a unique key.

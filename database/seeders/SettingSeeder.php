@@ -13,7 +13,7 @@ class SettingSeeder extends Seeder
      */
     public function run(): void
     {
-        $prodSettings = [
+        $initialSettings = [
             [
                 'key' => 'brand_name',
                 'value' => config('app.name'),
@@ -31,38 +31,6 @@ class SettingSeeder extends Seeder
             ],
         ];
 
-        $devSettings = [
-            [
-                'key' => 'brand_name',
-                'value' => config('app.name'),
-                'label' => 'Nama Brand',
-            ],
-            [
-                'key' => 'brand_logo',
-                'value' => config('app.logo'),
-                'label' => 'Logo Brand',
-            ],
-            [
-                'key' => 'is_installed',
-                'value' => false,
-                'label' => 'Aplikasi Terinstal',
-            ],
-        ];
-
-        if (setting()->isDev() && !empty($devSettings)) {
-            foreach ($devSettings as $set) {
-                Setting::updateOrCreate(['key' => $set['key']], $set);
-            }
-
-            return;
-        }
-
-        if (!empty($prodSettings)) {
-            foreach ($prodSettings as $set) {
-                Setting::updateOrCreate(['key' => $set['key']], $set);
-            }
-
-            return;
-        }
+        Setting::upsert($initialSettings, ['key'], ['value', 'label']);
     }
 }

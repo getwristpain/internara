@@ -15,12 +15,12 @@ class SharedServiceProvider extends ServiceProvider
     {
         $defaultSettings = [
             'brand_name' => config('app.name'),
-            'brand_logo' => config('app.logo'),
+            'brand_logo' => asset(config('app.logo')),
         ];
 
         $this->app->singleton('shared', fn ()
             => Attribute::make([
-                'settings' => setting()?->cached(array_keys($defaultSettings), $defaultSettings)
+                'settings' => setting(array_keys($defaultSettings), default: $defaultSettings)
             ]));
     }
 

@@ -20,7 +20,7 @@ return new class () extends Migration {
             $table->string('postal_code')->nullable();
             $table->string('principal_name')->nullable();
             $table->string('website')->nullable();
-            $table->string('logo')->nullable();
+            $table->string('logo_url')->nullable();
             $table->timestamps();
         });
     }

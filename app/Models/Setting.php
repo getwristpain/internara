@@ -32,12 +32,19 @@ class Setting extends Model
         }
 
         $type = $this->attributes['type'] ?? 'string';
-        return Transform::from($value)->to($type);
+        $transform = Transform::from($value);
+
+        return match ($type) {
+            'bool', 'boolean' => $transform->toBoolean(),
+            'arr', 'array' => $transform->toArray(),
+            'json' => $transform->toJson(),
+            default => $transform->toString(),
+        };
     }
 
     public function setKeyAttribute($value): void
     {
-        $this->attributes['key'] = Transform::from($value)
+        $this->attributes['key'] = str($value)
             ->lower()->slug('_')
             ->toString();
     }

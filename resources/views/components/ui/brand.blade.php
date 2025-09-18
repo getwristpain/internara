@@ -3,7 +3,7 @@
     'url' => '/',
     'brand' => [
         'name' => $shared->settings['brand_name'],
-        'logo' => asset($shared->settings['brand_logo']),
+        'logo' => $shared->settings['brand_logo'],
     ],
 ])
 
