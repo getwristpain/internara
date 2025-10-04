@@ -13,11 +13,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->runProdSeeders();
+        $this->runDevSeeders();
+    }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+    protected function runProdSeeders()
+    {
+        $this->call([
+            SettingSeeder::class
         ]);
+    }
+
+    protected function runDevSeeders()
+    {
+        if (app()->isLocal()) {
+            $this->call([
+                //
+            ]);
+        }
     }
 }
