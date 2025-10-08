@@ -1,18 +1,23 @@
 @props([
     'title' => null,
     'description' => null,
+    'size' => 'lg',
 ])
 
-<div class="flex flex-col text-center">
+<div class="flex flex-col items-center pb-6">
     <div class="flex justify-between gap-4">
         {{ $slot }}
     </div>
 
-    <flux:heading size="lg">
-        {{ $title }}
-    </flux:heading>
+    @isset($title)
+        <flux:heading :$size>
+            {{ $title }}
+        </flux:heading>
+    @endisset
 
-    <flux:subheading size="lg">
-        {{ $description }}
-    </flux:subheading>
+    @isset($description)
+        <flux:subheading :$size>
+            {{ $description }}
+        </flux:subheading>
+    @endisset
 </div>

@@ -1,10 +1,10 @@
 <?php
 
 use App\Services\AuthService;
-use function Livewire\Volt\{state, layout, title};
+use function Livewire\Volt\{state, layout, title, protect};
 
 layout('components.layouts.auth');
-title('Registrasi Akun | ' . setting('brand_name'));
+title('Registrasi Akun | ' . setting('brand_name') . ' - ' . setting('brand_description'));
 
 state([
     'title' => null,
@@ -33,6 +33,7 @@ $initialize = function () {
 };
 
 $register = function () {
+    $this->authService->register($this->data, $this->type);
     $this->dispatch("{$this->type}-registered");
 };
 

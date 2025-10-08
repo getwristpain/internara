@@ -14,7 +14,6 @@
         'xs' => 'w-full max-w-xs rounded-sm',
         'fit' => 'w-fit',
         'full' => 'w-full rounded-2xl',
-        'screen' => 'w-full h-full container mx-auto rounded-2xl',
     };
 
     $class = css($class, $sizeClass, 'flex flex-col gap-6 p-6 min-w-xs transition duration-150 ease-in-out', [

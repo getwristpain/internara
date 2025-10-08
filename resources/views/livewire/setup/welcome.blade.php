@@ -1,18 +1,20 @@
 <?php
 
-\Livewire\Volt\state();
-\Livewire\Volt\layout('components.layouts.guest');
-\Livewire\Volt\title('Selamat Datang di ' . setting('brand_name') . ' | ' . setting('brand_description'));
+use function Livewire\Volt\{state, layout, title, mount};
 
-\Livewire\Volt\mount(function () {});
+state();
+
+layout('components.layouts.guest');
+title('Selamat Datang di ' . setting('brand_name') . ' | ' . setting('brand_description'));
+
+mount(function () {
+    if (setting('is_installed', false)) {
+        $this->redirect(route('login'), navigate: true);
+    }
+});
 
 $next = function () {
-    $this->dispatch('notify-me', [
-        'message' => 'Postingan berhasil disimpan!',
-        'type' => 'success',
-    ]);
-
-    // $this->redirect(route('setup.account'));
+    $this->redirect(route('setup.account'));
 };
 
 ?>
