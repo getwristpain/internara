@@ -14,6 +14,9 @@
             {{ $slot }}
         </flux:main>
 
+        {{-- Notify Me --}}
+        <x-notify-me />
+
         @stack('scripts')
         @fluxScripts
     </body>

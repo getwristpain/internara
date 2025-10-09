@@ -1,18 +1,38 @@
 <?php
 
-use function Livewire\Volt\{state, layout, title, on};
+use App\Exceptions\AppException;
+use function Livewire\Volt\{state, layout, title, on, mount};
 
 state();
 
 layout('components.layouts.guest');
 title('Buat Akun Admin | ' . setting('brand_name') . ' - ' . setting('brand_description'));
 
+mount(function () {
+    if (!session('setup:welcome', false)) {
+        $this->redirect(route('setup'), navigate: true);
+    }
+});
+
 on([
     'owner-registered' => 'next',
 ]);
 
 $next = function () {
-    $this->redirect(route('setup.school'));
+    session()->put('setup:account', true);
+    $this->redirect(route('setup.school'), navigate: true);
+};
+
+$exception = function ($e, $stopPropagation) {
+    if ($e instanceof AppException) {
+        $this->dispatch('notify-me', [
+            'message' => $e->getUserMessage(),
+            'type' => 'error',
+        ]);
+    }
+
+    report($e);
+    $stopPropagation;
 };
 
 ?>

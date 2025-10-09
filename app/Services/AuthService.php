@@ -21,12 +21,14 @@ class AuthService extends Service
         $this->userService = $userService;
     }
 
-    public function register(array $data, string $type = 'student'): User|Authenticatable
+    public function register(array $data, string $type = 'Student'): User|Authenticatable
     {
+        $type = Str::title($type);
+
         try {
             $user = new User();
-            if ($type === 'owner') {
-                $user = $user->role('owner')->first();
+            if ($type === 'Owner') {
+                $user = $user->role('Owner')->first();
             }
 
             $this->ensureNotRateLimited('register');
@@ -35,7 +37,9 @@ class AuthService extends Service
             $regiteredUser = $this->userService->save($data, $user);
             $regiteredUser->syncRoles($data['roles']);
 
-            event(new Registered($regiteredUser));
+            if ($type !== 'Owner' || $type !== 'Admin') {
+                event(new Registered($regiteredUser));
+            }
 
             return $regiteredUser;
         } catch (\Throwable $th) {
@@ -46,7 +50,7 @@ class AuthService extends Service
         }
     }
 
-    public function ensureUserHasRole(array &$data, string $type = 'student'): void
+    public function ensureUserHasRole(array &$data, string $type = 'Student'): void
     {
         $type = Str::title($type);
         $data['roles'] = $type === 'Owner' ? ['Owner', 'Admin'] : [$type];

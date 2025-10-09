@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class UserService extends Service
 {
+    public function getOwner(): ?User
+    {
+        return User::role('Owner')->first();
+    }
+
     public function save(array $data, ?User $user = null): User
     {
         try {
