@@ -2,7 +2,7 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\AppSettingServiceProvider::class,
+    App\Providers\AppSettingsServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
     App\Providers\VoltServiceProvider::class,

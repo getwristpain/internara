@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Department extends Model
+class Status extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -13,13 +12,11 @@ class Department extends Model
      * @var array<string>
      */
     protected $fillable = [
-        'school_id',
         'name',
+        'type',
+        'label',
+        'color',
+        'icon',
         'description',
     ];
-
-    public function school(): BelongsTo
-    {
-        return $this->belongsTo(School::class);
-    }
 }

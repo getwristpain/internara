@@ -3,18 +3,14 @@
 namespace App\Services;
 
 use App\Models\Setting;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
 class SettingService extends Service
 {
-    /**
-     * @var \App\Models\Setting
-     */
-    public Model $model;
+    public Setting $model;
 
-    public int $cacheDuration = 3600;
+    protected int $cacheDuration = 3600;
 
     public function __construct(Setting $settingModel)
     {
@@ -101,7 +97,7 @@ class SettingService extends Service
      */
     public function getDirectly(string $key, mixed $default = null): mixed
     {
-        return ($setting = $this->model::find($key)) ? $setting->value : $default;
+        return ($setting = $this->model::find($key)) !== null ? $setting->value : $default;
     }
 
     /**
@@ -113,7 +109,6 @@ class SettingService extends Service
      */
     public function set(string $key, mixed $value, array $extraData = []): Setting
     {
-        /** @var \App\Models\Setting $setting */
         $setting = $this->model::updateOrCreate(
             ['key' => $key],
             ['value' => $value] + $extraData

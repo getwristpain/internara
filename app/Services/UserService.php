@@ -9,15 +9,22 @@ use Illuminate\Support\Facades\Hash;
 
 class UserService extends Service
 {
+    protected User $model;
+
+    public function __construct(User $userModel)
+    {
+        $this->model = $userModel;
+    }
+
     public function getOwner(): ?User
     {
-        return User::role('Owner')->first();
+        return $this->model::role('Owner')->first();
     }
 
     public function save(array $data, ?User $user = null): User
     {
         try {
-            $user ??= new User();
+            $user ??= $this->model;
             $this->ensurePasswordHashed($data);
             $user->fill($data)->save();
             return $user;

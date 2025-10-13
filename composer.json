@@ -31,6 +31,7 @@
     "autoload": {
         "files": [
             "app/Helpers/Functions/css.php",
+            "app/Helpers/Functions/notifyMe.php",
             "app/Helpers/Functions/setting.php"
         ],
         "psr-4": {

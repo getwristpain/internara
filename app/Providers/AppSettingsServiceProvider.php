@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
-class AppSettingServiceProvider extends ServiceProvider
+class AppSettingsServiceProvider extends ServiceProvider
 {
     protected static array $settingKeys = [
         'brand_name',
@@ -43,7 +43,7 @@ class AppSettingServiceProvider extends ServiceProvider
     {
         $defaultSettings = [];
         foreach (static::$settingKeys as $key) {
-            $defaultSettings[$key] = config('setting.' . $key, null);
+            $defaultSettings[$key] = config('settings.' . $key, null);
         }
 
         return $defaultSettings;

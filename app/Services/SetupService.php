@@ -2,88 +2,63 @@
 
 namespace App\Services;
 
+use App\Exceptions\AppException;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\School;
 use App\Models\User;
 use App\Services\Service;
-use App\Exceptions\AppException;
 
 class SetupService extends Service
 {
-    public function ensureIsNotInstalled(): bool
+    public function setupWelcome(): bool
     {
+        $this->ensureNotRateLimited('setup:welcome', maxAttempts: 10);
+        return !setting('is_installed', true);
+    }
+
+    public function setupAccount(): bool
+    {
+        $this->ensureNotRateLimited('setup:account', maxAttempts: 10);
+        return User::role('Owner')->exists();
+    }
+
+    public function setupSchool(): bool
+    {
+        $this->ensureNotRateLimited('setup:school', maxAttempts: 10);
+        return School::exists();
+    }
+
+    public function setupDepartment(): bool
+    {
+        $this->ensureNotRateLimited('setup:department', maxAttempts: 10);
+        return Department::exists();
+    }
+
+    public function setupProgram(): bool
+    {
+        $this->ensureNotRateLimited('setup:program', maxAttempts: 10);
+        return Program::exists();
+    }
+
+    public function setupComplete(): bool
+    {
+        $this->ensureNotRateLimited('setup:complete', maxAttempts: 10);
+
         try {
-            return !setting('is_installed', true);
+            $school = School::first();
+
+            setting()->set('brand_name', $school?->name);
+            setting()->set('brand_logo', $school?->getRawOriginal('logo_url'));
+            setting()->set('is_installed', true);
+
+            return setting('is_installed', false);
         } catch (\Throwable $th) {
             throw new AppException(
-                'Gagal melanjutkan instalasi',
-                'Installation failed: ' . $th->getMessage(),
+                'Terjadi kesalahan saat menyelesaikan instalasi.',
+                'Failed to install app: ' . $th->getMessage(),
                 previous: $th
             );
         }
-    }
-
-    public function ensureOwnerExists(): bool
-    {
-        try {
-            return User::role('Owner')->exists();
-        } catch (\Throwable $th) {
-            throw new AppException(
-                'Gagal melanjutkan konfigurasi akun.',
-                'Failed to setup Owner: ' . $th->getMessage(),
-                previous: $th
-            );
-        }
-    }
-
-    public function ensureSchoolExists(): bool
-    {
-        try {
-            return School::exists();
-        } catch (\Throwable $th) {
-            throw new AppException(
-                'Gagal melanjutkan konfigurasi sekolah.',
-                'Failed to setup School: ' . $th->getMessage(),
-                previous: $th
-            );
-        }
-    }
-
-    public function ensureDepartmentExists(): bool
-    {
-        try {
-            return Department::exists();
-        } catch (\Throwable $th) {
-            throw new AppException(
-                'Gagal melanjutkan konfigurasi jurusan.',
-                'Failed to setup Department: ' . $th->getMessage(),
-                previous: $th
-            );
-        }
-    }
-
-    public function ensureProgramExists(): bool
-    {
-        try {
-            return Program::exists();
-        } catch (\Throwable $th) {
-            throw new AppException(
-                'Gagal melanjutkan konfigurasi program PKL: ' . $th->getMessage(),
-                'Failed to setup Program: ' . $th->getMessage(),
-                previous: $th
-            );
-        }
-    }
-
-    public function performSetup(): bool
-    {
-        if (setting()->set('is_installed', true)) {
-            session()->flush();
-
-            return true;
-        }
-
-        return false;
     }
 }

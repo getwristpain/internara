@@ -20,37 +20,33 @@ class SetupWelcome extends Component
         $this->ensureIsNotInstalled();
     }
 
-    protected function ensureIsNotInstalled()
-    {
-        if (setting('is_installed', true)) {
-            return $this->redirect(route('login'));
-        }
-    }
-
     public function next()
     {
-        if ($this->setupService->ensureIsNotInstalled()) {
-            session()->put('setup:welcome');
-            $this->redirect(route('setup.account'), navigate: true);
-
+        if (!$this->setupService->setupWelcome()) {
+            notifyMe()->error('Terjadi kesalahan saat memulai instalasi.');
             return;
         }
 
-        $this->dispatch('notify-me', [
-            'message' => 'Tidak dapat menginstal ulang: Aplikasi telah terinstal.',
-            'type' => 'warning'
-        ]);
+        session()->put('setup:welcome', true);
+        $this->redirect(route('setup.account'), navigate: true);
+    }
+
+    protected function ensureIsNotInstalled()
+    {
+        if (setting('is_installed', true)) {
+            notifyMe()->error('Tidak dapat menginstal: Aplikasi telah teristal.');
+
+            $this->redirect(route('login'), navigate: true);
+            return;
+        }
     }
 
     public function exception($e, $stopPropagation)
     {
         if ($e instanceof AppException) {
-            $this->dispatch('notify-me', [
-                'message' => $e->getUserMessage(),
-                'type' => 'error'
-            ]);
-
+            notifyMe()->error($e->getUserMessage());
             report($e);
+
             $stopPropagation();
         }
     }
@@ -61,8 +57,9 @@ class SetupWelcome extends Component
          * @var \Illuminate\View\View $view
          */
         $view = view('livewire.setup.setup-welcome');
+
         return $view->layout('components.layouts.guest', [
-            'title' => 'Selamat Datang di '.setting('brand_name').' | '.setting('brand_description')
+            'title' => ' Selamat Datang | ' . config('settings.brand_signature')
         ]);
     }
 }
