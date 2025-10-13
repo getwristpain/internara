@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\RoleSeeder;
-use Database\Seeders\SettingSeeder;
+use Database\Seeders\RolesSeeder;
+use Database\Seeders\SettingsSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,8 +22,9 @@ class DatabaseSeeder extends Seeder
     protected function runProdSeeders()
     {
         $this->call([
-            SettingSeeder::class,
-            RoleSeeder::class,
+            SettingsSeeder::class,
+            RolesSeeder::class,
+            UserStatusesSeeder::class,
         ]);
     }
 

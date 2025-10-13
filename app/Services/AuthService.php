@@ -21,23 +21,14 @@ class AuthService extends Service
         $this->userService = $userService;
     }
 
-    public function register(array $data, string $type = 'Student'): User|Authenticatable
+    public function register(array $data, string $type = 'student'): User|Authenticatable
     {
-        $type = Str::title($type);
-
         try {
-            $user = new User();
-            if ($type === 'Owner') {
-                $user = $user->role('Owner')->first();
-            }
-
             $this->ensureNotRateLimited('register');
-            $this->ensureUserHasRole($data, $type);
 
-            $regiteredUser = $this->userService->save($data, $user);
-            $regiteredUser->syncRoles($data['roles']);
+            $regiteredUser = $this->userService->create($data, $type);
 
-            if ($type !== 'Owner' || $type !== 'Admin') {
+            if ($type !== 'owner' || $type !== 'admin') {
                 event(new Registered($regiteredUser));
             }
 
@@ -48,11 +39,5 @@ class AuthService extends Service
                 'Failed to register user: ' . $th->getMessage()
             );
         }
-    }
-
-    public function ensureUserHasRole(array &$data, string $type = 'Student'): void
-    {
-        $type = Str::title($type);
-        $data['roles'] = $type === 'Owner' ? ['Owner', 'Admin'] : [$type];
     }
 }
