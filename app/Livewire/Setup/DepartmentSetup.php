@@ -28,7 +28,7 @@ class DepartmentSetup extends Component
         }
 
         session()->put('setup:department', true);
-        $this->redirect(route('setup.program'));
+        $this->redirect(route('setup.program'), navigate: true);
     }
 
     protected function ensureReqStepsCompleted()

@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class SchoolService extends Service
 {
-    public function firstSchool(): ?School
+    public function first(): ?School
     {
         return School::first();
     }
 
     public function save(array $data, ?School $school = null): ?School
     {
-        $school ??= $this->firstSchool();
+        $school ??= $this->first();
 
         try {
             DB::beginTransaction();
@@ -31,7 +31,7 @@ class SchoolService extends Service
 
             DB::commit();
 
-            return $this->firstSchool();
+            return $this->first();
         } catch (\Throwable $th) {
             DB::rollBack();
 

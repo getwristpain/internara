@@ -42,7 +42,7 @@ class SchoolForm extends Component
     #[Computed()]
     public function school()
     {
-        return $this->schoolService->firstSchool();
+        return $this->schoolService->first();
     }
 
     public function submit()

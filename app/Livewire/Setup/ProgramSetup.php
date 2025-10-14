@@ -28,7 +28,7 @@ class ProgramSetup extends Component
         }
 
         session()->put('setup:program', true);
-        $this->redirect(route('setup.complete'));
+        $this->redirect(route('setup.complete'), navigate: true);
     }
 
     protected function ensureReqStepsCompleted()
@@ -45,8 +45,8 @@ class ProgramSetup extends Component
     {
         if ($e instanceof AppException) {
             notifyMe()->error($e->getUserMessage());
-
             report($e);
+
             $stopPropagation();
         };
     }
