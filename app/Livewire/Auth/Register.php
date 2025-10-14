@@ -10,7 +10,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-class RegisterForm extends Component
+class Register extends Component
 {
     public bool $readyToLoad = false;
 
@@ -44,9 +44,13 @@ class RegisterForm extends Component
     }
 
     #[Computed(persist: true)]
-    public function getOwnerId()
+    public function owner()
     {
-        return $this->userService->getOwner()?->id;
+        if ($this->type === 'owner') {
+            return $this->userService->getOwner();
+        }
+
+        return null;
     }
 
     public function submit()
@@ -54,7 +58,7 @@ class RegisterForm extends Component
         $this->validate(
             [
                 'data.name' => 'required|string|min:5|max:50',
-                'data.email' => 'required|email|unique:users,email,' . $this->getOwnerId,
+                'data.email' => 'required|email|unique:users,email,' . $this->owner?->id,
                 'data.password' => ['required', 'confirmed', Password::auto()],
             ],
             attributes: [
@@ -81,6 +85,6 @@ class RegisterForm extends Component
 
     public function render()
     {
-        return view('livewire.auth.register-form');
+        return view('livewire.auth.register');
     }
 }

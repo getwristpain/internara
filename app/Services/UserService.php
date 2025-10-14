@@ -7,28 +7,19 @@ use App\Models\User;
 use App\Services\Service;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Number;
-use Illuminate\Support\Str;
 
 class UserService extends Service
 {
-    protected User $model;
-
-    public function __construct(User $userModel)
-    {
-        $this->model = $userModel;
-    }
-
     public function getOwner(): ?User
     {
-        return $this->model::role('Owner')->first();
+        return User::role('Owner')->first();
     }
 
     public function create(array $data, string $type = 'student'): User
     {
         $user = $type === 'owner'
             ? $this->getOwner()
-            : $this->model;
+            : new User();
 
         try {
             $this->ensurePasswordHashed($data);

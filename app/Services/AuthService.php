@@ -2,14 +2,11 @@
 
 namespace App\Services;
 
-use Session;
 use App\Models\User;
 use App\Services\Service;
-use Illuminate\Support\Str;
 use App\Services\UserService;
 use App\Exceptions\AppException;
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 
 class AuthService extends Service
