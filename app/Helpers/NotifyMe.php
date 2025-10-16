@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Session;
+use Livewire\Livewire;
 
 class NotifyMe
 {
@@ -38,6 +39,13 @@ class NotifyMe
             'message' => $message,
             'type' => $type,
         ];
+
+        if (Livewire::isLivewireRequest()) {
+            $component = Livewire::current();
+            $component->dispatch('notify-me', $payload);
+
+            return;
+        }
 
         event('notify-me', $payload);
         self::pushToSession($payload);

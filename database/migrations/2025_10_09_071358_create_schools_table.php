@@ -14,7 +14,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('name')->unique();
             $table->string('principal_name')->nullable();
-            $table->json('address')->nullable();
+            $table->text('address')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();

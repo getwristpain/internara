@@ -35,7 +35,7 @@ class AccountSetup extends Component
 
     protected function ensureReqStepsCompleted()
     {
-        if (session('setup:welcome', false)) {
+        if (!session('setup:welcome', false)) {
             notifyMe()->warning('Lengkapi langkah sebelumnya untuk melanjutkan.');
 
             $this->redirect(route('setup'), navigate: true);

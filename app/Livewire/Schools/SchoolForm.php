@@ -9,6 +9,16 @@ use Livewire\Component;
 
 class SchoolForm extends Component
 {
+    public bool $readyToLoad = false;
+
+    public ?string $title = 'Data Sekolah';
+
+    public ?string $description = 'Lengkapi data sekolah berikut dengan benar.';
+
+    public ?string $size = 'xl';
+
+    public bool $bordered = false;
+
     public array $data = [
         'name' => null,
         'principal_name' => null,
@@ -32,11 +42,10 @@ class SchoolForm extends Component
     public function initialize()
     {
         if ($this->school->exists) {
-            $this->data = array_merge([
-                $this->data,
-                $this->school->toArray()
-            ]);
+            $this->data = $this->school->toArray();
         }
+
+        $this->readyToLoad = true;
     }
 
     #[Computed()]

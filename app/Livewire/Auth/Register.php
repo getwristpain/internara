@@ -14,6 +14,12 @@ class Register extends Component
 {
     public bool $readyToLoad = false;
 
+    public ?string $title = 'Buat Akun Pengguna';
+
+    public ?string $description = null;
+
+    public bool $bordered = false;
+
     #[Locked()]
     public string $type = 'student';
 
@@ -53,7 +59,7 @@ class Register extends Component
         return null;
     }
 
-    public function submit()
+    public function register()
     {
         $this->validate(
             [

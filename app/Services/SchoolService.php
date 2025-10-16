@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Exceptions\AppException;
-use App\Helpers\Media;
 use App\Models\School;
 use App\Services\Service;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class SchoolService extends Service
@@ -18,7 +16,7 @@ class SchoolService extends Service
 
     public function save(array $data, ?School $school = null): ?School
     {
-        $school ??= $this->first();
+        $school ??= School::firstOrNew();
 
         try {
             DB::beginTransaction();

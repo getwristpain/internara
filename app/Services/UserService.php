@@ -18,7 +18,7 @@ class UserService extends Service
     public function create(array $data, string $type = 'student'): User
     {
         $user = $type === 'owner'
-            ? $this->getOwner()
+            ? ($this->getOwner() ?? new User())
             : new User();
 
         try {
@@ -49,14 +49,14 @@ class UserService extends Service
 
     protected function ensureUsernameFilled(array &$data, string $type = 'student'): void
     {
-        if (!$data['username']) {
+        if (!isset($data['username'])) {
             $data['username'] = $this->generateUsername($type);
         }
     }
 
     protected function ensureUserHasRole(array &$data, string $type = 'student'): void
     {
-        if (!$data['roles']) {
+        if (!isset($data['roles'])) {
             $data['roles'] = $type === 'owner'
                 ? ['Owner', 'Admin']
                 : [ucfirst($type)];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\UploadedFile;
@@ -10,6 +11,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class School extends Model implements HasMedia
 {
+    use HasFactory;
     use InteractsWithMedia;
 
     /**
@@ -27,29 +29,6 @@ class School extends Model implements HasMedia
         'fax',
         'website',
     ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected function casts(): array
-    {
-        return [
-            'address' => 'array'
-        ];
-    }
-
-    public function getFullAddressAttribute(): ?string
-    {
-        $fullAddress = !empty($this->address)
-            ? implode(', ', array_filter($this->address, fn ($i) => !empty($i)))
-            : '';
-
-        return !empty($fullAddress)
-            ? trim($fullAddress . '. ' . $this->postal_code)
-            : $this->postal_code;
-    }
 
     public function getLogoUrlAttribute(): ?string
     {
