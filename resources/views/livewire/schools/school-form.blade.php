@@ -16,7 +16,7 @@
 
         <div class="col-span-full">
             <flux:input wire:model="data.postal_code" type="number" label="Kode Pos" placeholder="xxxxxx" required
-                autocomplete="school_postal_code" />
+                autocomplete="school_postal_code" :icon:trailing="$readyToLoad ? null : 'loading'" />
         </div>
 
         <flux:input wire:model="data.phone" type="tel" label="Telp. sekolah" placeholder="xx xxxx xxxx" required
@@ -31,6 +31,10 @@
         <flux:input wire:model="data.website" type="text" label="Website sekolah"
             placeholder="https://example.sch.id" required autocomplete="school_website" icon="globe-alt"
             :icon:trailing="$readyToLoad ? null : 'loading'" />
+
+        <div class="col-span-full">
+            <livewire:file-uploader :model="$this->school" collectionName="school_logo" label="Logo sekolah" />
+        </div>
 
         <flux:button class="col-span-full w-full" type="submit" variant="primary">Simpan</flux:button>
     </form>

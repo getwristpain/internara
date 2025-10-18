@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Livewire\Livewire;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureAppInstalled
@@ -38,7 +39,7 @@ class EnsureAppInstalled
      */
     protected function isAjaxRequest(Request $request): bool
     {
-        return $request->hasHeader('X-Livewire') || $request->hasHeader('X-Inertia');
+        return Livewire::isLivewireRequest() || $request->is('livewire/*');
     }
 
     /**
