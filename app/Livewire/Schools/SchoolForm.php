@@ -5,6 +5,7 @@ namespace App\Livewire\Schools;
 use App\Exceptions\AppException;
 use App\Services\SchoolService;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SchoolForm extends Component
@@ -28,8 +29,6 @@ class SchoolForm extends Component
         'phone' => null,
         'fax' => null,
         'website' => null,
-        'logo_url' => null,
-        'logo_file' => null,
     ];
 
     protected SchoolService $schoolService;
@@ -54,37 +53,44 @@ class SchoolForm extends Component
         return $this->schoolService->first();
     }
 
-    public function submit()
+    #[Computed(persist: true)]
+    public function schoolLogoRules()
     {
-        if (empty($this->data['logo_file'])) {
-            unset($this->data['logo_url']);
-        }
+        return [
+            'files.*' => 'nullable|image|mimes:jpg,png,webp|max:512'
+        ];
+    }
 
+    public function save()
+    {
         $this->validate([
             'data.name' => 'required|string|unique:schools,name,' . $this->school?->id,
             'data.principal_name' => 'required|string|max:50',
-            'data.address' => 'required|array',
+            'data.address' => 'required|string|max:150',
             'data.postal_code' => 'required|string|min:5',
             'data.email' => 'required|email|unique:schools,email,' . $this->school?->id,
-            'data.phone' => 'required|string|min:8|max:15|unique:schools,phone,' . $this->school?->id,
-            'data.fax' => 'required|string|min:8|max:15|unique:schools,fax,' . $this->school?->id,
+            'data.phone' => 'required|string|min:8|unique:schools,phone,' . $this->school?->id,
+            'data.fax' => 'required|string|min:8|unique:schools,fax,' . $this->school?->id,
             'data.website' => 'nullable|url',
-            'data.logo_url' => 'sometimes|nullable|url',
-            'data.logo_file' => 'sometimes|nullable|image|mimes:png,svg|max:512',
         ], attributes: [
-            'data.name' => null,
-            'data.principal_name' => null,
-            'data.address' => null,
-            'data.postal_code' => null,
-            'data.email' => null,
-            'data.phone' => null,
-            'data.fax' => null,
-            'data.website' => null,
-            'data.logo_url' => null,
-            'data.logo_file' => null,
+            'data.name' => 'nama sekolah',
+            'data.principal_name' => 'nama kepala sekolah',
+            'data.address' => 'alamat sekolah',
+            'data.postal_code' => 'kode pos sekolah',
+            'data.email' => 'email sekolah',
+            'data.phone' => 'telepon sekolah',
+            'data.fax' => 'fax sekolah',
+            'data.website' => 'website sekolah',
         ]);
 
+        $this->dispatch('save-attachments');
+    }
+
+    #[On('files-saved')]
+    public function saving()
+    {
         $savedSchool = $this->schoolService->save($this->data);
+
         if ($savedSchool) {
             $this->data = array_merge([
                 $this->data,

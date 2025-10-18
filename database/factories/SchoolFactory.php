@@ -34,7 +34,7 @@ class SchoolFactory extends Factory
             'email' => "{$initials}-school@example.com",
             'phone' => fake()->unique()->phoneNumber(),
             'fax' => fake()->unique()->phoneNumber(),
-            'website' => "{$initials}-school.example.com",
+            'website' => 'https://'.$initials.'-school.example.com',
         ];
     }
 

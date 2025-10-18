@@ -14,52 +14,65 @@
     x-on:livewire-upload-progress="progress = $event.detail.progress">
 
     {{-- 1. HEADER & LABEL --}}
-    <label class="mb-2 block text-sm font-medium text-neutral-800">
+    <label class="mb-2 block text-sm font-medium text-neutral-800 dark:text-neutral-200">
         {{ $label }}
 
         @if (!empty($hint))
-            <span class="ml-2 text-xs text-neutral-500">
+            <span class="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
                 ({{ $hint }})
             </span>
         @endif
     </label>
 
-    {{-- 2. INPUT FILE CUSTOM DENGAN DRAG AND DROP --}}
-    <div class="{{ $multiple ? 'border-neutral-300 hover:border-neutral-500' : 'min-h-[150px] h-full flex items-center justify-center group' }} relative cursor-pointer rounded-lg border-4 border-dashed p-4 transition-all duration-300"
+    {{-- 2. CUSTOM FILE INPUT & DRAG AND DROP AREA --}}
+    <div class="{{ $multiple ? 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-500 dark:hover:border-neutral-500' : 'min-h-[150px] h-full flex items-center justify-center group' }} relative cursor-pointer rounded-lg border-4 border-dashed p-4 transition-all duration-300"
         @dragover.prevent="isDragging = true" @dragleave.prevent="isDragging = false" @drop.prevent="handleDrop($event)"
         x-data="{ isHovering: false }" x-on:mouseenter="isHovering = true" x-on:mouseleave="isHovering = false"
         :class="{
-            'bg-neutral-100 border-neutral-600': isDragging,
-            'border-neutral-200 hover:border-neutral-300': !isDragging && (!files.length && !(
-                {{ $multiple ? 'false' : '$existingMedia->isNotEmpty()' }})),
-            'border-green-500/50 bg-green-50/50 hover:border-green-600': files.length || (!
-                {{ $multiple ? 'true' : 'false' }} && {{ '$existingMedia->isNotEmpty()' }})
+            'bg-neutral-100 dark:bg-neutral-800 border-neutral-600 dark:border-neutral-400': isDragging,
+        
+            // Kondisi 1: Placeholder/Empty State (hanya muncul jika NOT isDragging, NOT files, dan NOT existing media)
+            'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600': !
+                isDragging && (!files.length && !(
+                    {{ $multiple ? 'false' : ($existingMedia->isNotEmpty() ? 'true' : 'false') }})),
+        
+            // Kondisi 2: Preview State (jika ada files atau existing media. Dievaluasi di PHP)
+            'border-neutral-400/50 bg-neutral-100/50 dark:border-neutral-600/50 dark:bg-neutral-800/50 hover:border-neutral-600 dark:hover:border-neutral-500': files
+                .length > 0 || {{ $multiple ? 'false' : ($existingMedia->isNotEmpty() ? 'true' : 'false') }}
         }"
         x-on:click="$refs.fileInput.click()">
 
         <input class="sr-only" id="file-uploader-{{ $model->id ?? 'new' }}" x-ref="fileInput" type="file"
             wire:model.live="files" @if ($multiple) multiple @endif>
 
-        {{-- Logika Preview Mode Single: UTAMAKAN FILE BARU DULU --}}
         @php
             $displayFile = $files[0] ?? $existingMedia->first();
             $isTemporary = isset($files[0]);
         @endphp
 
         @if (!$multiple && $displayFile)
-            {{-- MODE SINGLE: PREVIEW AKTIF (BARU ATAU LAMA) --}}
+            {{-- SINGLE MODE: ACTIVE PREVIEW (NEW OR EXISTING FILE) --}}
             @php
-                $extension = strtoupper(
-                    $displayFile->getClientOriginalExtension() ?? ($displayFile->extension ?? 'FILE'),
-                );
-                $sizeKB = round(($displayFile->getSize() ?? $displayFile->size) / 1024, 2);
+                // === KOREKSI LOGIKA EKSTENSI DAN UKURAN UNTUK MENGHINDARI BadMethodCallException ===
+                if ($isTemporary) {
+                    $extension = strtoupper($displayFile->getClientOriginalExtension() ?? 'FILE');
+                    $size = $displayFile->getSize();
+                    $fileName = $displayFile->getClientOriginalName();
+                } else {
+                    // $displayFile adalah objek Spatie\MediaLibrary\MediaCollections\Models\Media
+                    $extension = strtoupper(pathinfo($displayFile->file_name, PATHINFO_EXTENSION) ?? 'FILE');
+                    $size = $displayFile->size;
+                    $fileName = $displayFile->file_name;
+                }
+
+                $sizeKB = round($size / 1024, 2);
                 $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
             @endphp
 
             <div class="absolute inset-0 flex flex-col items-center justify-center space-y-2 overflow-hidden p-2">
 
-                {{-- Overlay Drag-Over (UX FIX) --}}
-                <div class="pointer-events-auto absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border-4 border-dashed border-white bg-blue-600/90 p-3 text-white shadow-xl"
+                {{-- Drag-Over Overlay (Blue for UX feedback) --}}
+                <div class="pointer-events-auto absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg bg-blue-600/90 p-3 text-white shadow-xl"
                     x-show="isDragging" x-transition:enter.opacity.duration.150ms
                     x-transition:leave.opacity.duration.150ms>
 
@@ -69,12 +82,12 @@
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8" />
                     </svg>
                     <p class="mt-4 text-xl font-bold uppercase">LEPAS UNTUK MENGGANTI</p>
-                    <p class="text-sm">({{ $displayFile->file_name ?? $displayFile->getClientOriginalName() }}) akan
+                    <p class="text-sm">({{ $fileName }}) akan
                         diganti</p>
                 </div>
 
                 @if ($isImage)
-                    {{-- Gambar Preview --}}
+                    {{-- Image Preview --}}
                     <div class="pointer-events-none relative flex h-full w-full items-center justify-center p-2">
                         @if ($isTemporary)
                             <img class="max-h-full max-w-full rounded-lg object-contain"
@@ -85,49 +98,54 @@
                         @endif
                     </div>
 
-                    {{-- Info & Tombol Ganti/Hapus --}}
-                    <div class="pointer-events-none absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-200 bg-white/80 p-1 text-center backdrop-blur-sm transition-opacity duration-300"
+                    {{-- Info & Action Button (Replace/Delete) --}}
+                    <div class="pointer-events-none absolute bottom-0 left-0 right-0 z-10 border-t border-neutral-200 bg-white/80 p-1 text-center backdrop-blur-sm transition-opacity duration-300 dark:border-neutral-700 dark:bg-neutral-900/80"
                         :class="{ 'opacity-0 group-hover:opacity-100 pointer-events-auto': !isHovering }">
-                        <p class="truncate text-xs font-medium text-neutral-700"
-                            title="{{ $displayFile->file_name ?? $displayFile->getClientOriginalName() }}">
-                            {{ $displayFile->file_name ?? $displayFile->getClientOriginalName() }}
-                            <span class="text-neutral-500">({{ $extension }}, {{ $sizeKB }} KB)</span>
+                        <p class="truncate text-xs font-medium text-neutral-700 dark:text-neutral-300"
+                            title="{{ $fileName }}">
+                            {{ $fileName }}
+                            <span class="text-neutral-500 dark:text-neutral-400">({{ $extension }},
+                                {{ $sizeKB }} KB)</span>
                         </p>
                         @if ($isTemporary)
-                            <button class="text-xs text-red-600 transition hover:text-red-800" type="button"
-                                wire:click.stop="removeFile(0)" title="Ganti File">
+                            <button
+                                class="text-xs text-red-600 transition hover:text-red-800 dark:text-red-500 dark:hover:text-red-400"
+                                type="button" wire:click.stop="removeFile(0)" title="Ganti File">
                                 Klik untuk Ubah Berkas
                             </button>
                         @else
-                            <button class="text-xs text-red-600 transition hover:text-red-800" type="button"
-                                wire:click.stop="removeExistingMedia({{ $displayFile->id }})"
+                            <button
+                                class="text-xs text-red-600 transition hover:text-red-800 dark:text-red-500 dark:hover:text-red-400"
+                                type="button" wire:click.stop="removeExistingMedia({{ $displayFile->id }})"
                                 title="Hapus File Permanen">
                                 Klik untuk Hapus Berkas
                             </button>
                         @endif
                     </div>
                 @else
-                    {{-- Icon Non-Image (Logika Tombol sama) --}}
+                    {{-- Non-Image Icon --}}
                     <div class="pointer-events-none flex flex-col items-center justify-center space-y-2">
                         <div
-                            class="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-neutral-400 bg-neutral-200 text-sm font-bold uppercase text-neutral-600">
+                            class="flex h-16 w-16 items-center justify-center rounded-full border border-dashed border-neutral-400 bg-neutral-200 text-sm font-bold uppercase text-neutral-600 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-300">
                             {{ $extension }}
                         </div>
-                        <p class="max-w-[90%] truncate text-center text-sm font-medium text-neutral-700"
-                            title="{{ $displayFile->file_name ?? $displayFile->getClientOriginalName() }}">
-                            {{ $displayFile->file_name ?? $displayFile->getClientOriginalName() }}
+                        <p class="max-w-[90%] truncate text-center text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                            title="{{ $fileName }}">
+                            {{ $fileName }}
                         </p>
-                        <p class="mt-0.5 text-xs text-neutral-500">({{ $sizeKB }} KB)</p>
+                        <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">({{ $sizeKB }} KB)</p>
 
                         @if ($isTemporary)
-                            <button class="mt-1 text-xs text-red-600 transition hover:text-red-800" type="button"
-                                wire:click.stop="removeFile(0)"
+                            <button
+                                class="mt-1 text-xs text-red-600 transition hover:text-red-800 dark:text-red-500 dark:hover:text-red-400"
+                                type="button" wire:click.stop="removeFile(0)"
                                 :class="{ 'opacity-0 group-hover:opacity-100 pointer-events-auto': !isHovering }">
                                 Klik untuk Ubah Berkas
                             </button>
                         @else
-                            <button class="mt-1 text-xs text-red-600 transition hover:text-red-800" type="button"
-                                wire:click.stop="removeExistingMedia({{ $displayFile->id }})"
+                            <button
+                                class="mt-1 text-xs text-red-600 transition hover:text-red-800 dark:text-red-500 dark:hover:text-red-400"
+                                type="button" wire:click.stop="removeExistingMedia({{ $displayFile->id }})"
                                 :class="{ 'opacity-0 group-hover:opacity-100 pointer-events-auto': !isHovering }">
                                 Klik untuk Hapus Berkas
                             </button>
@@ -136,55 +154,67 @@
                 @endif
             </div>
         @else
-            {{-- PLACEHOLDER DRAG & DROP --}}
+            {{-- DRAG & DROP PLACEHOLDER --}}
             <div class="text-center">
-                <svg class="mx-auto h-12 w-12 text-neutral-400" fill="none" viewBox="0 0 24 24"
+                <svg class="mx-auto h-12 w-12 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8" />
                 </svg>
-                <p class="mt-1 text-sm font-medium text-neutral-600"
+                <p class="mt-1 text-sm font-medium text-neutral-600 dark:text-neutral-300"
                     x-text="isDragging ? 'LEPAS BERKAS DI SINI' : 'Tarik dan lepas berkas di sini'"></p>
-                <p class="text-xs text-neutral-500">atau klik untuk memilih berkas</p>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400">atau klik untuk memilih berkas</p>
             </div>
         @endif
     </div>
 
     {{-- 3. PROGRESS BAR --}}
     <div class="mt-2" x-show="isUploading">
-        <label class="mb-1 block text-xs font-medium text-neutral-700">Mengunggah...</label>
-        <progress class="h-2 w-full overflow-hidden rounded-full bg-neutral-200 transition-all duration-300"
+        <label class="mb-1 block text-xs font-medium text-neutral-700 dark:text-neutral-300">Mengunggah...</label>
+        <progress
+            class="h-2 w-full overflow-hidden rounded-full bg-neutral-200 transition-all duration-300 dark:bg-neutral-700"
             max="100" x-bind:value="progress">
         </progress>
     </div>
 
-    {{-- 4. ERROR VALIDASI --}}
+    {{-- 4. VALIDATION ERRORS (Red) --}}
     @error('files')
-        <p class="mt-1 text-sm font-medium text-red-600">{{ $message }}</p>
+        <p class="mt-1 text-sm font-medium text-red-600 dark:text-red-500">{{ $message }}</p>
     @enderror
     @error('files.*')
-        <p class="mt-1 text-sm text-red-600">Gagal memvalidasi satu atau lebih berkas: {{ $message }}</p>
+        <p class="mt-1 text-sm text-red-600 dark:text-red-500">Gagal memvalidasi satu atau lebih berkas:
+            {{ $message }}</p>
     @enderror
 
-    {{-- 5. LIST PREVIEW (Mode Multiple) --}}
+    {{-- 5. MULTIPLE MODE PREVIEW LIST --}}
     @if ($multiple)
         @php
             $combinedFiles = collect($files)->merge($existingMedia);
         @endphp
 
         @if ($combinedFiles->isNotEmpty())
-            <hr class="my-4 border-neutral-200">
-            <h3 class="mb-2 text-sm font-semibold text-neutral-700">Pratinjau Berkas</h3>
+            <hr class="my-4 border-neutral-200 dark:border-neutral-700">
+            <h3 class="mb-2 text-sm font-semibold text-neutral-700 dark:text-neutral-300">Pratinjau Berkas</h3>
 
             <div class="space-y-2">
                 @foreach ($combinedFiles as $index => $file)
                     @php
                         $isTemporary = $file instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-                        $extension = strtoupper($file->getClientOriginalExtension() ?? ($file->extension ?? 'FILE'));
-                        $sizeKB = round(($file->getSize() ?? $file->size) / 1024, 2);
+                        // === KOREKSI LOGIKA EKSTENSI DAN UKURAN ===
+                        if ($isTemporary) {
+                            $extension = strtoupper($file->getClientOriginalExtension() ?? 'FILE');
+                            $size = $file->getSize();
+                            $fileName = $file->getClientOriginalName();
+                        } else {
+                            $extension = strtoupper(pathinfo($file->file_name, PATHINFO_EXTENSION) ?? 'FILE');
+                            $size = $file->size;
+                            $fileName = $file->file_name;
+                        }
 
-                        // Gunakan $file->id untuk media library, atau $index untuk temporary file
+                        $sizeKB = round($size / 1024, 2);
+                        // ==========================================
+
                         $key = $isTemporary ? $index : 'media_' . $file->id;
                         $previewUrl = $isTemporary
                             ? (method_exists($file, 'temporaryUrl')
@@ -193,26 +223,26 @@
                             : $file->getUrl('thumb');
                     @endphp
 
-                    <div class="flex items-center justify-between overflow-hidden rounded-lg border bg-neutral-50 p-3 shadow-sm"
+                    <div class="flex items-center justify-between overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 p-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-800"
                         wire:key="{{ $key }}">
 
                         <div class="flex min-w-0 flex-grow items-center space-x-4">
-                            <img class="h-10 w-10 flex-shrink-0 rounded-md border border-neutral-300 object-cover"
+                            <img class="h-10 w-10 flex-shrink-0 rounded-md border border-neutral-300 object-cover dark:border-neutral-600"
                                 src="{{ $previewUrl }}" alt="Pratinjau">
 
                             <div class="min-w-0 truncate">
-                                <p class="truncate text-sm font-medium text-neutral-800"
-                                    title="{{ $file->file_name ?? ($file->getClientOriginalName() ?? 'N/A') }}">
-                                    {{ $file->file_name ?? ($file->getClientOriginalName() ?? 'N/A') }}
+                                <p class="truncate text-sm font-medium text-neutral-800 dark:text-neutral-200"
+                                    title="{{ $fileName }}">
+                                    {{ $fileName }}
                                 </p>
-                                <p class="mt-0.5 text-xs text-neutral-500">{{ $extension }}, {{ $sizeKB }} KB
+                                <p class="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{{ $extension }},
+                                    {{ $sizeKB }} KB
                                 </p>
                             </div>
                         </div>
 
-                        {{-- Tombol Hapus --}}
                         <button
-                            class="ml-4 flex-shrink-0 rounded-full p-1 text-red-600 transition hover:bg-red-50 hover:text-red-800"
+                            class="ml-4 flex-shrink-0 rounded-full p-1 text-red-600 transition hover:bg-red-100 hover:text-red-800 dark:text-red-500 dark:hover:bg-red-900 dark:hover:text-red-400"
                             type="button"
                             wire:click="{{ $isTemporary ? "removeFile($index)" : "removeExistingMedia($file->id)" }}"
                             wire:loading.attr="disabled"

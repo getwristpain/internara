@@ -28,12 +28,12 @@
         <flux:input wire:model="data.email" type="text" label="Email sekolah" placeholder="Email sekolah" required
             autocomplete="school_email" icon="envelope" :icon:trailing="$readyToLoad ? null : 'loading'" />
 
-        <flux:input wire:model="data.website" type="text" label="Website sekolah"
-            placeholder="https://example.sch.id" required autocomplete="school_website" icon="globe-alt"
-            :icon:trailing="$readyToLoad ? null : 'loading'" />
+        <flux:input wire:model="data.website" type="text" label="Website sekolah" placeholder="https://contoh.sch.id"
+            required autocomplete="school_website" icon="globe-alt" :icon:trailing="$readyToLoad ? null : 'loading'" />
 
         <div class="col-span-full">
-            <livewire:file-uploader :model="$this->school" collectionName="school_logo" label="Logo sekolah" />
+            <livewire:file-uploader :model="$this->school" collectionName="school_logo" label="Logo sekolah"
+                :rules="$this->schoolLogoRules" />
         </div>
 
         <flux:button class="col-span-full w-full" type="submit" variant="primary">Simpan</flux:button>

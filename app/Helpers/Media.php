@@ -37,7 +37,7 @@ class Media
         $extension = $file->getClientOriginalExtension();
         $uniqueId = Str::random(8);
 
-        $internalName = Str::slug(implode('_', [$timestamp, $cleanLabel, $uniqueId]));
+        $internalName = Str::slug(implode('_', [$cleanLabel, $timestamp, $uniqueId]));
         $newFileName = "{$internalName}.{$extension}";
 
         try {

@@ -19,16 +19,7 @@ class SchoolService extends Service
         $school ??= School::firstOrNew();
 
         try {
-            DB::beginTransaction();
-
             $school->fill($data)->save();
-
-            if (!$data['logo_file']) {
-                $school->saveLogo($data['logo_file']);
-            }
-
-            DB::commit();
-
             return $this->first();
         } catch (\Throwable $th) {
             DB::rollBack();

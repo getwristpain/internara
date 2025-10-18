@@ -10,19 +10,63 @@ use Spatie\MediaLibrary\HasMedia;
 use Livewire\Attributes\On;
 use Illuminate\Support\Collection;
 
+/**
+ * @title File Uploader Component
+ *
+ * This component handles file uploads using Livewire's WithFileUploads trait,
+ * providing support for temporary uploads, dynamic validation, and permanent
+ * storage using Spatie Media Library. It supports both single and multiple file modes.
+ */
 class FileUploader extends Component
 {
     use WithFileUploads;
 
-    public $files = []; // Untuk Temporary Uploads (File Baru)
-    public Collection $existingMedia; // Untuk Media dari database (File Lama)
+    /**
+     * @var array Temporary uploaded files bound to the file input.
+     * These are Livewire\Features\SupportFileUploads\TemporaryUploadedFile objects.
+     */
+    public $files = [];
+
+    /**
+     * @var Collection Existing media files retrieved from the model using Spatie Media Library.
+     */
+    public Collection $existingMedia;
+
+    /**
+     * @var HasMedia|null The Eloquent model instance that implements HasMedia.
+     */
     public ?HasMedia $model = null;
+
+    /**
+     * @var string The user-facing label for the file input.
+     */
     public string $label = 'document';
+
+    /**
+     * @var string The collection name used by Spatie Media Library.
+     */
     public string $collectionName = 'default';
+
+    /**
+     * @var bool Determines if multiple files can be uploaded.
+     */
     public bool $multiple = false;
+
+    /**
+     * @var array Custom validation rules passed from the parent component.
+     */
     public array $rules = [];
+
+    /**
+     * @var string|null Optional hint or descriptive text displayed below the label.
+     */
     public ?string $hint = null;
 
+    /**
+     * Defines the default validation rules for the file uploads.
+     *
+     * @return array
+     */
     protected function defaultRules(): array
     {
         return [
@@ -31,6 +75,17 @@ class FileUploader extends Component
         ];
     }
 
+    /**
+     * Initializes the component properties.
+     *
+     * @param HasMedia $model The model instance implementing Spatie\MediaLibrary\HasMedia.
+     * @param string $collectionName The media collection name.
+     * @param bool $isMultiple Whether to allow multiple files.
+     * @param array $rules Additional validation rules.
+     * @param string $label The display label for the input.
+     * @param string|null $hint The input hint/description.
+     * @throws \InvalidArgumentException If the provided model does not implement HasMedia (though type-hinting already enforces this).
+     */
     public function mount(HasMedia $model, string $collectionName = 'default', bool $isMultiple = false, array $rules = [], string $label = 'document', ?string $hint = null)
     {
         $this->model = $model;
@@ -42,6 +97,7 @@ class FileUploader extends Component
         $this->existingMedia = collect();
 
         if (!$this->multiple) {
+
             $this->rules['files'] = array_merge($this->rules['files'] ?? ['nullable'], ['max:1']);
         }
 
@@ -49,11 +105,13 @@ class FileUploader extends Component
     }
 
     /**
-     * Mengambil media yang sudah ada dari model sesuai dengan collectionName.
+     * Retrieves existing media from the bound model and populates $this->existingMedia.
+     * It handles the logic for single vs. multiple mode retrieval.
+     *
+     * @return void
      */
     protected function initializeExistingMedia()
     {
-        // Pastikan model sudah ada dan merupakan HasMedia
         if (!$this->model) {
             $this->existingMedia = collect();
             return;
@@ -62,17 +120,20 @@ class FileUploader extends Component
         $mediaQuery = $this->model->getMedia($this->collectionName);
 
         if (!$this->multiple) {
-            // Mode Single: Ambil yang paling terakhir (latest)
+
             $latestMedia = $mediaQuery->sortByDesc('created_at')->first();
             $this->existingMedia = $latestMedia ? collect([$latestMedia]) : collect();
         } else {
-            // Mode Multiple: Ambil semuanya
+
             $this->existingMedia = $mediaQuery;
         }
     }
 
     /**
-     * Menghapus media lama yang sudah tersimpan di Spatie Media.
+     * Removes an existing media file record and its physical file from storage.
+     *
+     * @param int $mediaId The ID of the Spatie Media record to delete.
+     * @return void
      */
     public function removeExistingMedia(int $mediaId)
     {
@@ -91,6 +152,11 @@ class FileUploader extends Component
         }
     }
 
+    /**
+     * Merges default rules with component-specific rules.
+     *
+     * @return array
+     */
     protected function getValidationRules(): array
     {
         $rules = $this->defaultRules();
@@ -106,16 +172,43 @@ class FileUploader extends Component
         return $rules;
     }
 
+    /**
+     * Defines custom validation attribute names for better user feedback.
+     *
+     * @return array
+     */
+    protected function getFilesAttributes(): array
+    {
+
+        $attribute = strtolower($this->label ?? 'document');
+        return [
+            'files' => $attribute,
+            'files.*' => $attribute
+        ];
+    }
+
+    /**
+     * Lifecycle hook executed when the $files property is updated (i.e., when a file is selected).
+     * Handles single file mode logic and runs client-side validation.
+     *
+     * @return void
+     */
     public function updatedFiles()
     {
+
         if (!$this->multiple && count($this->files) > 1) {
             array_shift($this->files);
             $this->files = array_values($this->files);
         }
 
-        $this->validate($this->getValidationRules());
+        $this->validate($this->getValidationRules(), attributes: $this->getFilesAttributes());
     }
 
+    /**
+     * Listener method invoked by the parent component to initiate the permanent save process.
+     *
+     * @return void
+     */
     #[On('save-attachments')]
     public function saveAttachments()
     {
@@ -123,33 +216,34 @@ class FileUploader extends Component
     }
 
     /**
-     * Menyimpan file baru ke Spatie Media Library.
+     * Validates and permanently stores the temporary uploaded files using Spatie Media Library.
+     *
+     * @return array List of paths or media objects (depending on Media::upload helper return).
      */
     public function save()
     {
-        $this->validate($this->getValidationRules());
 
         if (empty($this->files)) {
-            // Tidak perlu notifikasi jika tidak ada yang disimpan
-            // notifyMe()->warning('Tidak ada berkas baru untuk disimpan.');
+
+            $this->dispatch('files-saved', paths: []);
             return [];
         }
+
+        $this->validate($this->getValidationRules());
 
         if (!$this->model) {
             notifyMe()->warning('Model tidak tersedia.');
             return [];
         }
 
-        // Mode Single: Hapus media lama sebelum menyimpan yang baru
         if (!$this->multiple && $this->existingMedia->isNotEmpty()) {
             $this->existingMedia->first()->delete();
         }
 
-
         $paths = [];
 
         foreach ($this->files as $file) {
-            // Asumsi Media::upload mengembalikan path/Spatie Media object
+
             $paths[] = Media::upload(
                 $file,
                 $this->model,
@@ -160,8 +254,9 @@ class FileUploader extends Component
 
         if (!empty($paths)) {
             $this->files = [];
-            $this->initializeExistingMedia(); // Muat ulang existing media
+            $this->initializeExistingMedia();
             notifyMe()->success('Berkas berhasil disimpan.');
+
             $this->dispatch('files-saved', paths: $paths);
         } else {
             notifyMe()->error('Gagal menyimpan berkas.');
@@ -171,7 +266,10 @@ class FileUploader extends Component
     }
 
     /**
-     * Menghapus file sementara (temporary uploaded file).
+     * Removes a temporary uploaded file from the $files array, effectively canceling the upload.
+     *
+     * @param int $index The array index of the file to remove.
+     * @return void
      */
     public function removeFile($index)
     {
@@ -181,6 +279,13 @@ class FileUploader extends Component
         }
     }
 
+    /**
+     * Livewire lifecycle hook to handle exceptions globally within the component.
+     * Note: Content is kept in the original language as requested.
+     * * @param \Throwable $e
+     * @param \Closure $stopPropagation
+     * @return void
+     */
     public function exception(\Throwable $e, $stopPropagation)
     {
         if ($e instanceof AppException) {
@@ -191,6 +296,11 @@ class FileUploader extends Component
         }
     }
 
+    /**
+     * Renders the component's view.
+     *
+     * @return \Illuminate\View\View
+     */
     public function render()
     {
         return view('livewire.file-uploader');
